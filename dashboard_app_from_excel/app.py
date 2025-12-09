@@ -901,35 +901,37 @@ def swot_page():
     except Exception:
         rows = []
 
-    table_rows = []
-    key_insight_rows = []
+    sections = OrderedDict()
+    key_insights = []
 
     for row in rows:
         category = (row.get("Category") or "").strip()
         point_id = row.get("Point_ID") or ""
         key_item = row.get("Key_Item") or row.get("Key Item") or ""
-        insight_2025 = row.get("2025") or ""
-        strategy_2026 = row.get("2026") or ""
+        insight_2025 = row.get("2025") or row.get("2025 Insight") or ""
+        strategy_2026 = row.get("2026") or row.get("2026 Strategy") or ""
 
-        entry = {
-            "Category": category,
-            "Point_ID": point_id,
-            "Key_Item": key_item,
-            "2025": insight_2025,
-            "2026": strategy_2026
-        }
+        if not category:
+            continue
 
         if category.lower() == "key insight":
-            key_insight_rows.append(entry)
-        else:
-            table_rows.append(entry)
+            key_insights.append({
+                "title": key_item,
+                "content": insight_2025 or strategy_2026 or point_id
+            })
+            continue
 
-    table_rows.sort(key=lambda r: r.get("Category", ""))
+        sections.setdefault(category, []).append({
+            "id": point_id,
+            "title": key_item,
+            "details_2025": insight_2025,
+            "details_2026": strategy_2026
+        })
 
     return render_template(
         "swot.html",
-        rows=table_rows,
-        key_insights=key_insight_rows
+        sections=sections,
+        key_insights=key_insights
     )
 
 
