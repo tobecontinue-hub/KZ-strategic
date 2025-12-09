@@ -1,3 +1,4 @@
+<!-- templates/swot.html -->
 {% extends "base.html" %}
 {% block content %}
 
@@ -42,7 +43,7 @@ body {
 /* SWOT Compass Layout */
 .swot-compass {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
     margin-top: 20px;
 }
@@ -51,7 +52,7 @@ body {
 .swot-quadrant {
     background: white;
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     opacity: 0;
@@ -65,26 +66,25 @@ body {
 .swot-compass > div:nth-child(4) { animation-delay: 0.4s; }
 
 .swot-quadrant:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    transform: translateY(-4px);
+    box-shadow: 0 14px 26px rgba(0,0,0,0.15);
 }
 
 .quadrant-header {
     padding: 18px 20px;
     font-weight: 800;
-    font-size: 1.25rem;
+    font-size: 1.2rem;
     color: white;
     display: flex;
     align-items: center;
     gap: 10px;
-    letter-spacing: 0.5px;
     border-bottom: 3px solid rgba(255, 255, 255, 0.3);
 }
 /* Color Schemes */
 .strengths-header { background: linear-gradient(135deg, #157347, #2ecc71); }
-.opportunities-header { background: linear-gradient(135deg, #0a58ca, #48c6ef); }
-.weaknesses-header { background: linear-gradient(135deg, #ffc107, #f7b733); color: #333; }
-.threats-header { background: linear-gradient(135deg, #dc3545, #ff6b6b); }
+opportunities-header { background: linear-gradient(135deg, #0a58ca, #48c6ef); }
+weaknesses-header { background: linear-gradient(135deg, #ffc107, #f7b733); color: #333; }
+threats-header { background: linear-gradient(135deg, #dc3545, #ff6b6b); }
 
 .swot-list {
     padding: 0 20px 20px;
@@ -97,23 +97,21 @@ body {
     border-bottom: none;
 }
 
-/* --- Accordion/Interactive Header --- */
 .item-header {
     display: flex;
     align-items: center;
-    padding: 15px 0; /* Vertical padding */
+    padding: 15px 0;
     cursor: pointer;
-    transition: background 0.2s, color 0.2s;
+    transition: background 0.2s;
 }
 .item-header:hover {
     background: #f0f7ff;
 }
 
-/* Indicator for open/close state */
 .item-header .toggle-icon {
-    font-size: 1.2rem;
-    color: #495057;
-    margin-left: auto; /* Push icon to the right */
+    font-size: 1.1rem;
+    color: #0b63ff;
+    margin-left: auto;
     transition: transform 0.3s ease;
 }
 .item-header.active .toggle-icon {
@@ -123,7 +121,7 @@ body {
 .swot-id {
     min-width: 28px;
     height: 28px;
-    line-height: 28px; /* Center text vertically */
+    line-height: 28px;
     text-align: center;
     border-radius: 6px;
     font-weight: 900;
@@ -132,9 +130,9 @@ body {
     flex-shrink: 0;
 }
 .strength-id { background: #d4edda; color: #155724; }
-.opportunity-id { background: #d1ecf1; color: #0c5460; }
-.weakness-id { background: #fff3cd; color: #856404; }
-.threat-id { background: #f8d7da; color: #721c24; }
+opportunity-id { background: #d1ecf1; color: #0c5460; }
+weakness-id { background: #fff3cd; color: #856404; }
+threat-id { background: #f8d7da; color: #721c24; }
 
 .swot-title {
     font-weight: 700;
@@ -143,8 +141,20 @@ body {
     font-size: 1.05rem;
     line-height: 1.3;
 }
+.swot-preview {
+    font-size: 0.85rem;
+    color: #475569;
+    background: #f9fbff;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 6px;
+    border: 1px solid #edf2ff;
+    line-height: 1.4;
+}
+.swot-preview div + div { margin-top: 4px; }
+.swot-preview span { font-weight: 700; color: #0b63ff; margin-right: 6px; }
 
-/* --- Collapsible Details Content --- */
+/* Collapsible Details */
 .swot-details-content {
     max-height: 0;
     overflow: hidden;
@@ -152,16 +162,15 @@ body {
     padding: 0;
 }
 .swot-details-content.open {
-    max-height: 500px; /* Adjust based on max expected content height */
-    padding-bottom: 15px;
+    max-height: 480px;
+    padding-bottom: 12px;
 }
 
-/* Parallel Display Container (inside the collapsible) */
 .swot-details-parallel {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 15px;
-    padding-top: 10px; /* Padding for separation from header */
+    padding-top: 10px;
     border-top: 1px solid #f0f4f8;
 }
 
@@ -186,111 +195,81 @@ body {
     line-height: 1.5;
 }
 
-/* Responsive Styles */
-@media (max-width: 1100px) {
-    .swot-compass {
-        grid-template-columns: 1fr;
-    }
-}
 @media (max-width: 768px) {
     .swot-details-parallel {
         grid-template-columns: 1fr;
         gap: 10px;
     }
-    .main-container {
-        padding: 10px;
-    }
+    .main-container { padding: 10px; }
 }
 </style>
 
 <div class="main-container">
-    <!-- Load Bootstrap Icons (using arrow icon for toggle) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
     <div class="page-header">
         <h1>SWOT Analysis</h1>
-        <div class="subtitle">Click on any key item to compare 2025 performance against the 2026 strategic outlook.</div>
+        <div class="subtitle">Click on any key item to compare 2025 performance with the 2026 strategy.</div>
     </div>
 
     <div class="swot-compass">
-
-        <!-- QUADRANT RENDERING LOOP -->
         {% for category, icon, header_class, id_class in [
             ('Strength', 'bi-check-circle-fill', 'strengths-header', 'strength-id'),
             ('Opportunity', 'bi-lightbulb-fill', 'opportunities-header', 'opportunity-id'),
             ('Weakness', 'bi-exclamation-triangle-fill', 'weaknesses-header', 'weakness-id'),
             ('Threat', 'bi-shield-fill', 'threats-header', 'threat-id')
         ] %}
-            <div class="swot-quadrant">
-                <div class="quadrant-header {{ header_class }}">
-                    <i class="bi {{ icon }}"></i> {{ category }}s
-                </div>
-                <div class="swot-list">
-                    {% for item in sections.get(category, []) %}
-                        <div class="swot-item">
-                            <!-- Clickable Header to Toggle Details -->
-                            <div class="item-header" onclick="toggleDetails(this)">
-                                <span class="swot-id {{ id_class }}">{{ item.id }}</span>
-                                <h3 class="swot-title">{{ item.title }}</h3>
-                                <i class="bi bi-chevron-down toggle-icon"></i>
+        <div class="swot-quadrant">
+            <div class="quadrant-header {{ header_class }}">
+                <i class="bi {{ icon }}"></i> {{ category }}s
+            </div>
+            <div class="swot-list">
+                {% for item in sections.get(category, []) %}
+                <div class="swot-item">
+                    <div class="item-header" onclick="toggleDetails(this)">
+                        <span class="swot-id {{ id_class }}">{{ item.id }}</span>
+                        <div style="flex: 1">
+                            <h3 class="swot-title">{{ item.title or 'Untitled Item' }}</h3>
+                            <div class="swot-preview">
+                                <div><span>2025</span>{{ item.details_2025 | default("N/A") }}</div>
+                                <div><span>2026</span>{{ item.details_2026 | default("N/A") }}</div>
                             </div>
-
-                            <!-- Collapsible Details Content -->
-                            <div class="swot-details-content">
-                                <!-- Parallel 2025 and 2026 Details -->
-                                <div class="swot-details-parallel">
-                                    <!-- 2025 Column -->
-                                    <div class="detail-column">
-                                        <span class="detail-year">2025 Status / Performance</span>
-                                        <div class="swot-detail-text">
-                                            {{ item.details_2025 | default("N/A") }}
-                                        </div>
-                                        {% if item.details_2025_extra %}
-                                        <div class="swot-detail-text" style="margin-top:0.5rem;color:#0b63ff;font-size:0.8rem;">{{ item.details_2025_extra }}</div>
-                                        {% endif %}
-                                    </div>
-
-                                    <!-- 2026 Column -->
-                                    <div class="detail-column">
-                                        <span class="detail-year">2026 Outlook / Strategy</span>
-                                        <div class="swot-detail-text">
-                                            {{ item.details_2026 | default("N/A") }}
-                                        </div>
-                                        {% if item.details_2026_extra %}
-                                        <div class="swot-detail-text" style="margin-top:0.5rem;color:#0b63ff;font-size:0.8rem;">{{ item.details_2026_extra }}</div>
-                                        {% endif %}
-                                    </div>
+                        </div>
+                        <i class="bi bi-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="swot-details-content">
+                        <div class="swot-details-parallel">
+                            <div class="detail-column">
+                                <span class="detail-year">2025 Status</span>
+                                <div class="swot-detail-text">
+                                    {{ item.details_2025 | default("N/A") }}
+                                </div>
+                            </div>
+                            <div class="detail-column">
+                                <span class="detail-year">2026 Outlook</span>
+                                <div class="swot-detail-text">
+                                    {{ item.details_2026 | default("N/A") }}
                                 </div>
                             </div>
                         </div>
-                    {% endfor %}
-                    {% if not sections.get(category) %}
-                        <div class="p-4 text-center text-gray-500">
-                            No {{ category | lower }} items defined.
-                        </div>
-                    {% endif %}
+                    </div>
                 </div>
+                {% endfor %}
+                {% if not sections.get(category) %}
+                <div class="p-4 text-center text-muted">No {{ category | lower }} items defined.</div>
+                {% endif %}
             </div>
+        </div>
         {% endfor %}
-
     </div>
 </div>
 
 <script>
-    /**
-     * Toggles the visibility of the SWOT item details content using CSS transitions.
-     * @param {HTMLElement} headerElement The clicked item-header element.
-     */
-    function toggleDetails(headerElement) {
-        // Find the next sibling element which is the content container
-        const content = headerElement.nextElementSibling;
-
-        // Toggle the 'active' class on the header
-        headerElement.classList.toggle('active');
-
-        // Toggle the 'open' class on the content
-        content.classList.toggle('open');
-    }
+function toggleDetails(header) {
+    const content = header.nextElementSibling;
+    header.classList.toggle('active');
+    content.classList.toggle('open');
+}
 </script>
 
 {% endblock %}
