@@ -144,18 +144,6 @@
   }
 </style>
 
-<div class="org-wrapper">
-  <p class="subhead">Structure</p>
-  <h2>Organization Tree</h2>
-  <div class="tree">
-    <ul>
-      {% for node in root_nodes %}
-        {{ render_node(node) }}
-      {% endfor %}
-    </ul>
-  </div>
-</div>
-
 {% macro render_node(node) %}
   <li>
     <div class="member-card">
@@ -187,4 +175,16 @@
     {% endif %}
   </li>
 {% endmacro %}
+
+<div class="org-wrapper">
+  <p class="subhead">Structure</p>
+  <h2>Organization Tree</h2>
+  <div class="tree">
+    <ul class="root">
+      {% for node in root_nodes %}
+        {{ render_node(node) }}
+      {% endfor %}
+    </ul>
+  </div>
+</div>
 {% endblock %}
