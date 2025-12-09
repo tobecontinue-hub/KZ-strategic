@@ -1,60 +1,190 @@
 {% extends "base.html" %}
 {% block content %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.13/dist/tailwind.min.css">
 <style>
-  .node-card{border-radius:12px;box-shadow:0 12px 25px rgba(15,23,42,.12);transition:transform .2s,box-shadow .2s}
-  .node-card:hover{transform:translateY(-4px);box-shadow:0 18px 35px rgba(15,23,42,.18)}
-  .photo-ring{width:58px;height:58px;border-radius:50%;overflow:hidden;border:3px solid rgba(255,255,255,.7)}
-  .photo-ring img{width:100%;height:100%;object-fit:cover;display:block}
-  .grid-track{position:relative;padding:1.5rem 0}
-  .grid-track::before{content:"";position:absolute;top:0;left:calc(50% - 1px);width:2px;height:100%;background:linear-gradient(180deg,#cbd5f5,#e0e7ff)}
+  .org-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+  }
+  .org-wrapper h2 {
+    text-align: center;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 0.25rem;
+  }
+  .org-wrapper p.subhead {
+    text-align: center;
+    color: #64748b;
+    margin-bottom: 2rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+  }
+  .tree ul {
+    padding-top: 1rem;
+    position: relative;
+    padding-left: 0;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .tree li {
+    list-style-type: none;
+    margin: 0 0.7rem;
+    text-align: center;
+    position: relative;
+    padding: 1rem 0 0 0;
+  }
+  .tree li::before,
+  .tree li::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    border-top: 1px solid #d7dfe7;
+    width: 50%;
+    height: 1rem;
+  }
+  .tree li::before {
+    right: 50%;
+  }
+  .tree li::after {
+    left: 50%;
+    border-left: 1px solid #d7dfe7;
+  }
+  .tree li:only-child::after,
+  .tree li:only-child::before {
+    display: none;
+  }
+  .tree li:only-child {
+    padding-top: 0;
+  }
+  .tree li:first-child::before,
+  .tree li:last-child::after {
+    border: none;
+  }
+  .tree li:last-child::before {
+    border-right: 1px solid #d7dfe7;
+    border-radius: 0 0 0.75rem 0;
+  }
+  .tree li:first-child::after {
+    border-radius: 0 0 0 0.75rem;
+  }
+  .member-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    padding: 0.85rem 1rem;
+    min-width: 220px;
+    box-shadow: 0 8px 18px rgba(15,23,42,0.07);
+  }
+  .member-card .photo {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(148,163,184,0.4);
+    background: #e2e8f0;
+    flex-shrink: 0;
+  }
+  .member-card .photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .member-card .info {
+    text-align: left;
+  }
+  .member-card .name {
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.1rem;
+    font-size: 0.95rem;
+  }
+  .member-card .role {
+    font-size: 0.8rem;
+    color: #475569;
+    margin-bottom: 0.3rem;
+  }
+  .member-card .meta {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+  }
+  .member-card .badge {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    font-weight: 600;
+    background: #f1f5f9;
+    color: #334155;
+  }
+  .member-card .badge.status-vacant {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+  .member-card .badge.status-active {
+    background: #dcfce7;
+    color: #15803d;
+  }
+  @media (max-width: 768px) {
+    .tree ul {
+      flex-direction: column;
+      align-items: center;
+    }
+    .tree li::before,
+    .tree li::after {
+      display: none;
+    }
+  }
 </style>
-<div class="max-w-6xl mx-auto px-4 py-6 space-y-8">
-  <div class="text-center">
-    <p class="text-xs uppercase tracking-[0.3em] text-indigo-300">Organization</p>
-    <h2 class="text-3xl font-black text-slate-50">Team Structure</h2>
-    <p class="text-sm text-slate-400 mt-2">Visualizes reporting layers without the heavy animated graph</p>
+
+<div class="org-wrapper">
+  <p class="subhead">Structure</p>
+  <h2>Organization Tree</h2>
+  <div class="tree">
+    <ul>
+      {% for node in root_nodes %}
+        {{ render_node(node) }}
+      {% endfor %}
+    </ul>
   </div>
-  <div id="org-stripes" class="space-y-10"></div>
 </div>
-<script>
-  const tree = {{ root_nodes|tojson|safe }};
-  const flatten = (nodes, acc=[])=>{nodes.forEach(n=>{const level=parseInt(n.level||0,10);acc.push({...n,level});if(n.children?.length)flatten(n.children,acc)});return acc};
-  const nodes = flatten(tree);
-  const grouped = nodes.reduce((map,node)=>{map[node.level]??=[];map[node.level].push(node);return map},{});
-  const levelKeys = Object.keys(grouped).map(Number).sort((a,b)=>a-b);
-  const colorPalette=["bg-gradient-to-br from-indigo-500 to-sky-500","bg-gradient-to-br from-rose-500 to-orange-400","bg-gradient-to-br from-emerald-500 to-teal-500","bg-gradient-to-br from-amber-500 to-pink-500","bg-gradient-to-br from-slate-500 to-slate-700"];
-  const stripes=document.getElementById("org-stripes");
-  stripes.innerHTML=levelKeys.map((level,i)=>{
-    const nodes = grouped[level];
-    const trackColor = colorPalette[i%colorPalette.length];
-    return `
-      <section class="relative">
-        <div class="grid-track">
-          <span class="px-4 py-1 rounded-full text-xs font-semibold text-white ${trackColor}">LEVEL ${level}</span>
+
+{% macro render_node(node) %}
+  <li>
+    <div class="member-card">
+      <div class="photo">
+        {% if node.photo_url %}
+          <img src="{{ node.photo_url }}" alt="{{ node.original_name or node.name }}" onerror="this.remove();">
+        {% else %}
+          <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#475569;">
+            {{ (node.original_name or node.name)[:1] }}
+          </div>
+        {% endif %}
+      </div>
+      <div class="info">
+        <div class="name">{{ node.original_name or node.name }}</div>
+        <div class="role">{{ node.role or 'Role TBD' }}</div>
+        <div class="meta">
+          <span class="badge">{{ node.department or 'Department' }}</span>
+          {% set status = (node.status or '') %}
+          <span class="badge {{ 'status-vacant' if 'vacant' in status|lower else 'status-active' }}">{{ status or 'Status' }}</span>
         </div>
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          ${nodes.map(n=>{
-            const name = n.original_name || n.name || 'Unknown';
-            const dept = n.department || 'Department';
-            const status = (n.status || 'Status').toUpperCase();
-            const role = n.role || 'Role TBD';
-            const photo = n.photo_url && n.photo_url.trim().length ? `<div class="photo-ring ${trackColor}"><img src="${n.photo_url}" alt="${name}" onerror="this.closest('div').innerHTML='<span class=\'w-full h-full flex items-center justify-center text-white text-lg\'>${name.charAt(0)}</span>';"></div>` : `<div class="photo-ring ${trackColor} flex items-center justify-center text-white text-lg font-semibold">${name.charAt(0)}</div>`;
-            return `
-              <article class="node-card bg-slate-900/70 border border-white/5 p-4 flex gap-4">
-                ${photo}
-                <div>
-                  <h3 class="text-base font-semibold text-white leading-tight">${name}</h3>
-                  <p class="text-sm font-medium text-slate-300">${role}</p>
-                  <p class="text-xs text-slate-400 mt-1">${dept}</p>
-                  <span class="inline-flex mt-2 px-2 py-1 rounded-full text-[0.65rem] tracking-wide ${status.includes('VACANT') ? 'bg-red-500/20 text-red-300' : 'bg-emerald-500/20 text-emerald-200'}">${status}</span>
-                </div>
-              </article>
-            `;
-          }).join('')}
-        </div>
-      </section>
-    `;
-  }).join('');
-</script>
+      </div>
+    </div>
+    {% if node.children %}
+      <ul>
+        {% for child in node.children %}
+          {{ render_node(child) }}
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </li>
+{% endmacro %}
 {% endblock %}
