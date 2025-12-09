@@ -1,4 +1,5 @@
 # services/google_sheets.py
+import json
 import time
 import os
 from typing import Optional
@@ -13,13 +14,23 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive",
 ]
 
+SERVICE_ACCOUNT_JSON = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
+
 _cache = {"ts": 0, "spreadsheet": None}
 
 
 def _get_client():
-    if not os.path.exists(SERVICE_ACCOUNT_FILE):
-        raise FileNotFoundError(f"Service account JSON missing: {SERVICE_ACCOUNT_FILE}")
-    creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    if SERVICE_ACCOUNT_JSON:
+        try:
+            info = json.loads(SERVICE_ACCOUNT_JSON)
+        except json.JSONDecodeError as exc:
+            raise ValueError("GOOGLE_SERVICE_ACCOUNT_JSON is not valid JSON") from exc
+        creds = Credentials.from_service_account_info(info, scopes=SCOPES)
+    else:
+        if not os.path.exists(SERVICE_ACCOUNT_FILE):
+            raise FileNotFoundError(f"Service account JSON missing: {SERVICE_ACCOUNT_FILE}")
+        creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+
     return gspread.authorize(creds)
 
 
