@@ -1,146 +1,60 @@
 {% extends "base.html" %}
 {% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.13/dist/tailwind.min.css">
 <style>
-  .org-wrapper {
-    padding: 1.5rem;
-  }
-  .org-level {
-    margin-bottom: 2rem;
-  }
-  .org-level h4 {
-    font-size: 0.95rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #64748b;
-    margin-bottom: 0.75rem;
-  }
-  .org-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-  }
-  .org-card {
-    background: #fff;
-    border-radius: 14px;
-    padding: 1rem;
-    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
-    border-top: 4px solid #0ea5e9;
-    display: flex;
-    gap: 0.85rem;
-    align-items: center;
-  }
-  .org-photo {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(148, 163, 184, 0.4);
-  }
-  .org-placeholder {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    background: #e2e8f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    color: #334155;
-  }
-  .org-name {
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 0.15rem;
-  }
-  .org-role {
-    font-size: 0.85rem;
-    color: #475569;
-    margin-bottom: 0.35rem;
-  }
-  .org-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-    font-size: 0.75rem;
-  }
-  .org-meta span {
-    padding: 0.2rem 0.5rem;
-    border-radius: 999px;
-    background: #f1f5f9;
-    color: #475569;
-    font-weight: 600;
-  }
+  .node-card{border-radius:12px;box-shadow:0 12px 25px rgba(15,23,42,.12);transition:transform .2s,box-shadow .2s}
+  .node-card:hover{transform:translateY(-4px);box-shadow:0 18px 35px rgba(15,23,42,.18)}
+  .photo-ring{width:58px;height:58px;border-radius:50%;overflow:hidden;border:3px solid rgba(255,255,255,.7)}
+  .photo-ring img{width:100%;height:100%;object-fit:cover;display:block}
+  .grid-track{position:relative;padding:1.5rem 0}
+  .grid-track::before{content:"";position:absolute;top:0;left:calc(50% - 1px);width:2px;height:100%;background:linear-gradient(180deg,#cbd5f5,#e0e7ff)}
 </style>
-
-<div class="org-wrapper">
-  <h2 class="mb-4">Organizational Structure</h2>
-  <div id="org-chart"></div>
+<div class="max-w-6xl mx-auto px-4 py-6 space-y-8">
+  <div class="text-center">
+    <p class="text-xs uppercase tracking-[0.3em] text-indigo-300">Organization</p>
+    <h2 class="text-3xl font-black text-slate-50">Team Structure</h2>
+    <p class="text-sm text-slate-400 mt-2">Visualizes reporting layers without the heavy animated graph</p>
+  </div>
+  <div id="org-stripes" class="space-y-10"></div>
 </div>
-
 <script>
-  const orgTree = {{ root_nodes | tojson | safe }};
-  const deptColors = {{ dept_colors | tojson | safe }};
-  const roleColors = {{ role_colors | tojson | safe }};
-
-  const flattenTree = (nodes, acc = []) => {
-    nodes.forEach(node => {
-      acc.push(node);
-      if (node.children && node.children.length) {
-        flattenTree(node.children, acc);
-      }
-    });
-    return acc;
-  };
-
-  const nodes = flattenTree(orgTree);
-  const levels = {};
-  nodes.forEach(node => {
-    const level = parseInt(node.level || 0, 10);
-    if (!levels[level]) levels[level] = [];
-    levels[level].push(node);
-  });
-
-  const getDeptColor = dept => (deptColors[dept] || {}).border || '#0ea5e9';
-  const getRoleColor = role => (roleColors[role] || '#0ea5e9');
-
-  const createCard = (node) => {
-    const name = node.original_name || node.name || 'Unknown';
-    const role = node.role || 'Role TBD';
-    const dept = node.department || 'Department';
-    const status = node.status || 'Status';
-
-    const photo = node.photo_url && node.photo_url.trim().length
-      ? `<img class="org-photo" src="${node.photo_url}" alt="${name}" onerror="this.remove()">`
-      : `<div class="org-placeholder">${name.charAt(0)}</div>`;
-
+  const tree = {{ root_nodes|tojson|safe }};
+  const flatten = (nodes, acc=[])=>{nodes.forEach(n=>{const level=parseInt(n.level||0,10);acc.push({...n,level});if(n.children?.length)flatten(n.children,acc)});return acc};
+  const nodes = flatten(tree);
+  const grouped = nodes.reduce((map,node)=>{map[node.level]??=[];map[node.level].push(node);return map},{});
+  const levelKeys = Object.keys(grouped).map(Number).sort((a,b)=>a-b);
+  const colorPalette=["bg-gradient-to-br from-indigo-500 to-sky-500","bg-gradient-to-br from-rose-500 to-orange-400","bg-gradient-to-br from-emerald-500 to-teal-500","bg-gradient-to-br from-amber-500 to-pink-500","bg-gradient-to-br from-slate-500 to-slate-700"];
+  const stripes=document.getElementById("org-stripes");
+  stripes.innerHTML=levelKeys.map((level,i)=>{
+    const nodes = grouped[level];
+    const trackColor = colorPalette[i%colorPalette.length];
     return `
-      <div class="org-card" style="border-top-color:${getDeptColor(dept)}">
-        ${photo}
-        <div>
-          <div class="org-name">${name}</div>
-          <div class="org-role" style="color:${getRoleColor(role)}">${role}</div>
-          <div class="org-meta">
-            <span>${dept}</span>
-            <span>${status}</span>
-          </div>
+      <section class="relative">
+        <div class="grid-track">
+          <span class="px-4 py-1 rounded-full text-xs font-semibold text-white ${trackColor}">LEVEL ${level}</span>
         </div>
-      </div>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          ${nodes.map(n=>{
+            const name = n.original_name || n.name || 'Unknown';
+            const dept = n.department || 'Department';
+            const status = (n.status || 'Status').toUpperCase();
+            const role = n.role || 'Role TBD';
+            const photo = n.photo_url && n.photo_url.trim().length ? `<div class="photo-ring ${trackColor}"><img src="${n.photo_url}" alt="${name}" onerror="this.closest('div').innerHTML='<span class=\'w-full h-full flex items-center justify-center text-white text-lg\'>${name.charAt(0)}</span>';"></div>` : `<div class="photo-ring ${trackColor} flex items-center justify-center text-white text-lg font-semibold">${name.charAt(0)}</div>`;
+            return `
+              <article class="node-card bg-slate-900/70 border border-white/5 p-4 flex gap-4">
+                ${photo}
+                <div>
+                  <h3 class="text-base font-semibold text-white leading-tight">${name}</h3>
+                  <p class="text-sm font-medium text-slate-300">${role}</p>
+                  <p class="text-xs text-slate-400 mt-1">${dept}</p>
+                  <span class="inline-flex mt-2 px-2 py-1 rounded-full text-[0.65rem] tracking-wide ${status.includes('VACANT') ? 'bg-red-500/20 text-red-300' : 'bg-emerald-500/20 text-emerald-200'}">${status}</span>
+                </div>
+              </article>
+            `;
+          }).join('')}
+        </div>
+      </section>
     `;
-  };
-
-  const renderChart = () => {
-    const container = document.getElementById('org-chart');
-    const levelKeys = Object.keys(levels).map(Number).sort((a, b) => a - b);
-    container.innerHTML = levelKeys.map(level => `
-      <div class="org-level">
-        <h4>Level ${level}</h4>
-        <div class="org-grid">
-          ${levels[level].map(createCard).join('')}
-        </div>
-      </div>
-    `).join('');
-  };
-
-  renderChart();
+  }).join('');
 </script>
 {% endblock %}
