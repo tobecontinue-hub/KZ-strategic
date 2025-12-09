@@ -1,190 +1,75 @@
 {% extends "base.html" %}
 {% block content %}
 <style>
-  .org-wrapper {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 1.5rem 1rem 3rem;
-  }
-  .org-wrapper h2 {
-    text-align: center;
-    font-weight: 800;
-    color: #0f172a;
-    margin-bottom: 0.25rem;
-  }
-  .org-wrapper p.subhead {
-    text-align: center;
-    color: #64748b;
-    margin-bottom: 2rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-  }
-  .tree ul {
-    padding-top: 1rem;
-    position: relative;
-    padding-left: 0;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  .tree li {
-    list-style-type: none;
-    margin: 0 0.7rem;
-    text-align: center;
-    position: relative;
-    padding: 1rem 0 0 0;
-  }
-  .tree li::before,
-  .tree li::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    border-top: 1px solid #d7dfe7;
-    width: 50%;
-    height: 1rem;
-  }
-  .tree li::before {
-    right: 50%;
-  }
-  .tree li::after {
-    left: 50%;
-    border-left: 1px solid #d7dfe7;
-  }
-  .tree li:only-child::after,
-  .tree li:only-child::before {
-    display: none;
-  }
-  .tree li:only-child {
-    padding-top: 0;
-  }
-  .tree li:first-child::before,
-  .tree li:last-child::after {
-    border: none;
-  }
-  .tree li:last-child::before {
-    border-right: 1px solid #d7dfe7;
-    border-radius: 0 0 0.75rem 0;
-  }
-  .tree li:first-child::after {
-    border-radius: 0 0 0 0.75rem;
-  }
-  .member-card {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    background: #fff;
-    border-radius: 14px;
-    border: 1px solid #e2e8f0;
-    padding: 0.85rem 1rem;
-    min-width: 220px;
-    box-shadow: 0 8px 18px rgba(15,23,42,0.07);
-  }
-  .member-card .photo {
-    width: 54px;
-    height: 54px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 2px solid rgba(148,163,184,0.4);
-    background: #e2e8f0;
-    flex-shrink: 0;
-  }
-  .member-card .photo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .member-card .info {
-    text-align: left;
-  }
-  .member-card .name {
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 0.1rem;
-    font-size: 0.95rem;
-  }
-  .member-card .role {
-    font-size: 0.8rem;
-    color: #475569;
-    margin-bottom: 0.3rem;
-  }
-  .member-card .meta {
-    display: flex;
-    gap: 0.35rem;
-    flex-wrap: wrap;
-  }
-  .member-card .badge {
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    padding: 0.15rem 0.45rem;
-    border-radius: 999px;
-    font-weight: 600;
-    background: #f1f5f9;
-    color: #334155;
-  }
-  .member-card .badge.status-vacant {
-    background: #fee2e2;
-    color: #b91c1c;
-  }
-  .member-card .badge.status-active {
-    background: #dcfce7;
-    color: #15803d;
-  }
-  @media (max-width: 768px) {
-    .tree ul {
-      flex-direction: column;
-      align-items: center;
-    }
-    .tree li::before,
-    .tree li::after {
-      display: none;
-    }
-  }
+  .org-wrapper{max-width:1200px;margin:0 auto;padding:1rem 1rem 3rem;color:#0f172a}
+  .org-wrapper h2{text-align:center;font-weight:800;margin-bottom:.3rem}
+  .org-wrapper p.subhead{text-align:center;color:#64748b;letter-spacing:0.3em;text-transform:uppercase;font-size:0.75rem;margin-bottom:1.5rem}
+  .lane{position:relative;padding-top:2rem;margin-bottom:2.5rem}
+  .lane::before{content:"";position:absolute;top:0;left:calc(50% - 1px);width:2px;height:100%;background:linear-gradient(180deg,#cbd5f5,#e0e7ff)}
+  .lane-label{position:absolute;top:0;left:50%;transform:translate(-50%,-50%);padding:0.2rem 0.75rem;border-radius:999px;font-size:0.7rem;font-weight:600;color:#fff;background:#312e81;box-shadow:0 4px 15px rgba(49,46,129,.25)}
+  .lane-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:1rem;margin-top:0.5rem}
+  .member-card{min-width:200px;max-width:240px;padding:0.9rem 1rem;border-radius:14px;background:#fff;box-shadow:0 12px 30px rgba(15,23,42,.12);position:relative;transition:transform .2s,box-shadow .2s}
+  .member-card:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(15,23,42,.16)}
+  .member-card::before{content:"";position:absolute;top:-30px;left:50%;width:2px;height:30px;background:linear-gradient(180deg,#cbd5f5,#94a3b8)}
+  .member-card .photo{width:56px;height:56px;border-radius:50%;overflow:hidden;border:3px solid rgba(148,163,184,.4);background:#e2e8f0;margin-bottom:.5rem}
+  .member-card img{width:100%;height:100%;object-fit:cover;display:block}
+  .member-card .name{font-weight:700;margin-bottom:.1rem}
+  .member-card .role{font-size:.85rem;color:#475569;margin-bottom:.3rem}
+  .member-card .meta{display:flex;gap:.3rem;flex-wrap:wrap;font-size:.7rem}
+  .badge{padding:.15rem .45rem;border-radius:999px;background:#f1f5f9;color:#475569;font-weight:600}
+  .badge.status-vacant{background:#fee2e2;color:#b91c1c}
+  .badge.status-active{background:#dcfce7;color:#15803d}
+  .lane:first-of-type .member-card::before{display:none}
+  @media(max-width:768px){.lane::before{display:none}.member-card::before{display:none}}
 </style>
 
-{% macro render_node(node) %}
-  <li>
-    <div class="member-card">
-      <div class="photo">
-        {% if node.photo_url %}
-          <img src="{{ node.photo_url }}" alt="{{ node.original_name or node.name }}" onerror="this.remove();">
-        {% else %}
-          <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#475569;">
-            {{ (node.original_name or node.name)[:1] }}
-          </div>
-        {% endif %}
-      </div>
-      <div class="info">
-        <div class="name">{{ node.original_name or node.name }}</div>
-        <div class="role">{{ node.role or 'Role TBD' }}</div>
-        <div class="meta">
-          <span class="badge">{{ node.department or 'Department' }}</span>
-          {% set status = (node.status or '') %}
-          <span class="badge {{ 'status-vacant' if 'vacant' in status|lower else 'status-active' }}">{{ status or 'Status' }}</span>
-        </div>
-      </div>
-    </div>
-    {% if node.children %}
-      <ul>
-        {% for child in node.children %}
-          {{ render_node(child) }}
-        {% endfor %}
-      </ul>
-    {% endif %}
-  </li>
-{% endmacro %}
+{% set grouped = {'CEO': [], 'Head': [], 'Asst Manager': [], 'Exec+Dev': [], 'Staff+Junior': []} %}
+{% for node in root_nodes %}
+  {% set key = node.role|lower %}
+  {% if 'ceo' in key %}
+    {% set _ = grouped['CEO'].append(node) %}
+  {% elif 'head' in key %}
+    {% set _ = grouped['Head'].append(node) %}
+  {% elif 'asst' in key or 'assistant' in key %}
+    {% set _ = grouped['Asst Manager'].append(node) %}
+  {% elif 'executive' in key or 'developer' in key %}
+    {% set _ = grouped['Exec+Dev'].append(node) %}
+  {% else %}
+    {% set _ = grouped['Staff+Junior'].append(node) %}
+  {% endif %}
+{% endfor %}
 
 <div class="org-wrapper">
   <p class="subhead">Structure</p>
   <h2>Organization Tree</h2>
-  <div class="tree">
-    <ul class="root">
-      {% for node in root_nodes %}
-        {{ render_node(node) }}
-      {% endfor %}
-    </ul>
-  </div>
+  {% for label, members in grouped.items() %}
+    {% if members %}
+    <section class="lane">
+      <div class="lane-label">{{ label }}</div>
+      <div class="lane-grid">
+        {% for member in members %}
+        <article class="member-card">
+          <div class="photo">
+            {% if member.photo_url %}
+              <img src="{{ member.photo_url }}" alt="{{ member.original_name or member.name }}" onerror="this.remove();">
+            {% else %}
+              <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#475569;">
+                {{ (member.original_name or member.name)[:1] }}
+              </div>
+            {% endif %}
+          </div>
+          <div class="name">{{ member.original_name or member.name }}</div>
+          <div class="role">{{ member.role or 'Role TBD' }}</div>
+          <div class="meta">
+            <span class="badge">{{ member.department or 'Department' }}</span>
+            {% set status = member.status or '' %}
+            <span class="badge {{ 'status-vacant' if 'vacant' in status|lower else 'status-active' }}">{{ status or 'Status' }}</span>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+  {% endfor %}
 </div>
 {% endblock %}
