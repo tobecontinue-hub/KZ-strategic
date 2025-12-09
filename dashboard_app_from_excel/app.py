@@ -332,6 +332,7 @@ def executive_summary_page():
     mission_statement = ""
     dashboard_subtitle = ""
     strategic_insight = ""
+    summary_override = None
 
     for row in brand_rows:
         key = row.get("Content_Key", "")
@@ -344,6 +345,8 @@ def executive_summary_page():
             dashboard_subtitle = value
         elif "Strategic Insight" in key:
             strategic_insight = value
+        elif "Summary" in key:
+            summary_override = value
 
     # Parse executive summary data
     summary_text = None
@@ -362,7 +365,7 @@ def executive_summary_page():
         mission_statement=mission_statement,
         dashboard_subtitle=dashboard_subtitle,
         strategic_insight=strategic_insight,
-        summary=summary_text,
+        summary=summary_override or summary_text,
         points=kpi_points,
         title="Executive Summary"
     )
