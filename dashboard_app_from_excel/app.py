@@ -891,59 +891,46 @@ def roadmap_page():
 @app.route("/swot")
 def swot_page():
     try:
-        # Assuming gs.sheet_to_df("swot") returns the DataFrame with columns
-        # including '2025' and '2026' as per the image.
         df = gs.sheet_to_df("swot")
     except Exception:
-        # Fallback to an empty DataFrame if data fetching fails
         df = pd.DataFrame()
 
     rows = []
     try:
-        # Convert DataFrame rows to a list of dictionaries
-        rows = df.to_dict(orient="records") if hasattr(df, "to_dict") else df
+        rows = df.to_dict(orient="records") if hasattr(df, "to_dict") else []
     except Exception:
         rows = []
 
-    # Initialize sections for S-W-O-T
-    sections = {
-        "Strength": [],
-        "Opportunity": [],
-        "Weakness": [],
-        "Threat": []
-    }
+    table_rows = []
+    key_insight_rows = []
 
-    for r in rows:
-        cat = (r.get("Category") or "").strip()
-        if not cat:
-            continue
+    for row in rows:
+        category = (row.get("Category") or "").strip()
+        point_id = row.get("Point_ID") or ""
+        key_item = row.get("Key_Item") or row.get("Key Item") or ""
+        insight_2025 = row.get("2025") or ""
+        strategy_2026 = row.get("2026") or ""
 
-        # Normalize category
-        cat_lower = cat.lower().strip()
-        if "strength" in cat_lower:
-            cat = "Strength"
-        elif "opportun" in cat_lower:
-            cat = "Opportunity"
-        elif "weak" in cat_lower:
-            cat = "Weakness"
-        elif "threat" in cat_lower:
-            cat = "Threat"
-        else:
-            continue  # Skip unknown categories
-
-        # Extract data, including the separate 2025 and 2026 details
-        item = {
-            "id": r.get("Point_ID") or "",
-            "title": r.get("Key_Item") or r.get("Key Item") or "",
-            # Explicitly extract the content from the '2025' and '2026' columns
-            "details_2025": r.get("2025", "") or "",
-            "details_2026": r.get("2026", "") or "",
+        entry = {
+            "Category": category,
+            "Point_ID": point_id,
+            "Key_Item": key_item,
+            "2025": insight_2025,
+            "2026": strategy_2026
         }
 
-        if cat in sections:
-            sections[cat].append(item)
+        if category.lower() == "key insight":
+            key_insight_rows.append(entry)
+        else:
+            table_rows.append(entry)
 
-    return render_template("swot.html", sections=sections)
+    table_rows.sort(key=lambda r: r.get("Category", ""))
+
+    return render_template(
+        "swot.html",
+        rows=table_rows,
+        key_insights=key_insight_rows
+    )
 
 
 @app.route("/cost_per_x")
