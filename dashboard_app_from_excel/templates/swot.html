@@ -245,6 +245,9 @@ body {
                                         <div class="swot-detail-text">
                                             {{ item.details_2025 | default("N/A") }}
                                         </div>
+                                        {% if item.details_2025_extra %}
+                                        <div class="swot-detail-text" style="margin-top:0.5rem;color:#0b63ff;font-size:0.8rem;">{{ item.details_2025_extra }}</div>
+                                        {% endif %}
                                     </div>
 
                                     <!-- 2026 Column -->
@@ -253,6 +256,9 @@ body {
                                         <div class="swot-detail-text">
                                             {{ item.details_2026 | default("N/A") }}
                                         </div>
+                                        {% if item.details_2026_extra %}
+                                        <div class="swot-detail-text" style="margin-top:0.5rem;color:#0b63ff;font-size:0.8rem;">{{ item.details_2026_extra }}</div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
