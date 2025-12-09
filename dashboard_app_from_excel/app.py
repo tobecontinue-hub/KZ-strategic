@@ -1122,6 +1122,7 @@ def strategy_hub():
     if not fna_df.empty:
         for _, row in fna_df.iterrows():
             row = row.to_dict()
+            row = { (str(k) if isinstance(k, (int, float)) else k): v for k, v in row.items() }
             for k in ["YTD Actual (2025)", "2026 Target", "Variance", "Rationale"]:
                 row[k] = clean_latex(row.get(k, ""))
             fna_rows.append(row)
