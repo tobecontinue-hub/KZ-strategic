@@ -233,6 +233,11 @@ threat-id { background: #f8d7da; color: #721c24; }
                             <div class="swot-preview">
                                 <div><span>2025</span>{{ item.details_2025 | default("N/A") }}</div>
                                 <div><span>2026</span>{{ item.details_2026 | default("N/A") }}</div>
+                                {% if item.details_2025_extra or item.details_2026_extra %}
+                                <div style="margin-top:6px; color:#94a3b8; font-size:0.75rem;">
+                                  <span>Notes:</span> {{ item.details_2025_extra or item.details_2026_extra }}
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
                         <i class="bi bi-chevron-down toggle-icon"></i>
