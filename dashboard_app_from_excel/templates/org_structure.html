@@ -1,79 +1,77 @@
 {% extends "base.html" %}
 {% block content %}
 <style>
-  :root {
-    color-scheme: light dark;
-  }
-  .org-wrapper {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 1rem 1rem 3rem;
-  }
-  .lane {
+  .org-canvas {
     position: relative;
-    padding-top: 2.5rem;
-    margin-bottom: 2.5rem;
+    padding: 2rem 0;
   }
-  .lane::before {
-    content: "";
+  .org-lines {
     position: absolute;
     top: 0;
-    left: 50%;
-    width: 2px;
+    left: 0;
+    width: 100%;
     height: 100%;
-    transform: translateX(-50%);
-    background: linear-gradient(180deg,#cbd5f5,#e0e7ff);
+    pointer-events: none;
   }
-  .lane-label {
+  .tier-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  .tier {
+    position: relative;
+    padding-top: 1.75rem;
+  }
+  .tier-label {
     position: absolute;
     top: 0;
     left: 50%;
     transform: translate(-50%, -50%);
-    padding: 0.25rem 1rem;
+    padding: 0.2rem 0.9rem;
     border-radius: 999px;
-    font-size: 0.75rem;
-    letter-spacing: 0.2em;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: #fff;
     background: #312e81;
-    box-shadow: 0 6px 20px rgba(49,46,129,.25);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(49,46,129,.25);
   }
-  .lane-grid {
+  .tier-row {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 1rem;
   }
   .member-card {
-    width: 220px;
-    border-radius: 18px;
-    border: 1px solid rgba(148,163,184,.5);
+    width: 230px;
+    border-radius: 16px;
+    border: 1px solid rgba(148,163,184,.4);
     padding: 1rem;
-    box-shadow: 0 12px 30px rgba(15,23,42,.12);
-    position: relative;
+    box-shadow: 0 14px 30px rgba(15,23,42,.12);
     background: #fff;
+    text-align: center;
+    position: relative;
   }
   .member-card::before {
     content: "";
     position: absolute;
-    top: -28px;
+    top: -32px;
     left: 50%;
     width: 2px;
-    height: 30px;
+    height: 32px;
     background: linear-gradient(180deg,#cbd5f5,#94a3b8);
     transform: translateX(-50%);
   }
-  .lane:first-of-type .member-card::before {
-    display: none;
-  }
+  .tier:first-of-type .member-card::before { display: none; }
   .photo {
-    width: 58px;
-    height: 58px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
+    margin: 0 auto 0.5rem;
     overflow: hidden;
     border: 3px solid rgba(148,163,184,.4);
     background: #e2e8f0;
-    margin-bottom: .4rem;
   }
   .photo img {
     width: 100%;
@@ -81,90 +79,143 @@
     object-fit: cover;
     display: block;
   }
-  .name {
-    font-weight: 700;
-    font-size: 1rem;
-    color: #0f172a;
-  }
-  .role {
-    font-size: .85rem;
-    color: #475569;
-    margin-bottom: .3rem;
-  }
+  .name { font-weight: 700; color: #0f172a; margin-bottom: 0.1rem; }
+  .role { font-size: 0.85rem; color: #475569; margin-bottom: 0.35rem; }
   .meta {
-    display: flex;
-    gap: .4rem;
+    display: inline-flex;
+    gap: 0.3rem;
     flex-wrap: wrap;
-    font-size: .7rem;
+    justify-content: center;
   }
   .badge {
-    padding: .2rem .5rem;
+    padding: 0.2rem 0.45rem;
     border-radius: 999px;
+    font-size: 0.7rem;
     background: #f1f5f9;
     color: #475569;
     font-weight: 600;
   }
-  .status-vacant { background: #fee2e2; color: #b91c1c; }
-  .status-active { background: #dcfce7; color: #15803d; }
-  @media(max-width:768px){
-    .lane::before,.member-card::before{display:none}
-    .lane-label{position:static;transform:none;margin-bottom:.75rem}
+  .badge.status-vacant { background: #fee2e2; color: #b91c1c; }
+  .badge.status-active { background: #dcfce7; color: #15803d; }
+  @media (max-width: 768px) {
+    .member-card::before { display: none; }
+    .tier-label { position: static; transform: none; margin-bottom: 0.5rem; }
   }
 </style>
 
-{% set lanes = [
-  ('CEO', []),
-  ('Head', []),
-  ('Assistant Manager', []),
-  ('Executive / Developer', []),
-  ('Staff / Junior', [])
-] %}
-{% for node in root_nodes %}
-  {% set lower = (node.role or '')|lower %}
-  {% if 'ceo' in lower %}
-    {% set _ = lanes[0][1].append(node) %}
-  {% elif 'head' in lower %}
-    {% set _ = lanes[1][1].append(node) %}
-  {% elif 'asst' in lower or 'assistant' in lower %}
-    {% set _ = lanes[2][1].append(node) %}
-  {% elif 'executive' in lower or 'developer' in lower %}
-    {% set _ = lanes[3][1].append(node) %}
-  {% else %}
-    {% set _ = lanes[4][1].append(node) %}
-  {% endif %}
-{% endfor %}
-
-<div class="org-wrapper">
-  <p class="subhead">Structure</p>
-  <h2>Organization Tree</h2>
-  {% for label, members in lanes %}
-    {% if members %}
-      <section class="lane">
-        <div class="lane-label">{{ label }}</div>
-        <div class="lane-grid">
-          {% for member in members %}
-            <article class="member-card">
-              <div class="photo">
-                {% if member.photo_url %}
-                  <img src="{{ member.photo_url }}" alt="{{ member.original_name or member.name }}" onerror="this.remove();">
-                {% else %}
-                  <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#475569;">
-                    {{ (member.original_name or member.name)[:1] }}
-                  </div>
-                {% endif %}
-              </div>
-              <div class="name">{{ member.original_name or member.name }}</div>
-              <div class="role">{{ member.role or 'Role TBD' }}</div>
-              <div class="meta">
-                <span class="badge">{{ member.department or 'Department' }}</span>
-                {% set status = member.status or '' %}
-                <span class="badge {{ 'status-vacant' if 'vacant' in status|lower else 'status-active' }}">{{ status or 'Status' }}</span>
-              </div>
-            </article>
-          {% endfor %}
-        </div>
+<div class="org-canvas" id="orgCanvas">
+  <svg class="org-lines" id="orgLines"></svg>
+  <div class="tier-stack" id="tierStack">
+    {% for label in ["CEO", "Head", "Assistant Manager", "Executive / Developer", "Staff / Junior"] %}
+      <section class="tier" data-tier-index="{{ loop.index0 }}">
+        <div class="tier-label">{{ label }}</div>
+        <div class="tier-row" data-tier-row></div>
       </section>
-    {% endif %}
-  {% endfor %}
+    {% endfor %}
+  </div>
 </div>
+
+<script>
+  const treeData = {{ root_nodes | tojson | safe }};
+
+  const tiers = [
+    { label: 'CEO', match: [/ceo/] },
+    { label: 'Head', match: [/head/] },
+    { label: 'Assistant Manager', match: [/assistant/, /asst/] },
+    { label: 'Executive / Developer', match: [/executive/, /developer/] },
+    { label: 'Staff / Junior', match: [/staff/, /junior/] }
+  ];
+
+  const tierRows = document.querySelectorAll('[data-tier-row]');
+  const svg = document.getElementById('orgLines');
+  const canvas = document.getElementById('orgCanvas');
+  const nodeMap = new Map();
+
+  const flatten = (nodes, parentId = null, acc = [], prefix = 'n') => {
+    nodes.forEach((node, idx) => {
+      const name = node.original_name || node.name || 'node';
+      const safeId = `${prefix}-${idx}-${name.replace(/[^a-z0-9]+/gi,'-').toLowerCase()}`;
+      const entry = {
+        id: safeId,
+        name,
+        role: node.role || '',
+        department: node.department || '',
+        status: node.status || '',
+        photo: node.photo_url || '',
+        parentId,
+        children: node.children || []
+      };
+      acc.push(entry);
+      if (node.children && node.children.length) {
+        flatten(node.children, safeId, acc, safeId);
+      }
+    });
+    return acc;
+  };
+
+  const getTierIndex = role => {
+    const lower = (role || '').toLowerCase();
+    for (let i = 0; i < tiers.length; i++) {
+      if (tiers[i].match.some(regex => regex.test(lower))) {
+        return i;
+      }
+    }
+    return tiers.length - 1;
+  };
+
+  const nodes = flatten(treeData);
+
+  nodes.forEach(node => {
+    const tierIndex = getTierIndex(node.role);
+    const row = tierRows[tierIndex];
+    if (!row) return;
+    const card = document.createElement('article');
+    card.className = 'member-card';
+    card.dataset.nodeId = node.id;
+    card.dataset.parentId = node.parentId || '';
+    card.innerHTML = `
+      <div class="photo">
+        ${node.photo ? `<img src="${node.photo}" alt="${node.name}" onerror="this.remove();">` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#475569;">${node.name.charAt(0)}</div>`}
+      </div>
+      <div class="name">${node.name}</div>
+      <div class="role">${node.role || 'Role TBD'}</div>
+      <div class="meta">
+        <span class="badge">${node.department || 'Department'}</span>
+        <span class="badge ${node.status.toLowerCase().includes('vacant') ? 'status-vacant' : 'status-active'}">${node.status || 'Status'}</span>
+      </div>
+    `;
+    row.appendChild(card);
+    nodeMap.set(node.id, card);
+  });
+
+  const drawLines = () => {
+    const rect = canvas.getBoundingClientRect();
+    svg.setAttribute('width', rect.width);
+    svg.setAttribute('height', rect.height);
+    svg.innerHTML = '';
+
+    nodes.forEach(node => {
+      if (!node.parentId) return;
+      const childEl = nodeMap.get(node.id);
+      const parentEl = nodeMap.get(node.parentId);
+      if (!childEl || !parentEl) return;
+      const childRect = childEl.getBoundingClientRect();
+      const parentRect = parentEl.getBoundingClientRect();
+      const x1 = parentRect.left + parentRect.width / 2 - rect.left;
+      const y1 = parentRect.bottom - rect.top;
+      const x2 = childRect.left + childRect.width / 2 - rect.left;
+      const y2 = childRect.top - rect.top;
+      const midY = (y1 + y2) / 2;
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', `M${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`);
+      path.setAttribute('stroke', '#cbd5f5');
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke-width', '2');
+      svg.appendChild(path);
+    });
+  };
+
+  window.addEventListener('resize', () => requestAnimationFrame(drawLines));
+  drawLines();
+</script>
 {% endblock %}
