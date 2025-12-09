@@ -1,4 +1,5 @@
 Flask
+Gunicorn
 gspread
 google-auth
 google-auth-httplib2

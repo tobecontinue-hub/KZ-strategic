@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+
+pip install -r requirements.txt
+exec gunicorn app:app

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "env": {
+      "PYTHONUNBUFFERED": "1"
+    },
+    "command": "pip install -r requirements.txt"
+  },
+  "deploy": {
+    "startCommand": "gunicorn app:app"
+  }
+}
