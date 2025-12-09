@@ -1,0 +1,174 @@
+<!-- templates/trajectories.html -->
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+
+/* ---------- MATERIAL DESIGN 3 BASE ---------- */
+
+:root {
+  --md-surface: #ffffff;
+  --md-surface-variant: #f3f6fa;
+  --md-on-surface: #1c1b1f;
+  --md-outline: #c5c7d0;
+  --md-primary: #0b57d0;
+  --md-primary-container: #d6e3ff;
+  --md-on-primary: #ffffff;
+}
+
+/* PAGE */
+.main-container {
+  padding: 28px;
+  max-width: 900px;
+  margin: auto;
+}
+
+/* HEADER */
+.page-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.page-header h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--md-on-surface);
+  margin-bottom: 4px;
+}
+
+.page-header .subtitle {
+  color: #5d6268;
+  font-size: 0.95rem;
+  letter-spacing: 0.2px;
+}
+
+/* SECTION WRAPPER */
+.section-container {
+  background: var(--md-surface);
+  border-radius: 16px;
+  box-shadow: 0px 4px 14px rgba(0,0,0,0.08);
+  margin-bottom: 28px;
+  border: 1px solid var(--md-outline);
+}
+
+/* SECTION HEADER — TONAL */
+.section-header {
+  padding: 18px 22px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  background: var(--md-primary-container);
+  color: #083b91;
+  letter-spacing: .2px;
+  border-bottom: 1px solid var(--md-outline);
+}
+
+/* CARD ITEM */
+.card-item {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--md-outline);
+  transition: background 0.15s;
+}
+
+.card-item:last-child {
+  border-bottom: none;
+}
+
+.card-item:hover {
+  background: var(--md-surface-variant);
+}
+
+/* TITLE */
+.sub-header {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0a2e45;
+  margin-bottom: 4px;
+  letter-spacing: .15px;
+}
+
+/* DESC */
+.key-finding {
+  font-size: 0.88rem;
+  line-height: 1.25;
+  color: #50565c;
+}
+
+/* LIST */
+.bullet-list {
+  padding-left: 18px;
+  margin: 4px 0;
+  list-style-type: disc;
+}
+
+.bullet-list li {
+  margin-bottom: 2px;
+  line-height: 1.25;
+  font-size: 0.88rem;
+}
+
+</style>
+
+<div class="main-container">
+  
+
+  <!-- SECTION I -->
+  {% if sections["I. Trajectories"] %}
+  <div class="section-container">
+    <div class="section-header">I. Trajectories</div>
+
+    {% for item in sections["I. Trajectories"] %}
+      <div class="card-item">
+        <div class="sub-header">{{ item.Section_ID }} — {{ item.Section_Name }}</div>
+
+        {% set key_finding = item.Key_Finding %}
+        {% if key_finding %}
+          {% if '•' in key_finding or '✓' in key_finding %}
+            <ul class="bullet-list">
+              {% for line in key_finding.replace('✓','•').split('•') if line|trim %}
+                <li>{{ line|trim }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="key-finding">{{ key_finding }}</div>
+          {% endif %}
+        {% else %}
+          <div class="key-finding text-muted">No key finding</div>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+  </div>
+  {% endif %}
+
+  <!-- SECTION II -->
+  {% if sections["II. Summary"] %}
+  <div class="section-container">
+    <div class="section-header">II. Summary</div>
+
+    {% for item in sections["II. Summary"] %}
+      <div class="card-item">
+        <div class="sub-header">{{ item.Section_ID }} — {{ item.Section_Name }}</div>
+
+        {% set key_finding = item.Key_Finding %}
+        {% if key_finding %}
+          {% if '•' in key_finding or '✓' in key_finding %}
+            <ul class="bullet-list">
+              {% for line in key_finding.replace('✓','•').split('•') if line|trim %}
+                <li>{{ line|trim }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="key-finding">{{ key_finding }}</div>
+          {% endif %}
+        {% else %}
+          <div class="key-finding text-muted">No key finding</div>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+  </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,60 @@
+/* static/css/style.css — Blue + Teal, creative but light (B2) */
+:root{
+  --blue:#0b63a4;
+  --teal:#18a895;
+  --muted:#6c757d;
+  --bg:#f3f7fb;
+  --card:#ffffff;
+  --glass: rgba(255,255,255,0.75);
+}
+
+*{box-sizing:border-box}
+body{
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: linear-gradient(180deg, #f7fbfe 0%, var(--bg) 100%);
+  margin:0; color:#172b4d;
+}
+
+/* app shell */
+.app-shell{display:flex; min-height:100vh;}
+.sidebar{
+  width:240px; padding:20px 16px; background: linear-gradient(160deg,var(--blue),var(--teal)); color:white;
+  display:flex; flex-direction:column; gap:12px;
+}
+.brand{margin-bottom:8px}
+.brand .logo{font-weight:700; font-size:20px;}
+.brand .subtitle{font-size:12px; opacity:0.9}
+.nav-list{display:flex; flex-direction:column; gap:6px; margin-top:6px;}
+.nav-item{color:rgba(255,255,255,0.95); padding:10px 12px; border-radius:8px; text-decoration:none; display:block; transition: all .15s ease;}
+.nav-item:hover{background: rgba(255,255,255,0.06); transform: translateX(6px); color:white; box-shadow:0 6px 18px rgba(11,99,164,0.12);}
+.sidebar-footer{margin-top:auto; font-size:12px; opacity:0.95; text-align:center}
+
+/* main content */
+.main-content{flex:1; display:flex; flex-direction:column; min-height:100vh;}
+.topbar{background:transparent; padding:14px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid rgba(11,63,100,0.04);}
+.page-title{margin:0; font-weight:600;}
+.content{padding:24px}
+
+/* cards & hero */
+.card{background:var(--card); border-radius:12px;}
+.hero{background: linear-gradient(180deg, rgba(11,99,164,0.06), rgba(24,168,149,0.03)); border:1px solid rgba(11,99,164,0.06);}
+.small-card{border-radius:12px; transition:transform .12s ease, box-shadow .12s ease; }
+.small-card:hover{transform: translateY(-6px); box-shadow: 0 18px 36px rgba(11,99,164,0.08);}
+
+/* table styles */
+.table-card{border-radius:12px}
+.table thead th{background: linear-gradient(90deg,var(--blue),var(--teal)); color:white; position: sticky; top:0;}
+.table tbody tr:hover{background: rgba(24,168,149,0.04)}
+
+/* utility */
+.muted{color:var(--muted)}
+.card-card-link{text-decoration:none}
+.summary-item h5{margin-bottom:6px}
+.summary-item p{margin:0; color:var(--muted)}
+
+/* responsive */
+@media(max-width:900px){
+  .sidebar{display:none}
+  body.sidebar-hidden .sidebar{display:block}
+  .app-shell{flex-direction:column}
+}

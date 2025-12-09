@@ -1,0 +1,23 @@
+
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Operation Health</h1>
+  <table class="table">
+    <thead>
+      <tr>
+      {% for c in rows[0].keys() %}
+        <th>{{ c }}</th>
+      {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+        <tr>
+        {% for v in r.values() %}
+          <td>{{ v }}</td>
+        {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

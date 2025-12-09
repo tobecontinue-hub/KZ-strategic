@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: kz-strategic-dashboard
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: GOOGLE_SHEET_ID
+        value: "1JY0XOEHqy400a4o1oHRr5U-eAIH-Fr_tSBStV4mBaL0"
+      - key: GOOGLE_SERVICE_ACCOUNT_FILE
+        value: /opt/render/project/src/service_account.json
+      - key: SHEET_CACHE_TTL
+        value: "30"
+    autoDeploy: true

@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+
+/* --------------------------------------------------
+   HERO TEXT ANIMATIONS
+-------------------------------------------------- */
+
+.hero-text {
+  text-align: center;
+  padding-top: 60px;
+  color: #fff;
+}
+
+/* Typewriter Title */
+.typewriter {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 3px solid #ffffffc2;
+  width: 0;
+  margin: 0 auto;
+  font-size: 2.8rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  animation: typing 3s steps(40) forwards, blinkCursor .8s step-end infinite;
+}
+
+/* Subtitle text fade animation */
+.subtitle {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 1.2s ease forwards;
+  animation-delay: 3.1s; /* Starts right after typewriter finishes */
+}
+
+/* Glow effect ONLY on subtitle (not on typewriter) */
+.subtitle.glow {
+  animation: fadeUp 1.2s ease forwards, glowText 2.5s ease-in-out infinite alternate;
+  animation-delay: 3.1s; 
+}
+
+/* Keyframes */
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes blinkCursor {
+  50% { border-color: transparent; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glowText {
+  from { text-shadow: 0 0 10px rgba(255,255,255,0.4); }
+  to   { text-shadow: 0 0 25px rgba(255,255,255,0.9); }
+}
+
+
+/* --------------------------------------------------
+   HERO SECTION
+-------------------------------------------------- */
+
+.hero {
+  height: 85vh;
+  background: url('https://images.unsplash.com/photo-1583321500900-82807e458f3c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')
+    center/cover no-repeat;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  color: white;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.55);
+}
+
+.hero .hero-text {
+  position: relative;
+  z-index: 2;
+}
+
+/* Make sure only subtitle glows, not the H1 */
+.hero h1.typewriter {
+  position: relative;
+  z-index: 2;
+}
+
+
+/* --------------------------------------------------
+   FLOATING SHAPES (behind text)
+-------------------------------------------------- */
+
+.shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.12;
+  animation: float 6s infinite ease-in-out;
+  z-index: 1;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-25px); }
+  100% { transform: translateY(0px); }
+}
+
+.shape1 { width: 180px; height: 180px; background: #ffffff; top: 10%; left: 10%; animation-delay: 0.2s; }
+.shape2 { width: 260px; height: 260px; background: #ffffff; bottom: 15%; right: 12%; animation-delay: 0.5s; }
+.shape3 { width: 120px; height: 120px; background: #ffffff; top: 60%; left: 5%; animation-delay: 0.8s; }
+
+
+/* --------------------------------------------------
+   QUICK LINKS SECTION
+-------------------------------------------------- */
+
+.quick-links {
+  margin-top: -60px;
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.quick-card {
+  background: rgba(13, 27, 42, 0.75);
+  backdrop-filter: blur(6px);
+  width: 220px;
+  padding: 25px;
+  border-radius: 18px;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+  transition: 0.3s;
+  cursor: pointer;
+  color: #f8f9fc;
+}
+
+.quick-card:hover {
+  transform: translateY(-8px) scale(1.04);
+  box-shadow: 0 16px 30px rgba(0,0,0,0.16);
+}
+
+.quick-card i {
+  font-size: 2.1rem;
+  margin-bottom: 10px;
+  color: #4e73df;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-top: 90px;
+  margin-bottom: 25px;
+}
+
+/* Footer fade-in */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(25px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+</style>
+
+
+<!-- --------------------------------------------------
+     HERO BANNER
+-------------------------------------------------- -->
+<<div class="hero">
+  <div class="shape shape1"></div>
+  <div class="shape shape2"></div>
+  <div class="shape shape3"></div>
+
+  <div class="hero-text">
+    <h1 class="typewriter">Welcome to the Strategic Khit Zay 2026</h1>
+
+    <p class="subtitle glow">
+      Our centralized hub for insights, planning, performance & execution
+    </p>
+  </div>
+</div>
+
+
+<!-- --------------------------------------------------
+     QUICK LINKS
+-------------------------------------------------- -->
+<h2 class="section-title"></h2>
+
+<div class="quick-links">
+
+  <!-- Core Strategy -->
+  <a href="/org_structure" class="quick-card">
+    <i class="bi bi-diagram-3-fill"></i>
+    <h5>Organizational Structure</h5>
+  </a>
+
+  <a href="/dna" class="quick-card">
+    <i class="bi bi-fingerprint"></i>
+    <h5>Organizational DNA</h5>
+  </a>
+
+  <a href="/executive_summary" class="quick-card">
+    <i class="bi bi-house-door"></i>
+    <h5>Executive Summary</h5>
+  </a>
+
+  <!-- Customer & Market -->
+  <a href="/value_map" class="quick-card">
+    <i class="bi bi-diagram-3"></i>
+    <h5>Value Map — Full Price</h5>
+  </a>
+
+  <a href="/value_map_promo" class="quick-card">
+    <i class="bi bi-badge-ad"></i>
+    <h5>Value Map — Promo Price</h5>
+  </a>
+
+  <a href="/swot" class="quick-card">
+    <i class="bi bi-intersect"></i>
+    <h5>SWOT</h5>
+  </a>
+
+  <a href="/segments" class="quick-card">
+    <i class="bi bi-people"></i>
+    <h5>Segments</h5>
+  </a>
+
+  <a href="/trajectories" class="quick-card">
+    <i class="bi bi-shuffle"></i>
+    <h5>Trajectories</h5>
+  </a>
+
+  <!-- Financial Overview -->
+  <a href="/financial_review" class="quick-card">
+    <i class="bi bi-clipboard-data"></i>
+    <h5>Financial Review 2025</h5>
+  </a>
+
+  <a href="/profit_n_loss" class="quick-card">
+    <i class="bi bi-cash-coin"></i>
+    <h5>Profit & Loss</h5>
+  </a>
+
+  <a href="/profit_x" class="quick-card">
+    <i class="bi bi-percent"></i>
+    <h5>Profit per X</h5>
+  </a>
+
+  <a href="/cost_per_x" class="quick-card">
+    <i class="bi bi-activity"></i>
+    <h5>Cost per X</h5>
+  </a>
+
+  <!-- Planning & Execution -->
+  <a href="/roadmap" class="quick-card">
+    <i class="bi bi-map"></i>
+    <h5>Roadmap</h5>
+  </a>
+
+  <a href="/ecom" class="quick-card">
+    <i class="bi bi-cart-check"></i>
+    <h5>Sales Target Ecom</h5>
+  </a>
+
+  <a href="/okr" class="quick-card">
+    <i class="bi bi-bullseye"></i>
+    <h5>OKR</h5>
+  </a>
+
+  <a href="/strategy_hub" class="quick-card">
+    <i class="bi bi-collection"></i>
+    <h5>Strategy Hub</h5>
+  </a>
+
+  <!-- Top Sale Product -->
+  <a href="/top_product" class="quick-card">
+    <i class="bi bi-box-seam"></i>
+    <h5>Top Product — Full Price</h5>
+  </a>
+
+  <a href="/top_product_promo" class="quick-card">
+    <i class="bi bi-box"></i>
+    <h5>Top Product — Promo Price</h5>
+  </a>
+
+</div>
+
+<!-- --------------------------------------------------
+     FOOTER
+-------------------------------------------------- -->
+
+<footer style="margin-top:120px; padding:35px 0; text-align:center; background:#0d1b2a; color:white;
+                font-size:1.2rem; letter-spacing:1px; animation:fadeIn 2s ease;">
+  <p>“Alone we are drops, together we are ocean.”</p>
+</footer>
+
+{% endblock %}

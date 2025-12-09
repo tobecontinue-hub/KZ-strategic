@@ -1,0 +1,281 @@
+<!-- templates/dna.html -->
+{% extends "base.html" %}
+{% block content %}
+  <style>
+    /* Keep styles scoped; do not target html/body so base navbar/tabs remain intact */
+    .dna-app-wrapper {
+      width: 100%;
+      min-height: 100%;
+      overflow-y: auto;
+      padding: 24px 16px;
+      position: relative;
+    }
+
+    /* Floating particles background */
+    .dna-particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .dna-particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.06);
+      border-radius: 50%;
+      animation: dna-float 15s infinite ease-in-out;
+    }
+
+    @keyframes dna-float {
+      0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+    }
+
+    .dna-section-card {
+      background: white;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .dna-section-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+    }
+
+    .dna-section-core { --sec: #3b82f6; --sec-dark: #2563eb; --sec-light: #dbeafe; }
+    .dna-section-hygiene { --sec: #8b5cf6; --sec-dark: #7c3aed; --sec-light: #ede9fe; }
+    .dna-section-motivation { --sec: #f59e0b; --sec-dark: #d97706; --sec-light: #fef3c7; }
+
+    .dna-section-header {
+      background: linear-gradient(135deg, var(--sec) 0%, var(--sec-dark) 100%);
+      padding: 16px 24px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      color: #fff;
+    }
+
+    .dna-header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dna-section-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dna-section-icon {
+      width: 28px;
+      height: 28px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .dna-chevron svg { width: 16px; height: 16px; }
+    .dna-chevron svg path { stroke: white; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+    .dna-section-body { overflow: hidden; }
+    .dna-section-body.collapsed { display: none; }
+
+    .dna-value-item { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; display: flex; gap: 16px; }
+    .dna-value-item:last-child { border-bottom: none; }
+
+    .dna-point-badge {
+      width: 48px; height: 48px; min-width: 48px; border-radius: 12px;
+      background: var(--sec-light); border: 3px solid var(--sec);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 16px; color: var(--sec);
+    }
+
+    .dna-value-content { flex: 1; min-width: 0; }
+    .dna-key-title { font-size: 16px; font-weight: 700; color: #1e293b; margin: 0 0 8px; }
+    .dna-signal-list { list-style: none; padding: 0; margin: 0; }
+    .dna-signal-list li { padding: 6px 0 6px 24px; color: #475569; font-size: 14px; position: relative; }
+    .dna-signal-list li::before { content: '✓'; position: absolute; left: 0; top: 4px; width: 18px; height: 18px; background: var(--sec-light); color: var(--sec); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+
+    .dna-details-toggle { background: var(--sec); color: #fff; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+    .dna-details-box { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.3s ease; margin-top: 0; }
+    .dna-details-box.expanded { max-height: 800px; opacity: 1; margin-top: 12px; }
+
+    .dna-details-content { background: linear-gradient(135deg, var(--sec-light) 0%, white 100%); border-left: 4px solid var(--sec); border-radius: 12px; padding: 16px; }
+  </style>
+
+  <!-- Optional decorative layer under the content -->
+  <div class="dna-particles" id="particles"></div>
+
+  <div class="dna-app-wrapper">
+   <div class="main-container">
+    <!-- Core Values Section -->
+    <div class="dna-section-card dna-section-core">
+      <div class="dna-section-header" onclick="toggleSection('core')">
+        <div class="dna-header-content">
+          <h3 class="dna-section-title"><span class="dna-section-icon">💎</span> <span id="coreSectionTitle">I. Core Values</span></h3>
+          <div class="dna-chevron">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" /></svg>
+          </div>
+        </div>
+      </div>
+      <div class="dna-section-body" id="coreBody">
+        {% for item in sections["I. Core Values"] %}
+        <div class="dna-value-item">
+          <div class="dna-point-badge">{{ item.Point_ID }}</div>
+          <div class="dna-value-content">
+            <h4 class="dna-key-title">{{ item.Key_Item }}</h4>
+            {% if item.DNA %}
+              {% set lines = item.DNA.split('✔') | map('trim') | list %}
+              <ul class="dna-signal-list">
+                {% for ln in lines if ln %}
+                <li>{{ ln }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+            {% set details = item["Details/Data_Alignment"] %}
+            {% if details %}
+              <button class="dna-details-toggle" onclick="toggleDetails(this)"><span>Show Details</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" /></svg>
+              </button>
+              <div class="dna-details-box">
+                <div class="dna-details-content"><p>{{ details }}</p></div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Hygiene Factors Section -->
+    <div class="dna-section-card dna-section-hygiene">
+      <div class="dna-section-header" onclick="toggleSection('hygiene')">
+        <div class="dna-header-content">
+          <h3 class="dna-section-title"><span class="dna-section-icon">🛡️</span> <span id="hygieneSectionTitle">II. Hygiene Factors</span></h3>
+          <div class="dna-chevron">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" /></svg>
+          </div>
+        </div>
+      </div>
+      <div class="dna-section-body" id="hygieneBody">
+        {% for item in sections["II. Hygiene Factors"] %}
+        <div class="dna-value-item">
+          <div class="dna-point-badge">{{ item.Point_ID }}</div>
+          <div class="dna-value-content">
+            <h4 class="dna-key-title">{{ item.Key_Item }}</h4>
+            {% if item.DNA %}
+              {% set lines = item.DNA.split('✔') | map('trim') | list %}
+              <ul class="dna-signal-list">
+                {% for ln in lines if ln %}
+                <li>{{ ln }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+            {% set details = item["Details/Data_Alignment"] %}
+            {% if details %}
+              <button class="dna-details-toggle" onclick="toggleDetails(this)"><span>Show Details</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" /></svg>
+              </button>
+              <div class="dna-details-box">
+                <div class="dna-details-content"><p>{{ details }}</p></div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Motivation Factors Section -->
+    <div class="dna-section-card dna-section-motivation">
+      <div class="dna-section-header" onclick="toggleSection('motivation')">
+        <div class="dna-header-content">
+          <h3 class="dna-section-title"><span class="dna-section-icon">🚀</span> <span id="motivationSectionTitle">III. Motivation Factors</span></h3>
+          <div class="dna-chevron">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" /></svg>
+          </div>
+        </div>
+      </div>
+      <div class="dna-section-body" id="motivationBody">
+        {% for item in sections["III. Motivation Factors"] %}
+        <div class="dna-value-item">
+          <div class="dna-point-badge">{{ item.Point_ID }}</div>
+          <div class="dna-value-content">
+            <h4 class="dna-key-title">{{ item.Key_Item }}</h4>
+            {% if item.DNA %}
+              {% set lines = item.DNA.split('✔') | map('trim') | list %}
+              <ul class="dna-signal-list">
+                {% for ln in lines if ln %}
+                <li>{{ ln }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+            {% set details = item["Details/Data_Alignment"] %}
+            {% if details %}
+              <button class="dna-details-toggle" onclick="toggleDetails(this)"><span>Show Details</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" /></svg>
+              </button>
+              <div class="dna-details-box">
+                <div class="dna-details-content"><p>{{ details }}</p></div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+   </div>
+  </div>
+
+  <script>
+    function toggleSection(sectionId) {
+      const body = document.getElementById(sectionId + 'Body');
+      const header = body.previousElementSibling;
+      body.classList.toggle('collapsed');
+      header.classList.toggle('collapsed');
+    }
+
+    function toggleDetails(button) {
+      const detailsBox = button.nextElementSibling;
+      detailsBox.classList.toggle('expanded');
+      button.classList.toggle('expanded');
+      const span = button.querySelector('span');
+      span.textContent = detailsBox.classList.contains('expanded') ? 'Hide Details' : 'Show Details';
+    }
+
+    function createParticles() {
+      const container = document.getElementById('particles');
+      if (!container) return;
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'dna-particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 15 + 's';
+        particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+        container.appendChild(particle);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      createParticles();
+    });
+  </script>
+{% endblock %}

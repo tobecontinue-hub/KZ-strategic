@@ -1,0 +1,60 @@
+/* vibrant.css — Blue + Teal Creative (B2, enhanced) */
+:root{
+  --blue: #0b63ff;
+  --teal: #00b3a6;
+  --dark: #0b2540;
+  --muted: #6b7e8c;
+  --bg: linear-gradient(180deg,#f7fbff,#f0f8ff);
+}
+
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--dark);}
+
+/* shell */
+.v-shell{display:flex;min-height:100vh}
+.v-sidebar{width:250px;padding:22px;background:linear-gradient(180deg,var(--blue),var(--teal));color:#fff;display:flex;flex-direction:column}
+.v-sidebar.collapsed{width:72px}
+.v-brand{margin-bottom:18px}
+.v-brand .logo{font-weight:700;font-size:20px}
+.v-brand .tagline{font-size:12px;opacity:0.9}
+.v-nav{display:flex;flex-direction:column;gap:8px}
+.v-link{color:rgba(255,255,255,0.95);padding:10px;border-radius:8px;text-decoration:none}
+.v-link:hover{background:rgba(255,255,255,0.06);transform:translateX(6px)}
+.v-footer{margin-top:auto;font-size:12px;opacity:0.95}
+
+/* main */
+.v-main{flex:1;display:flex;flex-direction:column}
+.v-topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:transparent}
+.v-title{margin:0;font-weight:600}
+.v-content{padding:20px}
+
+/* banner */
+.v-banner{background:linear-gradient(90deg, rgba(11,99,164,0.15), rgba(0,179,166,0.12));padding:18px;border-radius:12px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
+
+/* KPI cards */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:18px}
+.kpi{background:#fff;padding:16px;border-radius:12px;box-shadow:0 10px 30px rgba(11,99,164,0.06);transition:transform .12s}
+.kpi:hover{transform:translateY(-6px)}
+.kpi .value{font-size:20px;font-weight:700}
+.kpi .label{color:var(--muted);font-size:13px}
+
+/* cards & sections */
+.section{margin-bottom:20px}
+.section .card{border-radius:12px;padding:16px;box-shadow:0 8px 20px rgba(11,99,164,0.04)}
+.section-title{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.section-title h5{margin:0;color:var(--blue)}
+
+/* table */
+.table-responsive{background:transparent;border-radius:12px;overflow:hidden}
+.table thead th{background:linear-gradient(90deg,var(--blue),var(--teal));color:white;position:sticky;top:0}
+.table tbody tr:hover{background:linear-gradient(90deg, rgba(0,179,166,0.05), rgba(11,99,164,0.03))}
+
+/* small card */
+.card-compact{border-radius:10px;padding:12px;background:#fff;box-shadow:0 8px 20px rgba(11,99,164,0.04)}
+
+/* responsive adjustments */
+@media(max-width:900px){
+  .v-sidebar{display:none}
+  .v-main{padding:8px}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+}

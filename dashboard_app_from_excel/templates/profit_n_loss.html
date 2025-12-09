@@ -1,0 +1,470 @@
+<!-- templates/profit_n_loss.html -->
+{% extends "base.html" %}
+
+{% block head %}
+    <!-- Metadata and Title -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+
+    <!-- Load Bootstrap 5 CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Load Plotly.js -->
+<script src="https://cdn.plot.ly/plotly-2.30.1.min.js"></script>
+
+    <style>
+        /* Define custom font and background */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Slightly cooler, softer background */
+        }
+
+        /* Page Layout */
+        .main-container {
+            padding: 20px;
+        }
+
+        /* Enhanced Filter Box with professional horizontal alignment and styling */
+        .filter-box {
+            display:flex;
+            flex-wrap: wrap; 
+            align-items: center; 
+            gap: 25px; 
+            padding: 15px 25px;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04); /* Subtle shadow for the filter bar */
+            margin-bottom: 30px !important; /* Ensuring margin separates it from KPIs */
+        }
+        .filter-box label {
+            font-weight: 600;
+            color: #343a40;
+        }
+        .form-select, .form-control {
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-select:focus, .form-control:focus {
+            border-color: #0b63ff;
+            box-shadow: 0 0 0 0.25rem rgba(11, 99, 255, 0.25);
+        }
+
+        /* Header */
+        .page-header {
+            margin-bottom: 30px; /* Increased margin for better separation */
+        }
+        .page-header h1 {
+            font-size: 2.5rem; /* Slightly larger title */
+            font-weight: 800; /* Bolder title */
+            color: #001f3f; /* Deep Navy for maximum professionalism */
+        }
+        /* Removed .page-header .subtitle */
+
+        /* KPI Cards */
+        .card {
+            border: none;
+            border-radius: 18px; /* Slightly larger radius */
+            /* Enhanced, softer shadow */
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.03); 
+            transition: transform 0.3s ease;
+            overflow: hidden; 
+        }
+        .card:hover {
+            transform: translateY(-3px); /* Hover effect for better UX */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .card h6 {
+            font-weight: 700; /* Bolder secondary text */
+            color: #495057; /* Slightly darker grey for better readability */
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        .card h5 {
+            font-size: 2.2rem; /* Larger metrics */
+            font-weight: 900; /* Max boldness */
+        }
+
+        /* Chart Container */
+        .chart-container {
+            padding: 30px; /* Increased padding */
+            background: white;
+            border-radius: 18px;
+            /* Enhanced, deeper shadow for main content blocks */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.05);
+        }
+        
+        /* Analysis Block CSS is now unused but kept for structure cleanliness */
+        .chart-analysis {
+            margin-top: 25px; 
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #495057;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        .chart-analysis strong {
+            color: #073047;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        .chart-title {
+            font-size: 1.7rem; /* Larger chart title */
+            font-weight: 700;
+            color: #001f3f;
+        }
+
+        .chart-subtitle {
+            font-size: 0.95rem; /* Better readable subtitle */
+            color: #6c757d;
+        }
+
+        .chart-wrapper {
+            height: 380px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .chart-wrapper {
+                height: 350px; 
+            }
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            .chart-title {
+                font-size: 1.4rem;
+            }
+        }
+        @media (max-width: 768px) {
+            .chart-wrapper {
+                height: 320px;
+            }
+            .card h5 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <!-- Filter (Styled as a distinct professional bar) -->
+    <div class="filter-box my-4">
+        <label for="yearFilter" class="form-label mb-0">Filter by Year:</label>
+        <select id="yearFilter" class="form-select" style="width:150px;">
+            <option value="all">All Periods</option>
+            <!-- Options populated by JS -->
+        </select>
+        
+        <!-- Min Revenue Filter -->
+        <div class="d-flex align-items-center gap-2">
+            <label for="minRevenueFilter" class="form-label mb-0">Min Revenue (MMK):</label>
+            <input type="number" id="minRevenueFilter" class="form-control" style="width:150px;" value="0" min="0">
+        </div>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="row g-4 mb-5" id="kpi-cards">
+        <!-- Total Revenue -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card p-3 text-center">
+                <h6>Total Revenue (MMK)</h6>
+                <h5 id="kpi-revenue" style="color:#0b63ff;">0.00</h5>
+            </div>
+        </div>
+
+        <!-- Total Net Profit -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card p-3 text-center">
+                <h6>Total Net Profit (MMK)</h6>
+                <h5 id="kpi-net-profit" style="color:#28a745;">0.00</h5>
+            </div>
+        </div>
+
+        <!-- Gross Margin % -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card p-3 text-center">
+                <h6>Gross Margin %</h6
+                ><h5 id="kpi-gross-margin" style="color:#ffc107;">0.00%</h5>
+            </div>
+        </div>
+
+        <!-- Total Expense -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card p-3 text-center">
+                <h6>Total Cost & Expense (MMK)</h6>
+                <h5 id="kpi-expense" style="color:#dc3545;">0.00</h5>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- CHART 1: REVENUE VS NET PROFIT (Full Width) -->
+    <div class="chart-container mb-5">
+        <div class="chart-header">
+            <div>
+                <h3 class="chart-title">Revenue vs Net Profit Trend</h3>
+                <div class="chart-subtitle">Monthly trend comparison to evaluate profitability alignment with sales.</div>
+            </div>
+        </div>
+        <div class="chart-wrapper" id="revenue_net_profit_chart"></div>
+        <!-- Removed chart-analysis -->
+    </div>
+    
+    <!-- CHART ROW 2 (Two Charts, col-lg-6) -->
+    <div class="row g-4 mb-5">
+        <!-- CHART 2: GROSS MARGIN % -->
+        <div class="col-lg-6 col-md-6">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div>
+                        <h3 class="chart-title">Gross Profit Margin %</h3>
+                        <div class="chart-subtitle">The percentage of revenue left after deducting Cost of Sales.</div>
+                    </div>
+                </div>
+                <div class="chart-wrapper" id="gross_margin_chart"></div>
+                <!-- Removed chart-analysis -->
+            </div>
+        </div>
+
+        <!-- CHART 3: COST OF SALES VS OPERATING EXPENSE -->
+        <div class="col-lg-6 col-md-6">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div>
+                        <h3 class="chart-title">Cost of Sales vs OpEx</h3>
+                        <div class="chart-subtitle">Monthly breakdown of direct (CoS) versus overhead (Expense) costs.</div>
+                    </div>
+                </div>
+                <div class="chart-wrapper" id="cost_breakdown_chart"></div>
+                <!-- Removed chart-analysis -->
+            </div>
+        </div>
+        
+        <!-- CHART 4: Expense Category Breakdown has been removed -->
+
+    </div>
+</div>
+
+<script>
+    const rawData = {{ rows | tojson | safe }};
+
+    // Helper function to format numbers with exactly 2 decimal places
+    const formatCurrency = (number) => {
+        return new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(number);
+    };
+    
+    // The Data Fabrication function for Expense Categories has been removed as the chart is no longer needed.
+
+    /**
+     * Retrieves data filtered by both Year and Minimum Revenue.
+     */
+    function getFilteredData() {
+        const selectedYear = document.getElementById("yearFilter").value;
+        // Use 0 if parsing fails or input is empty
+        const minRevenue = parseFloat(document.getElementById("minRevenueFilter").value) || 0;
+
+        let filteredData = rawData;
+
+        // 1. Filter by Year
+        if (selectedYear !== "all") {
+            filteredData = filteredData.filter(r => r.Date.includes(selectedYear));
+        }
+
+        // 2. Filter by Minimum Revenue
+        filteredData = filteredData.filter(r => r["Revenue"] >= minRevenue);
+
+        return filteredData;
+    }
+
+    /**
+     * Updates all KPI cards and charts based on the provided filtered data.
+     * @param {Array<Object>} data - The filtered P&L data records.
+     */
+    function updateCharts(data) {
+        // --- 1. Handle No Data State ---
+        if (!data || data.length === 0) {
+            document.getElementById('kpi-revenue').textContent = '0.00';
+            document.getElementById('kpi-net-profit').textContent = '0.00';
+            document.getElementById('kpi-gross-margin').textContent = '0.00%';
+            document.getElementById('kpi-expense').textContent = '0.00';
+            
+            Plotly.purge('revenue_net_profit_chart');
+            Plotly.purge('gross_margin_chart');
+            Plotly.purge('cost_breakdown_chart');
+            return;
+        }
+
+        // --- 2. Prepare Data Series ---
+        const dates = data.map(r => r.Date);
+        const revenue = data.map(r => r["Revenue"]);
+        const netProfit = data.map(r => r["Net Profit"]);
+        const grossProfit = data.map(r => r["Gross Profit"]);
+        const costOfSales = data.map(r => r["Cost of Sales"]);
+        const expense = data.map(r => r["Expense"]);
+        
+        const totalCosts = costOfSales.map((cos, i) => cos + expense[i]);
+        
+        // --- 3. Calculate Aggregated KPIs ---
+        const totalRevenue = revenue.reduce((sum, val) => sum + val, 0);
+        const totalNetProfit = netProfit.reduce((sum, val) => sum + val, 0);
+        const totalGrossProfit = grossProfit.reduce((sum, val) => sum + val, 0);
+        const totalCostAndExpense = totalCosts.reduce((sum, val) => sum + val, 0);
+
+        const grossMarginPercent = totalRevenue > 0
+            ? ((totalGrossProfit / totalRevenue) * 100).toFixed(2)
+            : '0.00';
+
+        // --- 4. Update KPI Displays ---
+        document.getElementById('kpi-revenue').textContent = formatCurrency(totalRevenue);
+        document.getElementById('kpi-net-profit').textContent = formatCurrency(totalNetProfit);
+        document.getElementById('kpi-gross-margin').textContent = `${grossMarginPercent}%`;
+        document.getElementById('kpi-expense').textContent = formatCurrency(totalCostAndExpense);
+
+
+        // --- 5. Render Charts ---
+
+        // Layout Configuration for X-axis clarity and professional look
+        const chartHeight = document.querySelector('.chart-wrapper').clientHeight;
+        const commonLayout = {
+            height: chartHeight,
+            margin: { l: 60, r: 40, t: 30, b: 100 }, // Increased bottom margin for rotated labels
+            xaxis: { title: { text: 'Month', font: { weight: 'bold' } }, tickangle: 45, automargin: true }, // Rotated labels for clarity
+            yaxis: { title: { text: 'MMK', font: { weight: 'bold' } } },
+            legend: { orientation: "h", y: 1.1 },
+            responsive: true,
+            plot_bgcolor: '#fcfcfc',
+            paper_bgcolor: '#fff',
+            hovermode: 'closest',
+            font: { family: 'Inter, sans-serif' }
+        };
+
+        // CHART 1: Revenue vs Net Profit
+        Plotly.newPlot('revenue_net_profit_chart', [
+            {
+                x: dates,
+                y: revenue,
+                name: 'Revenue',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: '#0b63ff', width: 4, shape: 'spline' },
+                marker: { size: 7 }
+            },
+            {
+                x: dates,
+                y: netProfit,
+                name: 'Net Profit',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: '#28a745', width: 4, shape: 'spline' },
+                marker: { size: 7 }
+            }
+        ], commonLayout);
+
+        // CHART 2: Gross Margin (%)
+        const grossMargin = grossProfit.map((gp, i) => (revenue[i] > 0 ? (gp / revenue[i]) * 100 : 0));
+
+        Plotly.newPlot('gross_margin_chart', [
+            {
+                x: dates,
+                y: grossMargin,
+                name: 'Gross Margin %',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: '#ffc107', width: 4, shape: 'spline' },
+                marker: { size: 7 }
+            }
+        ], {
+            ...commonLayout,
+            yaxis: { 
+                title: { text: 'Percentage (%)', font: { weight: 'bold' } }, 
+                tickformat: '.2f' // Ensure 2 decimal places on y-axis
+            }
+        });
+
+        // CHART 3: Cost of Sales vs Operating Expense (Grouped Bar Chart)
+        Plotly.newPlot('cost_breakdown_chart', [
+            {
+                x: dates,
+                y: costOfSales,
+                type: 'bar',
+                marker: { color: '#17a2b8' },
+                name: 'Cost of Sales'
+            },
+            {
+                x: dates,
+                y: expense,
+                type: 'bar',
+                marker: { color: '#dc3545' },
+                name: 'Operating Expense'
+            }
+        ], {
+            ...commonLayout,
+            barmode: 'group'
+        });
+    }
+
+    // --- Initialization Logic ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const yearFilter = document.getElementById("yearFilter");
+        const minRevenueFilter = document.getElementById("minRevenueFilter");
+        
+        if (rawData && rawData.length > 0) {
+            // Populate Filter
+            const years = [...new Set(rawData.map(r => r.Date.split(" ")[1]))].sort().reverse();
+            years.forEach(y => {
+                const option = document.createElement('option');
+                option.value = y;
+                option.textContent = y;
+                yearFilter.appendChild(option);
+            });
+
+            // Initial chart draw
+            updateCharts(getFilteredData());
+
+            // Event Listeners for Filter Changes
+            yearFilter.addEventListener("change", function() {
+                updateCharts(getFilteredData());
+            });
+
+            // Use 'input' event for immediate metric filtering feedback
+            minRevenueFilter.addEventListener("input", function() {
+                updateCharts(getFilteredData());
+            });
+
+            // Ensure decimal input fields look like currency amounts
+            minRevenueFilter.addEventListener("blur", function() {
+                if (this.value === '') {
+                    this.value = '0';
+                }
+            });
+            
+        } else {
+            // Handle case where no data is passed from the backend
+            updateCharts([]);
+        }
+    });
+
+    // Handle responsiveness on window resize
+    window.onresize = function() {
+        // Redraw Plotly charts on resize for responsiveness
+        const chartHeight = window.innerWidth > 1200 ? 380 : 320; 
+
+        Plotly.relayout('revenue_net_profit_chart', {width: document.getElementById('revenue_net_profit_chart').clientWidth, height: 380});
+        Plotly.relayout('gross_margin_chart', {width: document.getElementById('gross_margin_chart').clientWidth, height: chartHeight});
+        Plotly.relayout('cost_breakdown_chart', {width: document.getElementById('cost_breakdown_chart').clientWidth, height: chartHeight});
+    };
+</script>
+{% endblock %}

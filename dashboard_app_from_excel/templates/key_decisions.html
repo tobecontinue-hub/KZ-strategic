@@ -1,0 +1,13 @@
+
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Key Decisions</h1>
+  <table class="table">
+    <thead><tr>{% for h in rows[0].keys() %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>{% for v in r.values() %}<td>{{ v }}</td>{% endfor %}</tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

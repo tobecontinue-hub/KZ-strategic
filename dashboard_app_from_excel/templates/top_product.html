@@ -1,0 +1,241 @@
+<!-- templates/top_product.html -->
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* Compact, e-commerce-inspired product cards */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 10px 0 30px;
+}
+
+.product-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  transition: transform 0.25s, box-shadow 0.25s;
+  border: 1px solid #f0f4f8;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s forwards;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+/* Staggered animation delay */
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+{% for i in range(rows|length) %}
+  .product-card:nth-child({{ i + 1 }}) {
+    animation-delay: {{ i * 0.08 }}s;
+  }
+{% endfor %}
+
+/* Image */
+.product-img {
+  width: 100%;
+  height: 180px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 2.5rem;
+}
+.product-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 12px;
+  background: white;
+}
+
+/* Content */
+.product-body {
+  padding: 14px;
+}
+
+.rank-badge {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background: #0b63ff;
+  color: white;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 24px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.product-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 6px;
+  line-height: 1.3;
+}
+
+/* Forecast grid - compact */
+.forecast-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 10px 0;
+}
+.forecast-item {
+  text-align: center;
+  font-size: 0.85rem;
+}
+.forecast-item .q-label {
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+.forecast-item .q-value {
+  font-weight: 700;
+  color: #0b63ff;
+  font-size: 1rem;
+}
+
+/* Annual total */
+.annual-total {
+  text-align: center;
+  margin: 10px 0;
+  padding: 6px;
+  background: #f0f9ff;
+  border-radius: 6px;
+  font-weight: 700;
+  color: #0b63ff;
+  font-size: 0.95rem;
+}
+
+/* Insight & Strategy - muted but readable */
+.insight-text, .strategy-text {
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.4;
+  margin: 6px 0;
+}
+
+.section-title {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+/* Notes */
+.notes {
+  margin-top: 8px;
+  padding: 6px 8px;
+  background: #fffbeb;
+  border-left: 2px solid #eab308;
+  font-size: 0.85rem;
+  color: #854d0e;
+  border-radius: 0 4px 4px 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .product-img {
+    height: 160px;
+  }
+}
+</style>
+
+
+  {% if rows %}
+    <div class="product-grid">
+      {% for row in rows %}
+        <div class="product-card">
+          <!-- Image -->
+          <div class="product-img">
+            {% if row.Image_URL and row.Image_URL != "Placeholder" %}
+              <img src="{{ row.Image_URL }}" alt="{{ row.Product }}" loading="lazy">
+            {% else %}
+              📦
+            {% endif %}
+          </div>
+
+          <!-- Body -->
+          <div class="product-body">
+            <div>
+              <span class="rank-badge">{{ row.No }}</span>
+              <span class="product-name">{{ row.Product }}</span>
+            </div>
+            <!-- In top_product.html -->
+        <div class="d-flex justify-content-between mt-2 mb-3">
+            <div class="text-center" style="flex:1;">
+            <div class="text-muted" style="font-size:0.75rem;">Sold Qty</div>
+            <div class="fw-bold" style="color:#0b63ff;">{{ "{:,.0f}".format(row.Current_Qty) if row.Current_Qty else "–" }}</div>
+            </div>
+            <div class="vr"></div>
+            <div class="text-center" style="flex:1;">
+            <div class="text-muted" style="font-size:0.75rem;">Sales (MMK)</div>
+            <div class="fw-bold" style="color:#00b3a6;">{{ "{:,.0f}".format(row.Sale_Total) if row.Sale_Total else "–" }}</div>
+        </div>
+        </div>
+            <!-- Insight -->
+            <div class="section-title">Insight</div>
+            <div class="insight-text">{{ row.Insight }}</div>
+
+            <!-- Strategy -->
+            <div class="section-title">Strategy</div>
+            <div class="strategy-text">{{ row.Strategy_Focus }}</div>
+
+            <!-- Quarterly Forecast -->
+            <div class="section-title">Forecast</div>
+            <div class="forecast-grid">
+              <div class="forecast-item">
+                <div class="q-label">Q1</div>
+                <div class="q-value">{{ "{:,.0f}".format(row.Q1_Forecast) if row.Q1_Forecast else "–" }}</div>
+              </div>
+              <div class="forecast-item">
+                <div class="q-label">Q2</div>
+                <div class="q-value">{{ "{:,.0f}".format(row.Q2_Forecast) if row.Q2_Forecast else "–" }}</div>
+              </div>
+              <div class="forecast-item">
+                <div class="q-label">Q3</div>
+                <div class="q-value">{{ "{:,.0f}".format(row.Q3_Forecast) if row.Q3_Forecast else "–" }}</div>
+              </div>
+              <div class="forecast-item">
+                <div class="q-label">Q4</div>
+                <div class="q-value">{{ "{:,.0f}".format(row.Q4_Forecast) if row.Q4_Forecast else "–" }}</div>
+              </div>
+            </div>
+
+        
+
+            <!-- Notes -->
+            {% if row.Forecast_Notes %}
+              <div class="section-title">Notes</div>
+              <div class="notes">{{ row.Forecast_Notes }}</div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-warning">No product forecast data available.</div>
+  {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,267 @@
+<!-- templates/okr.html -->
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.okr-container {
+  padding: 10px 20px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.okr-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+.okr-header h1 {
+  font-size: 1.8rem;
+  color: #073047;
+  margin: 0;
+}
+.okr-header .subtitle {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin-top: 4px;
+}
+
+.team-section {
+  margin-bottom: 16px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(-25px);
+  animation: slideInLeft 0.45s forwards ease-out;
+}
+
+@keyframes slideInLeft {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+{% for i in range(10) %}
+.team-section:nth-child({{ i + 1 }}) {
+  animation-delay: {{ i * 0.08 }}s;
+}
+{% endfor %}
+
+.team-header {
+  padding: 14px 20px;
+  background: linear-gradient(90deg, #0b63ff, #00a6a1);
+  color: white;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.25s;
+}
+.team-header:hover {
+  background: linear-gradient(90deg, #084dcc, #008b89);
+}
+.team-header i {
+  transition: transform 0.3s;
+}
+
+.team-content {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.4s ease, opacity 0.3s ease;
+}
+.team-content.expanded {
+  max-height: 2000px;
+  opacity: 1;
+}
+
+.objective-card {
+  padding: 18px 22px;
+  border-bottom: 1px solid #f0f4f8;
+}
+.objective-card:last-child {
+  border-bottom: none;
+}
+.objective-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #073047;
+}
+
+.okr-full-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+.okr-full-table th {
+  background: #f8fafc;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #4b5563;
+  border-bottom: 1px solid #e5e7eb;
+}
+.okr-full-table td {
+  padding: 12px;
+  vertical-align: top;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  border-bottom: 1px solid #f0f4f8;
+  max-width: 200px;
+}
+.okr-full-table td p {
+  margin: 0 0 6px;
+  padding-left: 16px;
+  position: relative;
+}
+.okr-full-table td p::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #0b63ff;
+}
+
+/* Scrollable container for long content */
+.scrollable-cell {
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+.scrollable-cell::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollable-cell::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+/* Year Colors */
+.year-2025 { color: #0288d1; }
+.year-2026 { color: #2e7d32; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .okr-full-table {
+    display: block;
+    overflow-x: auto;
+  }
+  .okr-full-table th,
+  .okr-full-table td {
+    white-space: nowrap;
+  }
+}
+</style>
+
+<div class="okr-container">
+
+  {% if comparison %}
+    {% for team_data in comparison %}
+      <div class="team-section">
+        <div class="team-header" onclick="toggleTeam(this)">
+          {{ team_data.team }}
+          <i class="bi bi-chevron-right"></i>
+        </div>
+
+        <div class="team-content">
+          {% for obj in team_data.objectives %}
+            <div class="objective-card">
+              <div class="objective-title">{{ obj.objective }}</div>
+
+              <!-- 2025 Table -->
+              {% if obj.items_2025 %}
+                <h5 class="year-2025"><i class="bi bi-calendar-check"></i> 2025</h5>
+                <div class="table-responsive">
+                  <table class="okr-full-table">
+                    <thead>
+                      <tr>
+                        <th>Functional POVs</th>
+                        <th>Years</th>
+                        <th>Key Results</th>
+                        <th>Lead Outcomes</th>
+                        <th>Lead Actions</th>
+                        <th>Average</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for kr in obj.items_2025 %}
+                        <tr>
+                          <td>{{ kr['Functional POVs'] or '' }}</td>
+                          <td>{{ kr['Years'] or '' }}</td>
+                          <td>{{ kr['Key Results'] or '' }}</td>
+                          <td class="scrollable-cell">{{ kr['Lead Outcomes'] or '' }}</td>
+                          <td class="scrollable-cell">{{ kr['Lead Actions'] or '' }}</td>
+                          <td>{{ kr['Average'] or '' }}%</td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              {% endif %}
+
+              <!-- 2026 Table -->
+              {% if obj.items_2026 %}
+                <h5 class="year-2026 mt-4"><i class="bi bi-calendar-plus"></i> 2026</h5>
+                <div class="table-responsive">
+                  <table class="okr-full-table">
+                    <thead>
+                      <tr>
+                        <th>Functional POVs</th>
+                        <th>Years</th>
+                        <th>Key Results</th>
+                        <th>Lead Outcomes</th>
+                        <th>Lead Actions</th>
+                        <th>Success Metrics</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for kr in obj.items_2026 %}
+                        <tr>
+                          <td>{{ kr['Functional POVs'] or '' }}</td>
+                          <td>{{ kr['Years'] or '' }}</td>
+                          <td>{{ kr['Key Results'] or '' }}</td>
+                          <td class="scrollable-cell">{{ kr['Lead Outcomes'] or '' }}</td>
+                          <td class="scrollable-cell">{{ kr['Lead Actions'] or '' }}</td>
+                          <td class="scrollable-cell">{{ kr['Success Metrics'] or '' }}</td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="alert alert-warning text-center">No OKR data found in <code>okr</code> sheet.</div>
+  {% endif %}
+</div>
+
+<script>
+function toggleTeam(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector("i");
+
+  content.classList.toggle("expanded");
+
+  if (content.classList.contains("expanded")) {
+    icon.style.transform = "rotate(90deg)";
+  } else {
+    icon.style.transform = "rotate(0)";
+  }
+}
+
+// Default = all collapsed
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".team-content").forEach(c => c.classList.remove("expanded"));
+});
+</script>
+
+{% endblock %}
