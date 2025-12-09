@@ -1,6 +1,7 @@
 # KZ Strategic Dashboard
 
-Flask dashboard that reads strategic-performance data directly from Google Sheets and renders multiple executive views (executive summary, value maps, OKRs, etc.).
+Flask dashboard that renders executive views from the `strategic_insight.xlsx`
+workbook bundled with the project (one worksheet per dashboard section).
 
 ## Local development
 
@@ -9,23 +10,22 @@ python -m venv venv
 source venv/bin/activate           # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-# Provide credentials & sheet config
-set GOOGLE_SHEET_ID=...            # or export on macOS/Linux
-set GOOGLE_SERVICE_ACCOUNT_FILE=service_account.json
+# Optional: use a different workbook
+set LOCAL_EXCEL_FILE="D:\\data\\custom_dashboard.xlsx"
 
 python run.py
 # http://127.0.0.1:5000
 ```
 
-## Required environment variables
+## Configuration
 
 | Name | Description |
 |------|-------------|
-| `GOOGLE_SHEET_ID` | ID of the Google Spreadsheet containing all tabs used by the app |
-| `GOOGLE_SERVICE_ACCOUNT_FILE` | Path to the service-account JSON that has read access |
+| `LOCAL_EXCEL_FILE` | Absolute/relative path to the Excel workbook (defaults to `strategic_insight.xlsx` inside the project) |
 | `SHEET_CACHE_TTL` | Optional cache TTL (seconds). Defaults to 30 |
 
-The default `config.py` falls back to `service_account.json` in the repository root if the env vars are not provided.
+You no longer need Google credentials—the data is read directly from the local
+Excel file.
 
 ## Deployment (Render free tier example)
 
@@ -36,11 +36,10 @@ The default `config.py` falls back to `service_account.json` in the repository r
    - **Runtime:** Python
    - **Build command:** `pip install -r requirements.txt`
    - **Start command:** `gunicorn app:app` (or `gunicorn dashboard_app_from_excel.app:app` if the repo root contains additional files)
-5. Add Environment Variables in the Render dashboard:
-   - `GOOGLE_SHEET_ID`
-   - `GOOGLE_SERVICE_ACCOUNT_FILE` (point to the secret-file path, see below)
-6. Upload the Google service-account JSON via **Secret Files** in Render (Settings → Secret Files) and set `GOOGLE_SERVICE_ACCOUNT_FILE` to that generated path.
-7. Deploy. Render will build the image and provide a live URL.
+5. (Optional) Add Environment Variables in the Render dashboard:
+   - `LOCAL_EXCEL_FILE` if the workbook lives somewhere else (otherwise the bundled `strategic_insight.xlsx` is used)
+   - `SHEET_CACHE_TTL` if you want to adjust caching
+6. Deploy. Render will build the image and provide a live URL.
 
 ## Repository structure
 
@@ -58,6 +57,5 @@ dashboard_app_from_excel/
 ```
 
 ## Notes
-- **Do not commit** `service_account.json`. The `.gitignore` already ignores it.
-- Ensure the service account has at least read access on every tab referenced in the code (e.g., `exe_summary`, `value_map`, `org_chart`, etc.).
+- Ensure `strategic_insight.xlsx` stays in sync with the dashboard tabs (worksheet names must match those referenced in the code).
 - Each time you push to the main branch, Render (or any connected platform) can auto-deploy the latest version.
