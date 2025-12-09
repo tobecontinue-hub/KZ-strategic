@@ -3,135 +3,64 @@
 {% block content %}
 
 <style>
-:root {
-  color-scheme: light dark;
-}
 body {
-    font-family: 'Inter', sans-serif;
-    background-color: #f4f7f9;
+  font-family: 'Inter', sans-serif;
+  background-color: #f4f7f9;
 }
-.main-container {
-    padding: 20px;
-    max-width: 1200px;
-    margin: auto;
-}
-.page-header {
-    margin-bottom: 30px;
-    text-align: center;
-}
-.page-header h1 {
-    font-size: 2.4rem;
-    font-weight: 900;
-    color: #073047;
-}
-.subtitle {
-    font-size: 1rem;
-    color: #6c757d;
-}
+.main-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+.page-header { text-align: center; margin-bottom: 2rem; }
+.page-header h1 { font-size: 2.4rem; font-weight: 900; color: #073047; }
+.subtitle { color: #64748b; letter-spacing: 0.2em; text-transform: uppercase; font-size: 0.8rem; }
 
-.swot-category {
-    margin-bottom: 1.5rem;
-}
-.category-label {
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    color: #94a3b8;
-    margin-bottom: 0.3rem;
-}
-.card-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-.category-card {
-    flex: 1 1 280px;
-    border-radius: 14px;
-    background: #fff;
-    border: 1px solid rgba(148,163,184,0.3);
-    box-shadow: 0 14px 32px rgba(15,23,42,0.08);
-    padding: 1rem;
-}
-.category-card h3 {
-    margin-bottom: 0.4rem;
-    color: #0f172a;
-}
-.category-card p {
-    color: #475569;
-    font-weight: 500;
-}
-.details {
-    margin-top: 0.7rem;
-    padding-top: 0.7rem;
-    border-top: 1px solid #e2e8f0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 0.6rem;
-}
-.details div {
-    background: #f9fbff;
-    border-radius: 10px;
-    padding: 0.6rem;
-    font-size: 0.85rem;
-    color: #475569;
-}
-.details span {
-    display: block;
-    font-weight: 700;
-    color: #0b63ff;
-    margin-bottom: 0.2rem;
-}
+.swot-section { margin-bottom: 2rem; }
+.section-title { font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: #94a3b8; margin-bottom: 0.5rem; }
+.card-grid { display: flex; flex-wrap: wrap; gap: 1rem; }
+.swot-card { flex: 1 1 280px; background: #fff; border-radius: 18px; padding: 1rem; border: 1px solid rgba(148,163,184,0.3); box-shadow: 0 14px 32px rgba(15,23,42,0.08); }
+.swot-card h3 { margin: 0.3rem 0; color: #0f172a; }
+.swot-card small { color: #94a3b8; text-transform: uppercase; letter-spacing: 0.2em; }
+.details { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 0.75rem; margin-top: 0.75rem; }
+.details div { background: #f9fbff; border-radius: 10px; padding: 0.75rem; font-size: 0.9rem; color: #475569; }
+.details span { display: block; font-weight: 700; color: #0b63ff; margin-bottom: 0.2rem; }
 
-.key-insights {
-    margin-top: 2rem;
-    padding: 1.25rem;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #0b63ff, #5a78ff);
-    color: #fff;
-}
-.key-insights h2 {
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
-}
-.key-insights ul {
-    margin: 0;
-    padding-left: 1.2rem;
-}
+.key-insights { margin-top: 2rem; padding: 1.5rem; border-radius: 16px; background: linear-gradient(135deg,#0b63ff,#5a78ff); color: #fff; }
+.key-insights h2 { margin-bottom: 0.6rem; }
+.key-insights li { margin-bottom: 0.4rem; }
 </style>
 
 <div class="main-container">
-    <div class="page-header">
-        <h1>SWOT Analysis</h1>
-        <div class="subtitle">Department-wise insights with yearly context</div>
-    </div>
+  <div class="page-header">
+    <p class="subtitle">Strategic View</p>
+    <h1>SWOT Analysis</h1>
+  </div>
 
-    {% for category, entries in categories.items() %}
-      <section class="swot-category">
-        <div class="category-label">{{ category }}</div>
-        <div class="card-grid">
-          {% for entry in entries %}
-          <article class="category-card">
-            <p class="text-muted" style="font-size:0.8rem;margin-bottom:0.2rem;">ID {{ entry.id }}</p>
-            <h3>{{ entry.title }}</h3>
-            <div class="details">
-              <div><span>2025</span>{{ entry.details_2025 or 'N/A' }}</div>
-              <div><span>2026</span>{{ entry.details_2026 or 'N/A' }}</div>
-            </div>
-          </article>
-          {% endfor %}
+  {% for category, entries in sections.items() %}
+  <section class="swot-section">
+    <h3 class="section-title">{{ category }}</h3>
+    <div class="card-grid">
+      {% for item in entries %}
+      <article class="swot-card">
+        <small>{{ item.id }}</small>
+        <h3>{{ item.title }}</h3>
+        <div class="details">
+          <div><span>2025</span>{{ item.details_2025 or 'N/A' }}</div>
+          <div><span>2026</span>{{ item.details_2026 or 'N/A' }}</div>
         </div>
-      </section>
-    {% endfor %}
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
 
-    {% if key_insights %}
-    <section class="key-insights">
-      <h2>Key Insights</h2>
-      <ul>
-        {% for insight in key_insights %}
-        <li><strong>{{ insight.title }}:</strong> {{ insight.content }}</li>
-        {% endfor %}
-      </ul>
-    </section>
-    {% endif %}
+  {% if key_insights %}
+  <section class="key-insights">
+    <h2>Key Insights</h2>
+    <ul>
+      {% for insight in key_insights %}
+      <li><strong>{{ insight.title }}:</strong> {{ insight.content }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
 </div>
 
 {% endblock %}
