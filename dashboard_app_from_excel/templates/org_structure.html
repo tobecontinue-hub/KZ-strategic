@@ -1,221 +1,110 @@
 {% extends "base.html" %}
 {% block content %}
 <style>
-  .org-canvas {
+  :root { color-scheme: light dark; }
+  .org-wrapper { max-width: 1200px; margin: 0 auto; padding: 1rem 1rem 3rem; }
+  .org-wrapper h2 { text-align: center; font-weight: 800; margin-bottom: 0.35rem; }
+  .org-wrapper p.subhead { text-align: center; letter-spacing: 0.3em; text-transform: uppercase; font-size: 0.75rem; color: #94a3b8; margin-bottom: 1.75rem; }
+  .tree ul { padding-top: 1rem; position: relative; padding-left: 0; display: flex; justify-content: center; flex-wrap: wrap; }
+  .tree li { list-style-type: none; margin: 0 0.8rem; text-align: center; position: relative; padding: 1rem 0 0 0; }
+  .tree li::before,
+  .tree li::after { content: ''; position: absolute; top: 0; border-top: 1px solid #d7dfe7; width: 50%; height: 1rem; }
+  .tree li::before { right: 50%; }
+  .tree li::after { left: 50%; border-left: 1px solid #d7dfe7; }
+  .tree li:only-child::after,
+  .tree li:only-child::before { display: none; }
+  .tree li:only-child { padding-top: 0; }
+  .tree li:first-child::before,
+  .tree li:last-child::after { border: none; }
+  .tree li:last-child::before { border-right: 1px solid #d7dfe7; border-radius: 0 0 0.75rem 0; }
+  .tree li:first-child::after { border-radius: 0 0 0 0.75rem; }
+  .node-card {
+    --dept-color: #94a3b8;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    border-radius: 16px;
+    border: 1px solid rgba(148,163,184,0.4);
+    padding: 0.85rem 1rem;
+    min-width: 220px;
+    background: #fff;
+    box-shadow: 0 14px 32px rgba(15,23,42,0.12);
     position: relative;
-    padding: 2rem 0;
   }
-  .org-lines {
+  .node-card::after {
+    content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
+    border-radius: 16px;
+    border: 2px solid var(--dept-color);
+    opacity: 0.18;
     pointer-events: none;
   }
-  .tier-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-  .tier {
-    position: relative;
-    padding-top: 1.75rem;
-  }
-  .tier-label {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 0.2rem 0.9rem;
-    border-radius: 999px;
-    font-size: 0.7rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    background: #312e81;
-    color: #fff;
-    font-weight: 600;
-    box-shadow: 0 4px 16px rgba(49,46,129,.25);
-  }
-  .tier-row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1rem;
-  }
-  .member-card {
-    width: 230px;
-    border-radius: 16px;
-    border: 1px solid rgba(148,163,184,.4);
-    padding: 1rem;
-    box-shadow: 0 14px 30px rgba(15,23,42,.12);
-    background: #fff;
-    text-align: center;
-    position: relative;
-  }
-  .member-card::before {
-    content: "";
-    position: absolute;
-    top: -32px;
-    left: 50%;
-    width: 2px;
-    height: 32px;
-    background: linear-gradient(180deg,#cbd5f5,#94a3b8);
-    transform: translateX(-50%);
-  }
-  .tier:first-of-type .member-card::before { display: none; }
-  .photo {
-    width: 60px;
-    height: 60px;
+  .photo-frame {
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
-    margin: 0 auto 0.5rem;
     overflow: hidden;
-    border: 3px solid rgba(148,163,184,.4);
+    border: 3px solid rgba(148,163,184,0.4);
     background: #e2e8f0;
+    flex-shrink: 0;
   }
-  .photo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .name { font-weight: 700; color: #0f172a; margin-bottom: 0.1rem; }
-  .role { font-size: 0.85rem; color: #475569; margin-bottom: 0.35rem; }
-  .meta {
-    display: inline-flex;
-    gap: 0.3rem;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .badge {
-    padding: 0.2rem 0.45rem;
-    border-radius: 999px;
-    font-size: 0.7rem;
-    background: #f1f5f9;
-    color: #475569;
-    font-weight: 600;
-  }
+  .photo-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .node-name { font-weight: 700; color: #0f172a; margin-bottom: 0.1rem; }
+  .node-role { font-size: 0.85rem; color: #475569; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .node-meta { display: flex; gap: 0.35rem; flex-wrap: wrap; font-size: 0.7rem; }
+  .badge { padding: 0.18rem 0.45rem; border-radius: 999px; background: #f1f5f9; color: #475569; font-weight: 600; }
   .badge.status-vacant { background: #fee2e2; color: #b91c1c; }
   .badge.status-active { background: #dcfce7; color: #15803d; }
   @media (max-width: 768px) {
-    .member-card::before { display: none; }
-    .tier-label { position: static; transform: none; margin-bottom: 0.5rem; }
+    .tree ul { flex-direction: column; align-items: center; }
+    .tree li::before,
+    .tree li::after { display: none; }
   }
 </style>
 
-<div class="org-canvas" id="orgCanvas">
-  <svg class="org-lines" id="orgLines"></svg>
-  <div class="tier-stack" id="tierStack">
-    {% for label in ["CEO", "Head", "Assistant Manager", "Executive / Developer", "Staff / Junior"] %}
-      <section class="tier" data-tier-index="{{ loop.index0 }}">
-        <div class="tier-label">{{ label }}</div>
-        <div class="tier-row" data-tier-row></div>
-      </section>
-    {% endfor %}
+{% macro render_node(node, dept_colors) %}
+  {% set dept_color = dept_colors.get(node.department, '#94a3b8') %}
+  <li>
+    <div class="node-card" style="--dept-color: {{ dept_color }};">
+      <div class="photo-frame">
+        {% if node.photo_url %}
+          <img src="{{ node.photo_url }}" alt="{{ node.original_name or node.name }}" onerror="this.remove();">
+        {% else %}
+          <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#475569;">
+            {{ (node.original_name or node.name)[:1] }}
+          </div>
+        {% endif %}
+      </div>
+      <div>
+        <div class="node-role">{{ node.role or 'Role TBD' }}</div>
+        <div class="node-name">{{ node.original_name or node.name }}</div>
+        <div class="node-meta">
+          <span class="badge">{{ node.department or 'Department' }}</span>
+          {% set status = node.status or '' %}
+          <span class="badge {{ 'status-vacant' if 'vacant' in status|lower else 'status-active' }}">{{ status or 'Status' }}</span>
+        </div>
+      </div>
+    </div>
+    {% if node.children %}
+      <ul>
+        {% for child in node.children %}
+          {{ render_node(child, dept_colors) }}
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </li>
+{% endmacro %}
+
+<div class="org-wrapper">
+  <p class="subhead">Department • Role • Reporting Line</p>
+  <h2>Organization Tree</h2>
+  <div class="tree">
+    <ul class="root">
+      {% for node in root_nodes %}
+        {{ render_node(node, dept_colors) }}
+      {% endfor %}
+    </ul>
   </div>
 </div>
-
-<script>
-  const treeData = {{ root_nodes | tojson | safe }};
-
-  const tiers = [
-    { label: 'CEO', match: [/ceo/] },
-    { label: 'Head', match: [/head/] },
-    { label: 'Assistant Manager', match: [/assistant/, /asst/] },
-    { label: 'Executive / Developer', match: [/executive/, /developer/] },
-    { label: 'Staff / Junior', match: [/staff/, /junior/] }
-  ];
-
-  const tierRows = document.querySelectorAll('[data-tier-row]');
-  const svg = document.getElementById('orgLines');
-  const canvas = document.getElementById('orgCanvas');
-  const nodeMap = new Map();
-
-  const flatten = (nodes, parentId = null, acc = [], prefix = 'n') => {
-    nodes.forEach((node, idx) => {
-      const name = node.original_name || node.name || 'node';
-      const safeId = `${prefix}-${idx}-${name.replace(/[^a-z0-9]+/gi,'-').toLowerCase()}`;
-      const entry = {
-        id: safeId,
-        name,
-        role: node.role || '',
-        department: node.department || '',
-        status: node.status || '',
-        photo: node.photo_url || '',
-        parentId,
-        children: node.children || []
-      };
-      acc.push(entry);
-      if (node.children && node.children.length) {
-        flatten(node.children, safeId, acc, safeId);
-      }
-    });
-    return acc;
-  };
-
-  const getTierIndex = role => {
-    const lower = (role || '').toLowerCase();
-    for (let i = 0; i < tiers.length; i++) {
-      if (tiers[i].match.some(regex => regex.test(lower))) {
-        return i;
-      }
-    }
-    return tiers.length - 1;
-  };
-
-  const nodes = flatten(treeData);
-
-  nodes.forEach(node => {
-    const tierIndex = getTierIndex(node.role);
-    const row = tierRows[tierIndex];
-    if (!row) return;
-    const card = document.createElement('article');
-    card.className = 'member-card';
-    card.dataset.nodeId = node.id;
-    card.dataset.parentId = node.parentId || '';
-    card.innerHTML = `
-      <div class="photo">
-        ${node.photo ? `<img src="${node.photo}" alt="${node.name}" onerror="this.remove();">` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#475569;">${node.name.charAt(0)}</div>`}
-      </div>
-      <div class="name">${node.name}</div>
-      <div class="role">${node.role || 'Role TBD'}</div>
-      <div class="meta">
-        <span class="badge">${node.department || 'Department'}</span>
-        <span class="badge ${node.status.toLowerCase().includes('vacant') ? 'status-vacant' : 'status-active'}">${node.status || 'Status'}</span>
-      </div>
-    `;
-    row.appendChild(card);
-    nodeMap.set(node.id, card);
-  });
-
-  const drawLines = () => {
-    const rect = canvas.getBoundingClientRect();
-    svg.setAttribute('width', rect.width);
-    svg.setAttribute('height', rect.height);
-    svg.innerHTML = '';
-
-    nodes.forEach(node => {
-      if (!node.parentId) return;
-      const childEl = nodeMap.get(node.id);
-      const parentEl = nodeMap.get(node.parentId);
-      if (!childEl || !parentEl) return;
-      const childRect = childEl.getBoundingClientRect();
-      const parentRect = parentEl.getBoundingClientRect();
-      const x1 = parentRect.left + parentRect.width / 2 - rect.left;
-      const y1 = parentRect.bottom - rect.top;
-      const x2 = childRect.left + childRect.width / 2 - rect.left;
-      const y2 = childRect.top - rect.top;
-      const midY = (y1 + y2) / 2;
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', `M${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`);
-      path.setAttribute('stroke', '#cbd5f5');
-      path.setAttribute('fill', 'none');
-      path.setAttribute('stroke-width', '2');
-      svg.appendChild(path);
-    });
-  };
-
-  window.addEventListener('resize', () => requestAnimationFrame(drawLines));
-  drawLines();
-</script>
 {% endblock %}
