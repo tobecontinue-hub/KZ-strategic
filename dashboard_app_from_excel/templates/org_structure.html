@@ -1,440 +1,130 @@
-<!-- templates/org_structure.html -->
 {% extends "base.html" %}
 {% block content %}
-  <style>
-    body {
-      box-sizing: border-box;
-    }
-    
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    @keyframes pulse {
-      0%, 100% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.05);
-      }
-    }
-    
-    .employee-card {
-      animation: fadeInUp 0.6s ease-out forwards;
-      opacity: 0;
-      transition: all 0.3s ease;
-    }
-    
-    .employee-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-    }
-    
-    .connector-line {
-      animation: drawLine 0.8s ease-out forwards;
-      stroke-dasharray: 1000;
-      stroke-dashoffset: 1000;
-    }
-    
-    @keyframes drawLine {
-      to {
-        stroke-dashoffset: 0;
-      }
-    }
-    
-    @keyframes flow {
-      0% {
-        stroke-dashoffset: 1000;
-      }
-      100% {
-        stroke-dashoffset: 0;
-      }
-    }
-    
-    .connector-line-animated {
-      animation: flow 2s linear infinite;
-    }
-    
-    .status-badge {
-      font-size: 0.65rem;
-      padding: 2px 6px;
-      border-radius: 10px;
-      font-weight: 600;
-    }
-    
-    .vacant-card {
-      border: 2px dashed #cbd5e1;
-      background: repeating-linear-gradient(
-        45deg,
-        #f8fafc,
-        #f8fafc 10px,
-        #f1f5f9 10px,
-        #f1f5f9 20px
-      );
-    }
-    
-    .photo-container {
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .photo-container::after {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(
-        45deg,
-        transparent,
-        rgba(255, 255, 255, 0.3),
-        transparent
-      );
-      transform: rotate(45deg);
-      transition: all 0.5s;
-    }
-    
-    .employee-card:hover .photo-container::after {
-      left: 100%;
-    }
-    
-    .org-chart-container {
-      padding: 2.5rem;
-      min-height: 100%;
-      overflow-x: auto;
-      overflow-y: auto;
-    }
-    
-    .level-container {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      margin-bottom: 4rem;
-      gap: 1.5rem;
-      flex-wrap: nowrap;
-      padding: 0 1rem;
-      overflow-x: visible;
-    }
-    
-    .connection-svg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
-  </style>
-  <style>@view-transition { navigation: auto; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
- </head>
- <body class="h-full">
-  <div id="app" class="w-full h-full"></div>
-  <script>
-    const defaultConfig = {
-      chart_title: "KHIT ZAY E-Commerce Department",
-      ceo_name: "Chief Executive Officer",
-      background_color: "#f0f4f8",
-      card_color: "#ffffff",
-      text_color: "#1e293b",
-      primary_action_color: "#3b82f6",
-      secondary_action_color: "#64748b"
-    };
+<style>
+  .org-wrapper {
+    padding: 2rem 1rem;
+    overflow-x: auto;
+  }
+  .org-tree {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .org-tree ul {
+    list-style: none;
+    padding-left: 1.5rem;
+    border-left: 1px solid #e2e8f0;
+    margin-top: 1rem;
+  }
+  .org-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    padding: 1rem;
+    min-width: 220px;
+    max-width: 280px;
+    border-top: 4px solid #3b82f6;
+  }
+  .org-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .org-photo {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e2e8f0;
+  }
+  .org-placeholder {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #e0e7ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #312e81;
+  }
+  .org-name {
+    font-weight: 700;
+    margin-bottom: 0.1rem;
+    color: #0f172a;
+  }
+  .org-role {
+    font-size: 0.85rem;
+    color: #475569;
+  }
+  .org-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    color: #475569;
+  }
+  .badge {
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+  .badge--status {
+    background: #e0f2fe;
+    color: #0369a1;
+  }
+  .badge--vacant {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+  .department-label {
+    font-weight: 600;
+    color: #64748b;
+  }
+</style>
 
-    const orgData = [
-      { level: 0, department: "CEO", role: "CEO", name: "CEO", status: "Permanent", photo: "", reportsTo: "" },
-      { level: 1, department: "KHIT ZAY", role: "Dep. Head of Ecommerce", name: "Ms. Thae Su Naing", status: "Permanent", photo: "https://via.placeholder.com/60", reportsTo: "CEO" },
-      { level: 2, department: "LAST-MILE OPERATION TEAM", role: "ASST MANAGER", name: "Mr. Su Myat Toe", status: "Probation", photo: "https://via.placeholder.com/60", reportsTo: "Ms. Thae Su Naing" },
-      { level: 2, department: "BUSINESS INTELLIGENCE TEAM", role: "ASST MANAGER", name: "vacant_1", status: "Vacant", photo: "", reportsTo: "Ms. Thae Su Naing" },
-      { level: 3, department: "BUSINESS INTELLIGENCE TEAM", role: "Executive", name: "Mr. Kaung Myat Kyaw", status: "Probation", photo: "https://via.placeholder.com/60", reportsTo: "vacant_1" },
-      { level: 4, department: "BUSINESS INTELLIGENCE TEAM", role: "STAFF (Data Analyst) + Virtual Fast Cash", name: "Ms. Sein Lae Aung Hlaing", status: "Probation", photo: "https://via.placeholder.com/60", reportsTo: "Mr. Kaung Myat Kyaw" },
-      { level: 2, department: "UI/UX TEAM", role: "DEVELOPER", name: "vacant_2", status: "Vacant", photo: "", reportsTo: "Ms. Thae Su Naing" },
-      { level: 3, department: "UI/UX TEAM", role: "SNR DESIGNER", name: "Ms. Wai Yan Lin", status: "Permanent", photo: "https://via.placeholder.com/60", reportsTo: "vacant_2" },
-      { level: 3, department: "UI/UX TEAM", role: "SNR DESIGNER", name: "Ms. Thaw Zin Hlaing", status: "Permanent", photo: "https://via.placeholder.com/60", reportsTo: "vacant_2" },
-      { level: 3, department: "LAST-MILE OPERATION TEAM", role: "EXECUTIVE", name: "Ms. Thin Mar Lar Soe", status: "Permanent", photo: "https://via.placeholder.com/60", reportsTo: "Mr. Su Myat Toe" },
-      { level: 3, department: "UI/UX TEAM", role: "STAFF", name: "Mr. Min Thu Khaing", status: "Probation", photo: "https://via.placeholder.com/60", reportsTo: "Ms. Wai Yan Lin" },
-      { level: 2, department: "DATA-BASED MARKETING TEAM", role: "ASST MANAGER", name: "vacant_3", status: "Vacant", photo: "", reportsTo: "Ms. Thae Su Naing" },
-      { level: 3, department: "DATA-BASED MARKETING TEAM", role: "EXECUTIVE (Shopper Marketing)", name: "Ms. May Thu Khaing", status: "Probation", photo: "", reportsTo: "vacant_3" },
-      { level: 3, department: "DATA-BASED MARKETING TEAM", role: "EXECUTIVE (Buyer Marketing)", name: "vacant_4", status: "Vacant", photo: "", reportsTo: "vacant_3" },
-      { level: 4, department: "LAST-MILE OPERATION TEAM", role: "JUNIOR", name: "Ms. Ni Ni Htun", status: "Permanent", photo: "https://via.placeholder.com/60", reportsTo: "Mr. Su Myat Toe" },
-      { level: 2, department: "BOB & CUSTOMER CARE TEAM", role: "ASST MANAGER", name: "Ms. Myat Lay Thitsar", status: "Probation", photo: "https://via.placeholder.com/60", reportsTo: "Ms. Thae Su Naing" },
-      { level: 3, department: "BOB & CUSTOMER CARE TEAM", role: "BOB SALE DRIVE SUPERVISOR", name: "vacant_5", status: "Vacant", photo: "", reportsTo: "Ms. Myat Lay Thitsar" },
-      { level: 4, department: "BOB & CUSTOMER CARE TEAM", role: "CC Agent-VIP & Loyalty", name: "vacant_7", status: "Vacant", photo: "", reportsTo: "vacant_5" },
-      { level: 4, department: "BOB & CUSTOMER CARE TEAM", role: "CC Agent-VIP & Loyalty", name: "vacant_8", status: "Vacant", photo: "", reportsTo: "vacant_5" },
-      { level: 4, department: "BOB & CUSTOMER CARE TEAM", role: "BOB", name: "Mr. Htet Wai Yan Oo", status: "Permanent", photo: "https://via.placeholder.com/60", reportsTo: "Ms. Myat Lay Thitsar" },
-      { level: 4, department: "BOB & CUSTOMER CARE TEAM", role: "BOB", name: "Mr. Zin Min Khant", status: "Permanent", photo: "https://via.placeholder.com/60", reportsTo: "Ms. Myat Lay Thitsar" },
-      { level: 4, department: "BOB & CUSTOMER CARE TEAM", role: "BOB", name: "Mr. Pyae Phyo Han", status: "Permanent", photo: "https://via.placeholder.com/60", reportsTo: "Ms. Myat Lay Thitsar" },
-      { level: 4, department: "BOB & CUSTOMER CARE TEAM", role: "BOB", name: "Ms. Myo Thiri Aung", status: "Permanent", photo: "https://via.placeholder.com/60", reportsTo: "Ms. Myat Lay Thitsar" },
-      { level: 4, department: "BOB & CUSTOMER CARE TEAM", role: "BOB", name: "Ms. Khin Chan Myae Hlaing", status: "Permanent", photo: "https://via.placeholder.com/60", reportsTo: "Ms. Myat Lay Thitsar" },
-      { level: 4, department: "BOB & CUSTOMER CARE TEAM", role: "BOB", name: "Ms. Ei Ei Myo", status: "Permanent", photo: "https://via.placeholder.com/60", reportsTo: "Ms. Myat Lay Thitsar" },
-      { level: 4, department: "BOB & CUSTOMER CARE TEAM", role: "CC Agent-Complaint", name: "Mr. Nyan Lin Htet", status: "Permanent", photo: "https://via.placeholder.com/60", reportsTo: "Ms. Myat Lay Thitsar" },
-      { level: 4, department: "BOB & CUSTOMER CARE TEAM", role: "CC Agent-Complaint", name: "Mr. Ye Min Oo", status: "Permanent", photo: "https://via.placeholder.com/60", reportsTo: "Ms. Myat Lay Thitsar" },
-      { level: 4, department: "BOB & CUSTOMER CARE TEAM", role: "CC Agent-Complaint", name: "Ms. Kyawt Zin Khine", status: "Permanent", photo: "https://via.placeholder.com/60", reportsTo: "Ms. Myat Lay Thitsar" }
-    ];
-
-    function getStatusColor(status) {
-      const colors = {
-        'Permanent': { bg: '#dcfce7', text: '#166534' },
-        'Probation': { bg: '#fef3c7', text: '#92400e' },
-        'Vacant': { bg: '#fee2e2', text: '#991b1b' }
-      };
-      return colors[status] || { bg: '#e5e7eb', text: '#374151' };
-    }
-
-    function getDepartmentColor(department) {
-      const colors = {
-        'CEO': { primary: '#8b5cf6', light: '#f3e8ff', border: '#7c3aed' },
-        'KHIT ZAY': { primary: '#3b82f6', light: '#dbeafe', border: '#2563eb' },
-        'LAST-MILE OPERATION TEAM': { primary: '#10b981', light: '#d1fae5', border: '#059669' },
-        'BUSINESS INTELLIGENCE TEAM': { primary: '#f59e0b', light: '#fef3c7', border: '#d97706' },
-        'UI/UX TEAM': { primary: '#ec4899', light: '#fce7f3', border: '#db2777' },
-        'DATA-BASED MARKETING TEAM': { primary: '#06b6d4', light: '#cffafe', border: '#0891b2' },
-        'BOB & CUSTOMER CARE TEAM': { primary: '#ef4444', light: '#fee2e2', border: '#dc2626' }
-      };
-      return colors[department] || { primary: '#64748b', light: '#f1f5f9', border: '#475569' };
-    }
-
-    function getRoleColor(role) {
-      const roleColors = {
-        'CEO': '#8b5cf6',
-        'Dep. Head of Ecommerce': '#3b82f6',
-        'ASST MANAGER': '#10b981',
-        'Executive': '#f59e0b',
-        'EXECUTIVE': '#f59e0b',
-        'DEVELOPER': '#ec4899',
-        'SNR DESIGNER': '#a855f7',
-        'STAFF': '#06b6d4',
-        'JUNIOR': '#14b8a6',
-        'BOB SALE DRIVE SUPERVISOR': '#ef4444',
-        'BOB': '#f97316',
-        'CC Agent-VIP & Loyalty': '#84cc16',
-        'CC Agent-Complaint': '#eab308'
-      };
-      
-      // Check for partial matches
-      for (const [key, color] of Object.entries(roleColors)) {
-        if (role.includes(key)) return color;
-      }
-      
-      return '#64748b';
-    }
-
-    function createEmployeeCard(employee, index, config) {
-      const isVacant = employee.status === 'Vacant';
-      const statusColor = getStatusColor(employee.status);
-      const departmentColor = getDepartmentColor(employee.department);
-      const roleColor = getRoleColor(employee.role);
-      const displayName = employee.name === 'CEO' ? config.ceo_name || defaultConfig.ceo_name : employee.name;
-      
-      return `
-        <div class="employee-card ${isVacant ? 'vacant-card' : ''}" 
-             style="animation-delay: ${index * 0.18}s; background: linear-gradient(135deg, ${departmentColor.light} 0%, ${config.card_color || defaultConfig.card_color} 100%); border-radius: 10px; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); padding: 0.75rem; width: 170px; position: relative; border-left: 4px solid ${departmentColor.border}; border-top: 2px solid ${roleColor};"
-             data-employee="${employee.name}">
-          ${!isVacant && employee.photo ? `
-            <div class="photo-container" style="width: 44px; height: 44px; margin: 0 auto 0.4rem; border-radius: 50%; overflow: hidden; border: 2.5px solid ${departmentColor.primary}; box-shadow: 0 0 0 1.5px ${roleColor};">
-              <img src="${employee.photo}" alt="${displayName}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src=''; this.alt='Image failed to load'; this.style.display='none';">
-            </div>
-          ` : `
-            <div style="width: 44px; height: 44px; margin: 0 auto 0.4rem; border-radius: 50%; background: linear-gradient(135deg, ${departmentColor.primary} 0%, ${roleColor} 100%); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: white; font-weight: bold; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
-              ${isVacant ? '?' : displayName.charAt(0)}
-            </div>
-          `}
-          <h3 style="font-size: 0.75rem; font-weight: 700; text-align: center; margin-bottom: 0.15rem; color: ${config.text_color || defaultConfig.text_color}; line-height: 1.2;">
-            ${displayName}
-          </h3>
-          <p style="font-size: 0.6rem; color: ${roleColor}; text-align: center; margin-bottom: 0.35rem; font-weight: 600; line-height: 1.2;">
-            ${employee.role}
-          </p>
-          <div style="text-align: center; margin-bottom: 0.35rem;">
-            <span class="status-badge" style="background-color: ${statusColor.bg}; color: ${statusColor.text};">
-              ${employee.status}
-            </span>
-          </div>
-          <p style="font-size: 0.58rem; color: ${departmentColor.primary}; text-align: center; font-weight: 600; background: rgba(255,255,255,0.7); padding: 0.15rem 0.35rem; border-radius: 5px; line-height: 1.2;">
-            ${employee.department}
-          </p>
+{% macro render_node(node) %}
+  <li>
+    <div class="org-card">
+      <div class="org-header">
+        {% if node.photo_url %}
+          <img class="org-photo" src="{{ node.photo_url }}" alt="{{ node.original_name or node.name }}" onerror="this.style.display='none'">
+        {% else %}
+          <div class="org-placeholder">{{ (node.original_name or node.name)[:1] }}</div>
+        {% endif %}
+        <div>
+          <div class="org-name">{{ node.original_name or node.name }}</div>
+          <div class="org-role">{{ node.role or 'Role TBD' }}</div>
         </div>
-      `;
-    }
+      </div>
+      <div class="org-meta">
+        <span class="department-label">{{ node.department or 'Department' }}</span>
+        <span class="badge {{ 'badge--vacant' if (node.status|default('')).lower() == 'vacant' else 'badge--status' }}">
+          {{ node.status or 'Status N/A' }}
+        </span>
+      </div>
+    </div>
+    {% if node.children %}
+      <ul>
+        {% for child in node.children %}
+          {{ render_node(child) }}
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </li>
+{% endmacro %}
 
-    function renderOrgChart(config) {
-      const app = document.getElementById('app');
-      const levels = {};
-      
-      orgData.forEach(emp => {
-        if (!levels[emp.level]) levels[emp.level] = [];
-        levels[emp.level].push(emp);
-      });
-
-      let html = `
-        <div class="org-chart-container" style="background: ${config.background_color || defaultConfig.background_color}; position: relative;">
-          <svg class="connection-svg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;">
-            <defs>
-              <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                <polygon points="0 0, 10 3, 0 6" fill="${config.primary_action_color || defaultConfig.primary_action_color}" opacity="0.9" />
-              </marker>
-            </defs>
-          </svg>
-          
-          <h1 style="text-align: center; font-size: 2rem; font-weight: 800; margin-bottom: 1.5rem; color: ${config.text_color || defaultConfig.text_color}; position: relative; z-index: 1;">
-            ${config.chart_title || defaultConfig.chart_title}
-          </h1>
-          
-          <div style="display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap; position: relative; z-index: 1;">
-            <div style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              <h3 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.5rem; color: ${config.text_color || defaultConfig.text_color};">Departments</h3>
-              <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem;"><span style="width: 12px; height: 12px; background: #8b5cf6; border-radius: 2px; display: inline-block;"></span> CEO</span>
-                <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem;"><span style="width: 12px; height: 12px; background: #3b82f6; border-radius: 2px; display: inline-block;"></span> KHIT ZAY</span>
-                <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem;"><span style="width: 12px; height: 12px; background: #10b981; border-radius: 2px; display: inline-block;"></span> Last-Mile Ops</span>
-                <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem;"><span style="width: 12px; height: 12px; background: #f59e0b; border-radius: 2px; display: inline-block;"></span> Business Intelligence</span>
-                <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem;"><span style="width: 12px; height: 12px; background: #ec4899; border-radius: 2px; display: inline-block;"></span> UI/UX</span>
-                <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem;"><span style="width: 12px; height: 12px; background: #06b6d4; border-radius: 2px; display: inline-block;"></span> Marketing</span>
-                <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem;"><span style="width: 12px; height: 12px; background: #ef4444; border-radius: 2px; display: inline-block;"></span> BOB & Customer Care</span>
-              </div>
-            </div>
-            
-            <div style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              <h3 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.5rem; color: ${config.text_color || defaultConfig.text_color};">Role Colors (Top Border)</h3>
-              <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem;"><span style="width: 12px; height: 12px; background: #10b981; border-radius: 2px; display: inline-block;"></span> Manager</span>
-                <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem;"><span style="width: 12px; height: 12px; background: #f59e0b; border-radius: 2px; display: inline-block;"></span> Executive</span>
-                <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem;"><span style="width: 12px; height: 12px; background: #a855f7; border-radius: 2px; display: inline-block;"></span> Designer</span>
-                <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem;"><span style="width: 12px; height: 12px; background: #f97316; border-radius: 2px; display: inline-block;"></span> BOB</span>
-                <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem;"><span style="width: 12px; height: 12px; background: #eab308; border-radius: 2px; display: inline-block;"></span> CC Agent</span>
-              </div>
-            </div>
-          </div>
-      `;
-
-      Object.keys(levels).sort((a, b) => a - b).forEach((level, levelIndex) => {
-        html += `<div class="level-container" style="position: relative; z-index: 1;">`;
-        levels[level].forEach((employee, empIndex) => {
-          html += createEmployeeCard(employee, levelIndex * 10 + empIndex, config);
-        });
-        html += `</div>`;
-      });
-
-      html += `</div>`;
-      app.innerHTML = html;
-      
-      // Draw connections after DOM is ready
-      setTimeout(() => drawConnections(config), 100);
-    }
-    
-    function drawConnections(config) {
-      const svg = document.querySelector('.connection-svg');
-      if (!svg) return;
-      
-      // Clear existing lines
-      const existingLines = svg.querySelectorAll('path, line');
-      existingLines.forEach(line => line.remove());
-      
-      orgData.forEach((employee, index) => {
-        if (!employee.reportsTo) return;
-        
-        const childCard = document.querySelector(`[data-employee="${employee.name}"]`);
-        const parentCard = document.querySelector(`[data-employee="${employee.reportsTo}"]`);
-        
-        if (!childCard || !parentCard) return;
-        
-        const childRect = childCard.getBoundingClientRect();
-        const parentRect = parentCard.getBoundingClientRect();
-        const containerRect = svg.getBoundingClientRect();
-        
-        const x1 = parentRect.left + parentRect.width / 2 - containerRect.left;
-        const y1 = parentRect.bottom - containerRect.top;
-        const x2 = childRect.left + childRect.width / 2 - containerRect.left;
-        const y2 = childRect.top - containerRect.top;
-        
-        const departmentColor = getDepartmentColor(employee.department);
-        
-        // Create curved path
-        const midY = (y1 + y2) / 2;
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        const d = `M ${x1} ${y1} L ${x1} ${midY} L ${x2} ${midY} L ${x2} ${y2}`;
-        
-        path.setAttribute('d', d);
-        path.setAttribute('stroke', departmentColor.primary);
-        path.setAttribute('stroke-width', '2.5');
-        path.setAttribute('fill', 'none');
-        path.setAttribute('opacity', '0.85');
-        path.setAttribute('class', 'connector-line connector-line-animated');
-        path.setAttribute('marker-end', 'url(#arrowhead)');
-        path.setAttribute('stroke-dasharray', '8 4');
-        path.style.animationDelay = `${index * 0.05}s`;
-        
-        svg.appendChild(path);
-      });
-    }
-
-    async function onConfigChange(config) {
-      renderOrgChart(config);
-    }
-
-    if (window.elementSdk) {
-      window.elementSdk.init({
-        defaultConfig,
-        onConfigChange,
-        mapToCapabilities: (config) => ({
-          recolorables: [
-            {
-              get: () => config.background_color || defaultConfig.background_color,
-              set: (value) => {
-                config.background_color = value;
-                window.elementSdk.setConfig({ background_color: value });
-              }
-            },
-            {
-              get: () => config.card_color || defaultConfig.card_color,
-              set: (value) => {
-                config.card_color = value;
-                window.elementSdk.setConfig({ card_color: value });
-              }
-            },
-            {
-              get: () => config.text_color || defaultConfig.text_color,
-              set: (value) => {
-                config.text_color = value;
-                window.elementSdk.setConfig({ text_color: value });
-              }
-            },
-            {
-              get: () => config.primary_action_color || defaultConfig.primary_action_color,
-              set: (value) => {
-                config.primary_action_color = value;
-                window.elementSdk.setConfig({ primary_action_color: value });
-              }
-            },
-            {
-              get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
-              set: (value) => {
-                config.secondary_action_color = value;
-                window.elementSdk.setConfig({ secondary_action_color: value });
-              }
-            }
-          ],
-          borderables: [],
-          fontEditable: undefined,
-          fontSizeable: undefined
-        }),
-        mapToEditPanelValues: (config) => new Map([
-          ["chart_title", config.chart_title || defaultConfig.chart_title],
-          ["ceo_name", config.ceo_name || defaultConfig.ceo_name]
-        ])
-      });
-    }
-
-    renderOrgChart(defaultConfig);
-  </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9aaae87df11c9d0b',t:'MTc2NTE4MjcwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<div class="org-wrapper">
+  <h2 class="text-center mb-4">Organizational Structure</h2>
+  <ul class="org-tree">
+    {% for node in root_nodes %}
+      {{ render_node(node) }}
+    {% endfor %}
+  </ul>
+</div>
 {% endblock %}
