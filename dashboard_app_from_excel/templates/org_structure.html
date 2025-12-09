@@ -2,129 +2,145 @@
 {% block content %}
 <style>
   .org-wrapper {
-    padding: 2rem 1rem;
-    overflow-x: auto;
+    padding: 1.5rem;
   }
-  .org-tree {
-    list-style: none;
-    padding-left: 0;
-    display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    justify-content: center;
+  .org-level {
+    margin-bottom: 2rem;
   }
-  .org-tree ul {
-    list-style: none;
-    padding-left: 1.5rem;
-    border-left: 1px solid #e2e8f0;
-    margin-top: 1rem;
+  .org-level h4 {
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #64748b;
+    margin-bottom: 0.75rem;
+  }
+  .org-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
   }
   .org-card {
     background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    border-radius: 14px;
     padding: 1rem;
-    min-width: 220px;
-    max-width: 280px;
-    border-top: 4px solid #3b82f6;
-  }
-  .org-header {
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+    border-top: 4px solid #0ea5e9;
     display: flex;
+    gap: 0.85rem;
     align-items: center;
-    gap: 0.75rem;
   }
   .org-photo {
-    width: 56px;
-    height: 56px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #e2e8f0;
+    border: 2px solid rgba(148, 163, 184, 0.4);
   }
   .org-placeholder {
-    width: 56px;
-    height: 56px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
-    background: #e0e7ff;
+    background: #e2e8f0;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    color: #312e81;
+    color: #334155;
   }
   .org-name {
     font-weight: 700;
-    margin-bottom: 0.1rem;
     color: #0f172a;
+    margin-bottom: 0.15rem;
   }
   .org-role {
     font-size: 0.85rem;
     color: #475569;
+    margin-bottom: 0.35rem;
   }
   .org-meta {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 0.75rem;
-    font-size: 0.8rem;
-    color: #475569;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    font-size: 0.75rem;
   }
-  .badge {
-    padding: 0.15rem 0.5rem;
+  .org-meta span {
+    padding: 0.2rem 0.5rem;
     border-radius: 999px;
-    font-size: 0.7rem;
+    background: #f1f5f9;
+    color: #475569;
     font-weight: 600;
-  }
-  .badge--status {
-    background: #e0f2fe;
-    color: #0369a1;
-  }
-  .badge--vacant {
-    background: #fee2e2;
-    color: #b91c1c;
-  }
-  .department-label {
-    font-weight: 600;
-    color: #64748b;
   }
 </style>
 
-{% macro render_node(node) %}
-  <li>
-    <div class="org-card">
-      <div class="org-header">
-        {% if node.photo_url %}
-          <img class="org-photo" src="{{ node.photo_url }}" alt="{{ node.original_name or node.name }}" onerror="this.style.display='none'">
-        {% else %}
-          <div class="org-placeholder">{{ (node.original_name or node.name)[:1] }}</div>
-        {% endif %}
+<div class="org-wrapper">
+  <h2 class="mb-4">Organizational Structure</h2>
+  <div id="org-chart"></div>
+</div>
+
+<script>
+  const orgTree = {{ root_nodes | tojson | safe }};
+  const deptColors = {{ dept_colors | tojson | safe }};
+  const roleColors = {{ role_colors | tojson | safe }};
+
+  const flattenTree = (nodes, acc = []) => {
+    nodes.forEach(node => {
+      acc.push(node);
+      if (node.children && node.children.length) {
+        flattenTree(node.children, acc);
+      }
+    });
+    return acc;
+  };
+
+  const nodes = flattenTree(orgTree);
+  const levels = {};
+  nodes.forEach(node => {
+    const level = parseInt(node.level || 0, 10);
+    if (!levels[level]) levels[level] = [];
+    levels[level].push(node);
+  });
+
+  const getDeptColor = dept => (deptColors[dept] || {}).border || '#0ea5e9';
+  const getRoleColor = role => (roleColors[role] || '#0ea5e9');
+
+  const createCard = (node) => {
+    const name = node.original_name || node.name || 'Unknown';
+    const role = node.role || 'Role TBD';
+    const dept = node.department || 'Department';
+    const status = node.status || 'Status';
+
+    const photo = node.photo_url && node.photo_url.trim().length
+      ? `<img class="org-photo" src="${node.photo_url}" alt="${name}" onerror="this.remove()">`
+      : `<div class="org-placeholder">${name.charAt(0)}</div>`;
+
+    return `
+      <div class="org-card" style="border-top-color:${getDeptColor(dept)}">
+        ${photo}
         <div>
-          <div class="org-name">{{ node.original_name or node.name }}</div>
-          <div class="org-role">{{ node.role or 'Role TBD' }}</div>
+          <div class="org-name">${name}</div>
+          <div class="org-role" style="color:${getRoleColor(role)}">${role}</div>
+          <div class="org-meta">
+            <span>${dept}</span>
+            <span>${status}</span>
+          </div>
         </div>
       </div>
-      <div class="org-meta">
-        <span class="department-label">{{ node.department or 'Department' }}</span>
-        <span class="badge {{ 'badge--vacant' if (node.status|default('')).lower() == 'vacant' else 'badge--status' }}">
-          {{ node.status or 'Status N/A' }}
-        </span>
-      </div>
-    </div>
-    {% if node.children %}
-      <ul>
-        {% for child in node.children %}
-          {{ render_node(child) }}
-        {% endfor %}
-      </ul>
-    {% endif %}
-  </li>
-{% endmacro %}
+    `;
+  };
 
-<div class="org-wrapper">
-  <h2 class="text-center mb-4">Organizational Structure</h2>
-  <ul class="org-tree">
-    {% for node in root_nodes %}
-      {{ render_node(node) }}
-    {% endfor %}
-  </ul>
-</div>
+  const renderChart = () => {
+    const container = document.getElementById('org-chart');
+    const levelKeys = Object.keys(levels).map(Number).sort((a, b) => a - b);
+    container.innerHTML = levelKeys.map(level => `
+      <div class="org-level">
+        <h4>Level ${level}</h4>
+        <div class="org-grid">
+          ${levels[level].map(createCard).join('')}
+        </div>
+      </div>
+    `).join('');
+  };
+
+  renderChart();
+</script>
 {% endblock %}
