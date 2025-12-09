@@ -298,9 +298,17 @@ def org_structure():
         title="Organizational Structure"
     )
 
+import pandas as pd
+from urllib.parse import quote # Added to handle spaces and special characters in URLs
+
+@app.route("/home")
+def home_page():
+    return render_template("home.html")
 
 # ===== ROUTES =====
 @app.route("/")
+def index():
+    return redirect(url_for("home_page"))
 
 
 @app.route("/executive_summary")
@@ -359,13 +367,6 @@ def executive_summary_page():
         title="Executive Summary"
     )
     
-import pandas as pd
-from urllib.parse import quote # Added to handle spaces and special characters in URLs
-
-@app.route("/home")
-def home_page():
-    return render_template("home.html")
-
 @app.route("/top_product_promo")
 def top_product_promo():
     try:
