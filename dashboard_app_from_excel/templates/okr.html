@@ -4,31 +4,34 @@
 
 <style>
 .okr-container {
-  padding: 10px 20px;
+  padding: 14px 20px 26px;
   max-width: 1200px;
   margin: auto;
 }
 
 .okr-header {
   text-align: center;
-  margin-bottom: 25px;
+  margin-bottom: 24px;
 }
 .okr-header h1 {
-  font-size: 1.8rem;
+  font-size: 1.9rem;
   color: #073047;
   margin: 0;
+  letter-spacing:-0.03em;
 }
 .okr-header .subtitle {
   color: #6b7280;
-  font-size: 0.95rem;
+  font-size: 0.93rem;
   margin-top: 4px;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
 }
 
 .team-section {
   margin-bottom: 16px;
   background: white;
-  border-radius: 14px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(15,23,42,0.12);
   overflow: hidden;
   opacity: 0;
   transform: translateX(-25px);
@@ -42,16 +45,16 @@
   }
 }
 {% for i in range(10) %}
-.team-section:nth-child({{ i + 1 }}) {
+.team-section:nth-of-type({{ i + 1 }}) {
   animation-delay: {{ i * 0.08 }}s;
 }
 {% endfor %}
 
 .team-header {
-  padding: 14px 20px;
+  padding: 12px 18px;
   background: linear-gradient(90deg, #0b63ff, #00a6a1);
   color: white;
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   font-weight: 700;
   cursor: pointer;
   display: flex;
@@ -64,6 +67,22 @@
 }
 .team-header i {
   transition: transform 0.3s;
+}
+.team-header-meta {
+  display:flex;
+  align-items:center;
+  gap:0.75rem;
+  font-size:0.8rem;
+}
+.team-header-chip {
+  padding:0.18rem 0.6rem;
+  border-radius:999px;
+  background:rgba(255,255,255,0.16);
+  font-size:0.78rem;
+}
+.team-header-score {
+  font-size:0.9rem;
+  font-weight:600;
 }
 
 .team-content {
@@ -163,9 +182,21 @@
   {% if comparison %}
     {% for team_data in comparison %}
       <div class="team-section">
+        {% set avg_2025 = (team_data.avg_2025 if team_data.avg_2025 is defined else None) %}
+        {% set avg_2026 = (team_data.avg_2026 if team_data.avg_2026 is defined else None) %}
         <div class="team-header" onclick="toggleTeam(this)">
-          {{ team_data.team }}
-          <i class="bi bi-chevron-right"></i>
+          <div>{{ team_data.team }}</div>
+          <div class="team-header-meta">
+            {% if avg_2025 %}
+              <span class="team-header-chip">2025 Avg</span>
+              <span class="team-header-score">{{ avg_2025 }}%</span>
+            {% endif %}
+            {% if avg_2026 %}
+              <span class="team-header-chip">2026 Avg</span>
+              <span class="team-header-score">{{ avg_2026 }}%</span>
+            {% endif %}
+            <i class="bi bi-chevron-right"></i>
+          </div>
         </div>
 
         <div class="team-content">
@@ -181,7 +212,7 @@
                     <thead>
                       <tr>
                         <th>Functional POVs</th>
-                        <th>Years</th>
+                        <th>Objective</th>
                         <th>Key Results</th>
                         <th>Lead Outcomes</th>
                         <th>Lead Actions</th>
@@ -192,10 +223,32 @@
                       {% for kr in obj.items_2025 %}
                         <tr>
                           <td>{{ kr['Functional POVs'] or '' }}</td>
-                          <td>{{ kr['Years'] or '' }}</td>
+                          <td>{{ kr['Objective'] or '' }}</td>
                           <td>{{ kr['Key Results'] or '' }}</td>
-                          <td class="scrollable-cell">{{ kr['Lead Outcomes'] or '' }}</td>
-                          <td class="scrollable-cell">{{ kr['Lead Actions'] or '' }}</td>
+                          <td class="scrollable-cell">
+                            {% set lo = kr['Lead Outcomes'] or '' %}
+                            {% if '\n' in lo %}
+                              <ul style="padding-left:18px;margin:0;">
+                                {% for line in lo.split('\n') if line|trim %}
+                                  <li>{{ line|trim }}</li>
+                                {% endfor %}
+                              </ul>
+                            {% else %}
+                              {{ lo }}
+                            {% endif %}
+                          </td>
+                          <td class="scrollable-cell">
+                            {% set la = kr['Lead Actions'] or '' %}
+                            {% if '\n' in la %}
+                              <ul style="padding-left:18px;margin:0;">
+                                {% for line in la.split('\n') if line|trim %}
+                                  <li>{{ line|trim }}</li>
+                                {% endfor %}
+                              </ul>
+                            {% else %}
+                              {{ la }}
+                            {% endif %}
+                          </td>
                           <td>{{ kr['Average'] or '' }}%</td>
                         </tr>
                       {% endfor %}
@@ -212,22 +265,44 @@
                     <thead>
                       <tr>
                         <th>Functional POVs</th>
-                        <th>Years</th>
+                        <th>Objective</th>
                         <th>Key Results</th>
                         <th>Lead Outcomes</th>
                         <th>Lead Actions</th>
-                        <th>Success Metrics</th>
+                        <th>Average</th>
                       </tr>
                     </thead>
                     <tbody>
                       {% for kr in obj.items_2026 %}
                         <tr>
                           <td>{{ kr['Functional POVs'] or '' }}</td>
-                          <td>{{ kr['Years'] or '' }}</td>
+                          <td>{{ kr['Objective'] or '' }}</td>
                           <td>{{ kr['Key Results'] or '' }}</td>
-                          <td class="scrollable-cell">{{ kr['Lead Outcomes'] or '' }}</td>
-                          <td class="scrollable-cell">{{ kr['Lead Actions'] or '' }}</td>
-                          <td class="scrollable-cell">{{ kr['Success Metrics'] or '' }}</td>
+                          <td class="scrollable-cell">
+                            {% set lo2 = kr['Lead Outcomes'] or '' %}
+                            {% if '\n' in lo2 %}
+                              <ul style="padding-left:18px;margin:0;">
+                                {% for line in lo2.split('\n') if line|trim %}
+                                  <li>{{ line|trim }}</li>
+                                {% endfor %}
+                              </ul>
+                            {% else %}
+                              {{ lo2 }}
+                            {% endif %}
+                          </td>
+                          <td class="scrollable-cell">
+                            {% set la2 = kr['Lead Actions'] or '' %}
+                            {% if '\n' in la2 %}
+                              <ul style="padding-left:18px;margin:0;">
+                                {% for line in la2.split('\n') if line|trim %}
+                                  <li>{{ line|trim }}</li>
+                                {% endfor %}
+                              </ul>
+                            {% else %}
+                              {{ la2 }}
+                            {% endif %}
+                          </td>
+                          <td>{{ kr['Average'] or '' }}%</td>
                         </tr>
                       {% endfor %}
                     </tbody>

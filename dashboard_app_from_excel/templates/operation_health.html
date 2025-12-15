@@ -1,23 +1,200 @@
-
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block content %}
-  <h1>Operation Health</h1>
-  <table class="table">
-    <thead>
-      <tr>
-      {% for c in rows[0].keys() %}
-        <th>{{ c }}</th>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<style>
+:root {
+  --ink: #021728;
+  --muted: #6b7c8f;
+  --surface: #ffffff;
+  --surface-2: #f6f8fb;
+  --accent: #0b63ff;
+}
+.ops-hero {
+  background: linear-gradient(130deg, #04172f, #0b63ff);
+  border-radius: 26px;
+  padding: 26px 26px 24px;
+  color: #fff;
+  box-shadow: 0 28px 60px rgba(4,23,47,.35);
+  margin-bottom: 24px;
+}
+.ops-hero h1 { font-weight: 800; margin: 0 0 4px; letter-spacing:-0.03em; }
+.ops-hero p { margin: 0; opacity: .82; }
+.status-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+.status-badge {
+  background: rgba(255,255,255,.12);
+  border-radius: 999px;
+  padding: 8px 14px;
+  text-transform: uppercase;
+  font-size: .72rem;
+  letter-spacing: 0.16em;
+}
+.chip-row {
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.45rem;
+  margin-top:0.75rem;
+}
+.chip {
+  padding:0.2rem 0.6rem;
+  border-radius:999px;
+  border:1px solid rgba(148,163,184,0.7);
+  font-size:0.72rem;
+  color:#e5e7eb;
+  background:rgba(15,23,42,0.15);
+}
+.insight-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.insight-card {
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 16px 16px 14px;
+  border: 1px solid #e4e9f2;
+  box-shadow: 0 15px 30px rgba(4,23,47,.08);
+}
+.insight-card h4 { font-size: 0.98rem; margin-bottom: 6px; color: var(--ink); }
+.insight-card p { margin: 0 0 6px; color: var(--muted); font-size: .9rem; }
+.insight-card small { font-size:0.78rem; color:#9ca3af; }
+.pipeline-section {
+  margin-bottom: 28px;
+}
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.section-header h3 { margin: 0; color: var(--ink); font-size:1rem; }
+.ops-meta { font-size:0.8rem; color: var(--muted); }
+.ops-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 15px 28px rgba(4,23,47,.08);
+}
+.ops-table thead {
+  background: var(--surface-2);
+  text-transform: uppercase;
+  font-size: .78rem;
+  letter-spacing: .6px;
+  color: var(--muted);
+}
+.ops-table th,
+.ops-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #edf1f7;
+  font-size: .9rem;
+}
+.ops-table tbody tr:last-child td { border-bottom: none; }
+.status-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: .78rem;
+  background: #eef2ff;
+  color: var(--accent);
+}
+.status-chip.status-done { background:#dcfce7; color:#15803d; }
+.status-chip.status-risk { background:#fef3c7; color:#b45309; }
+.status-chip.status-blocked { background:#fee2e2; color:#b91c1c; }
+@media(max-width:768px){
+  .section-header { flex-direction: column; align-items: flex-start; gap: 4px; }
+}
+</style>
+
+<div class="ops-hero">
+  <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+    <div>
+      <p>Execution Radar</p>
+      <h1>Operations Health Monitor</h1>
+      <p>Funnel-by-funnel pulse: bottlenecks, owners, and timeline expectations.</p>
+      <div class="chip-row">
+        <span class="chip">Funnel Health</span>
+        <span class="chip">Status Mix</span>
+        <span class="chip">Operational Focus</span>
+      </div>
+    </div>
+    <div class="status-badges">
+      {% for status, count in status_counter.items() %}
+        <span class="status-badge">{{ status }} • {{ count }}</span>
       {% endfor %}
-      </tr>
-    </thead>
-    <tbody>
-      {% for r in rows %}
+    </div>
+  </div>
+</div>
+
+{% if insights %}
+<section class="pipeline-section">
+  <div class="section-header">
+    <h3><i class="bi bi-lightbulb"></i> Strategic Insights</h3>
+    <span class="ops-meta">Narratives tagged as "Insight" from the sheet</span>
+  </div>
+  <div class="insight-grid">
+    {% for item in insights %}
+      <article class="insight-card">
+        <h4>{{ item.get('Metric Name','Key Insight') }}</h4>
+        <p>{{ item.get('Metric Value','') or item.get('Rationale','') }}</p>
+        {% if item.get('Owner') %}
+          <small>Owner: {{ item.get('Owner') }}</small>
+        {% endif %}
+      </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% for stage, items in grouped_ops.items() %}
+<section class="pipeline-section">
+  <div class="section-header">
+    <h3>{{ stage }}</h3>
+    <span class="ops-meta">{{ items|length }} trackers</span>
+  </div>
+  <div class="table-responsive">
+    <table class="ops-table">
+      <thead>
         <tr>
-        {% for v in r.values() %}
-          <td>{{ v }}</td>
-        {% endfor %}
+          <th>Metric</th>
+          <th>Current</th>
+          <th>Target</th>
+          <th>Status</th>
         </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        {% set s = (item.get('Status') or '')|lower %}
+        <tr>
+          <td>{{ item.get('Metric Name','Unnamed Metric') }}</td>
+          <td>{{ item.get('Metric Value','No metric provided') }}</td>
+          <td>{{ item.get('Target','--') }}</td>
+          <td>
+            {% if item.get('Status') %}
+              <span class="status-chip
+                {% if 'done' in s or 'completed' in s %} status-done
+                {% elif 'risk' in s or 'delay' in s %} status-risk
+                {% elif 'block' in s %} status-blocked
+                {% endif %}">
+                {{ item['Status'] }}
+              </span>
+            {% else %}
+              --
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% else %}
+<div class="alert alert-warning">No operational data available.</div>
+{% endfor %}
+
 {% endblock %}

@@ -10,14 +10,15 @@ body {
   background: #f4f7fb;
 }
 .swot-shell {
-  max-width: 1200px;
+  max-width: 1220px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 24px 18px 32px;
 }
 .swot-shell h1 {
   text-align: center;
   font-weight: 900;
   color: #073047;
+  letter-spacing: -0.03em;
   animation: fadeDown .6s ease;
 }
 .swot-shell .subtitle {
@@ -26,63 +27,86 @@ body {
   letter-spacing: 0.3em;
   text-transform: uppercase;
   font-size: .8rem;
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.2rem;
   animation: fadeDown .6s ease .05s both;
 }
 .filter-bar {
-  display: flex;
-  justify-content: center;
-  gap: .75rem;
+  display: inline-flex;
+  justify-content: flex-start;
+  gap: .5rem;
   flex-wrap: wrap;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.2rem;
+  padding: 0.25rem;
+  border-radius: 999px;
+  background: rgba(148,163,184,0.1);
 }
 .filter-chip {
-  padding: .4rem 1.4rem;
+  padding: .36rem 1.1rem;
   border-radius: 999px;
-  border: 1px solid rgba(148,163,184,.4);
-  background: #fff;
+  border: 1px solid transparent;
+  background: transparent;
   font-weight: 600;
-  color: #475569;
+  font-size: 0.8rem;
+  color: #64748b;
   cursor: pointer;
-  transition: all .2s ease;
+  transition: all .18s ease;
 }
-.filter-chip.active,
-.filter-chip:hover {
+.filter-chip.active {
   background: #2563eb;
   color: #fff;
-  border-color: transparent;
+  border-color: #1d4ed8;
+  box-shadow: 0 10px 25px rgba(37,99,235,0.35);
+}
+.filter-chip:hover:not(.active) {
+  background: rgba(255,255,255,0.9);
+  border-color: rgba(148,163,184,.5);
+}
+.swot-layout {
+  display:grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 1.6fr);
+  gap:1.4rem;
+  align-items:flex-start;
+}
+@media (max-width: 992px) {
+  .swot-layout { grid-template-columns: minmax(0,1fr); }
 }
 .swot-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.25rem;
+  gap: 1rem;
 }
 .swot-card {
   border-radius: 18px;
   background: #fff;
   border: 1px solid rgba(148,163,184,.25);
   box-shadow: 0 24px 60px rgba(15,23,42,.08);
-  padding: 1rem;
+  padding: 0.95rem 0.95rem 1.05rem;
   animation: fadeUp .45s ease both;
   position: relative;
   overflow: hidden;
 }
-.swot-card::after {
-  content: attr(data-category);
-  position: absolute;
-  top: 12px;
-  right: -32px;
-  transform: rotate(40deg);
-  font-weight: 800;
-  letter-spacing: .35em;
-  color: rgba(148,163,184,.25);
-  font-size: .8rem;
+.swot-tag {
+  display:inline-flex;
+  align-items:center;
+  gap:0.35rem;
+  padding:0.18rem 0.6rem;
+  border-radius:999px;
+  font-size:0.7rem;
+  text-transform:uppercase;
+  letter-spacing:0.18em;
+  color:#64748b;
+  background:#f1f5f9;
 }
-.swot-card h3 { margin: 0.35rem 0; color: #0f172a; }
-.swot-card small { color: #94a3b8; letter-spacing: .2em; text-transform: uppercase; font-size: .7rem; }
-.swot-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: .75rem; margin-top: .75rem; }
-.swot-details div { background: #f9fbff; border-radius: 12px; padding: .85rem; color: #475569; font-size: .85rem; position: relative; overflow: hidden; }
-.swot-details div span { display: block; font-weight: 700; color: #0b63ff; margin-bottom: .2rem; }
+.swot-tag-dot {
+  width:8px;
+  height:8px;
+  border-radius:999px;
+}
+.swot-card h3 { margin: 0.35rem 0; color: #0f172a; font-size:1rem; }
+.swot-card small { color: #9ca3af; letter-spacing: .2em; text-transform: uppercase; font-size: .65rem; }
+.swot-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: .6rem; margin-top: .65rem; }
+.swot-details div { background: #f9fbff; border-radius: 12px; padding: .75rem; color: #475569; font-size: .83rem; position: relative; overflow: hidden; }
+.swot-details div span { display: block; font-weight: 700; color: #0b63ff; margin-bottom: .15rem; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.12em; }
 .swot-details div::after {
   content: '';
   position: absolute;
@@ -94,16 +118,16 @@ body {
 }
 .swot-card:hover .swot-details div::after { opacity: 1; }
 .key-insight-card {
-  margin-top: 2rem;
-  padding: 20px;
+  padding: 18px 18px 20px;
   border-radius: 16px;
   background: linear-gradient(120deg,#6366f1,#8b5cf6);
   color: #fff;
   box-shadow: 0 24px 60px rgba(99,102,241,.35);
   animation: fadeUp .45s ease .1s both;
 }
-.key-insight-card h2 { font-weight: 800; margin-bottom: 0.6rem; }
-.key-insight-card li { margin-bottom: 0.5rem; }
+.key-insight-card h2 { font-weight: 800; margin-bottom: 0.5rem; font-size:1rem; display:flex; align-items:center; gap:0.5rem; }
+.key-insight-card ul { padding-left:1rem; margin:0; font-size:0.87rem; }
+.key-insight-card li { margin-bottom: 0.45rem; line-height:1.4; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
 </style>
@@ -119,38 +143,54 @@ body {
     {% endfor %}
   </div>
 
-  <div class="swot-grid" id="swotGrid">
-    {% for category, entries in sections.items() %}
-      {% for entry in entries %}
-      <article class="swot-card" data-category="{{ category }}">
-        <small>{{ category }}</small>
-        <h3>{{ entry.title or 'Untitled Item' }}</h3>
-        <p class="text-muted" style="font-size:0.85rem;">Ref: {{ entry.id or 'N/A' }}</p>
-        <div class="swot-details">
-          <div>
-            <span>2025 Insight</span>
-            {{ entry.details_2025 or 'N/A' }}
+  <div class="swot-layout">
+    <div class="swot-grid" id="swotGrid">
+      {% for category, entries in sections.items() %}
+        {% for entry in entries %}
+        {% set cat = category|lower %}
+        {% set dot_color = '#22c55e' %}
+        {% if 'strength' in cat %}
+          {% set dot_color = '#22c55e' %}
+        {% elif 'weak' in cat %}
+          {% set dot_color = '#ef4444' %}
+        {% elif 'opportun' in cat %}
+          {% set dot_color = '#0ea5e9' %}
+        {% elif 'threat' in cat %}
+          {% set dot_color = '#eab308' %}
+        {% endif %}
+        <article class="swot-card" data-category="{{ category }}">
+          <div class="swot-tag">
+            <span class="swot-tag-dot" style="background: {{ dot_color }};"></span>
+            {{ category }}
           </div>
-          <div>
-            <span>2026 Strategy</span>
-            {{ entry.details_2026 or 'N/A' }}
+          <h3>{{ entry.title or 'Untitled Item' }}</h3>
+          <p class="text-muted" style="font-size:0.78rem; margin-bottom:0.15rem;">Ref: {{ entry.id or 'N/A' }}</p>
+          <div class="swot-details">
+            <div>
+              <span>2025 Insight</span>
+              {{ entry.details_2025 or 'N/A' }}
+            </div>
+            <div>
+              <span>2026 Strategy</span>
+              {{ entry.details_2026 or 'N/A' }}
+            </div>
           </div>
-        </div>
-      </article>
+        </article>
+        {% endfor %}
       {% endfor %}
-    {% endfor %}
-  </div>
+    </div>
 
-  {% if key_insights %}
-  <section class="key-insight-card">
-    <h2><i class="bi bi-lightbulb"></i> Key Insights</h2>
-    <ul>
-      {% for insight in key_insights %}
-      <li><strong>{{ insight.title or 'Insight' }}:</strong> {{ insight.content }}</li>
-      {% endfor %}
-    </ul>
-  </section>
-  {% endif %}
+    {% if key_insights %}
+    <section class="key-insight-card">
+      <h2><i class="bi bi-lightbulb"></i> Key Insights</h2>
+      <ul>
+        {% for insight in key_insights %}
+        <li><strong>{{ insight.title or 'Insight' }}:</strong> {{ insight.content }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+  </div>
 </div>
 
 <script>

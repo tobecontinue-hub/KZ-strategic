@@ -3,9 +3,6 @@
 {% block content %}
 
 <style>
-
-/* ---------- MATERIAL DESIGN 3 BASE ---------- */
-
 :root {
   --md-surface: #ffffff;
   --md-surface-variant: #f3f6fa;
@@ -16,84 +13,109 @@
   --md-on-primary: #ffffff;
 }
 
-/* PAGE */
 .main-container {
-  padding: 28px;
-  max-width: 900px;
+  padding: 26px 20px 32px;
+  max-width: 980px;
   margin: auto;
 }
 
-/* HEADER */
 .page-header {
   text-align: center;
-  margin-bottom: 36px;
+  margin-bottom: 26px;
 }
 
 .page-header h1 {
-  font-size: 1.8rem;
+  font-size: 1.9rem;
   font-weight: 800;
   color: var(--md-on-surface);
   margin-bottom: 4px;
+  letter-spacing: -0.03em;
 }
 
 .page-header .subtitle {
   color: #5d6268;
-  font-size: 0.95rem;
-  letter-spacing: 0.2px;
+  font-size: 0.92rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
-/* SECTION WRAPPER */
+.chip-row {
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:0.5rem;
+  margin-top:0.75rem;
+}
+.chip {
+  padding:0.22rem 0.7rem;
+  border-radius:999px;
+  border:1px solid rgba(148,163,184,0.7);
+  font-size:0.75rem;
+  color:#4b5563;
+  background:#f9fafb;
+}
+
 .section-container {
   background: var(--md-surface);
-  border-radius: 16px;
-  box-shadow: 0px 4px 14px rgba(0,0,0,0.08);
-  margin-bottom: 28px;
+  border-radius: 18px;
+  box-shadow: 0px 14px 40px rgba(15,23,42,0.12);
+  margin-bottom: 26px;
   border: 1px solid var(--md-outline);
+  overflow:hidden;
 }
 
-/* SECTION HEADER — TONAL */
 .section-header {
-  padding: 18px 22px;
-  font-size: 1.15rem;
+  padding: 16px 22px;
+  font-size: 0.9rem;
   font-weight: 700;
   background: var(--md-primary-container);
   color: #083b91;
-  letter-spacing: .2px;
+  letter-spacing: .16em;
+  text-transform:uppercase;
   border-bottom: 1px solid var(--md-outline);
 }
 
-/* CARD ITEM */
 .card-item {
-  padding: 18px 24px;
+  padding: 16px 22px 16px 28px;
   border-bottom: 1px solid var(--md-outline);
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.12s;
+  position:relative;
 }
 
 .card-item:last-child {
   border-bottom: none;
 }
 
-.card-item:hover {
-  background: var(--md-surface-variant);
+.card-item::before {
+  content:"";
+  position:absolute;
+  left:14px;
+  top:22px;
+  width:6px;
+  height:6px;
+  border-radius:999px;
+  background:#0b57d0;
 }
 
-/* TITLE */
+.card-item:hover {
+  background: var(--md-surface-variant);
+  transform: translateY(-1px);
+}
+
 .sub-header {
-  font-size: 1rem;
+  font-size: 0.96rem;
   font-weight: 700;
   color: #0a2e45;
   margin-bottom: 4px;
   letter-spacing: .15px;
 }
 
-/* DESC */
 .key-finding {
   font-size: 0.88rem;
-  line-height: 1.25;
+  line-height: 1.4;
   color: #50565c;
 }
 
-/* LIST */
 .bullet-list {
   padding-left: 18px;
   margin: 4px 0;
@@ -102,14 +124,21 @@
 
 .bullet-list li {
   margin-bottom: 2px;
-  line-height: 1.25;
+  line-height: 1.35;
   font-size: 0.88rem;
 }
 
 </style>
 
 <div class="main-container">
-  
+  <header class="page-header">
+    <p class="subtitle">From current position to future direction</p>
+    <div class="chip-row">
+      <span class="chip">Trajectories</span>
+      <span class="chip">Key Themes</span>
+      <span class="chip">Executive Summary</span>
+    </div>
+  </header>
 
   <!-- SECTION I -->
   {% if sections["I. Trajectories"] %}

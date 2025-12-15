@@ -6,8 +6,10 @@ import json
 import re
 from collections import defaultdict
 from collections import OrderedDict
+from collections import Counter
 from flask import redirect, url_for
 from jinja2 import Environment, FileSystemLoader
+from pathlib import Path
 import pandas as pd
 
 from services import google_sheets as gs
@@ -49,24 +51,59 @@ def clean_latex_math(text):
 @app.route("/profit_n_loss")
 def profit_n_loss():
     try:
-        df = gs.sheet_to_df("P&L")  # ← Must match your sheet tab name exactly
+        df = gs.sheet_to_df("P&L")
     except Exception as e:
         print(f"❌ Error loading P&L: {e}")
         df = pd.DataFrame()
 
-    rows = df.to_dict(orient="records") if not df.empty else []
+    if df.empty:
+        return render_template(
+            "profit_n_loss.html",
+            rows=[],
+            title="Profit & Loss"
+        )
 
-    for row in rows:
-        row["Date"] = str(row.get("Date", "")).strip()
-        row["Revenue"] = float(row.get("Revenue", 0))
-        row["Cost of Sales"] = float(row.get("Cost of Sales", 0))
-        row["Gross Profit"] = float(row.get("Gross Profit", 0))
-        row["Expense"] = float(row.get("Expense", 0))
-        row["Net Profit"] = float(row.get("Net Profit", 0))
+    df.columns = (
+        df.columns.astype(str)
+        .str.strip()
+        .str.replace("\u00A0", " ", regex=False)
+    )
+
+    def to_float(val):
+        if pd.isna(val) or val == "":
+            return 0.0
+        try:
+            return float(str(val).replace(",", "").strip())
+        except Exception:
+            return 0.0
+
+    records = []
+    for _, row in df.iterrows():
+        date_val = str(row.get("Date", "")).strip()
+        year = str(row.get("Year", "")).strip()
+        month = str(row.get("Month", "")).strip()
+        if date_val and (not year or not month):
+            parts = re.split(r"[-/ ]", date_val)
+            if len(parts) >= 2:
+                month = month or parts[0]
+                year = year or parts[1]
+        entry = {
+            "Year": year or "",
+            "Month": month or "",
+            "Label": f"{month} {year}".strip(),
+            "Revenue": to_float(row.get("Revenue")),
+            "Cost of Sales": to_float(row.get("Cost of Sales")),
+            "Gross Profit": to_float(row.get("Gross Profit")),
+            "Expense": to_float(row.get("Expense")),
+            "Net Profit": to_float(row.get("Net Profit"))
+        }
+        records.append(entry)
+
+    records.sort(key=lambda r: (r["Year"], r["Month"]))
 
     return render_template(
         "profit_n_loss.html",
-        rows=rows,
+        rows=records,
         title="Profit & Loss"
     )
     
@@ -185,15 +222,142 @@ def ecom():
 
     return render_template(
         "ecom.html",
-        columns=cols,
-        rows=formatted_rows,
-        insight=insight_text,
-        title="2026 E-commerce Target"
+        active_tab="target",
+        target_columns=cols,
+        target_rows=formatted_rows,
+        target_insight=insight_text,
+        comp_rows=[],
+        comp_summary={},
+        title="E-commerce Performance"
     )
 
-    
-    
-    
+
+@app.route("/ecom_comp")
+def ecom_comparison():
+    try:
+        df = gs.sheet_to_df("ecom 2024 vs 2025")
+    except Exception as e:
+        print("Error loading sheet 'ecom 2024 vs 2025':", e)
+        df = pd.DataFrame()
+
+    df.columns = df.columns.astype(str).str.strip() if not df.empty else []
+    if not df.empty:
+        keep = [c for c in ["Months", "2024", "2025"] if c in df.columns]
+        df = df[keep]
+
+    def fmt_int(val):
+        try:
+            return f"{float(val):,.0f}"
+        except Exception:
+            return "0"
+
+    records = []
+    total_2024 = total_2025 = 0
+    max_row = min_row = None
+
+    if not df.empty:
+        for _, row in df.iterrows():
+            month = str(row.get("Months", "")).strip()
+            val_2024 = parse_number(row.get("2024")) or 0
+            val_2025 = parse_number(row.get("2025")) or 0
+            entry = {
+                "Months": month,
+                "2024": val_2024,
+                "2025": val_2025,
+                "2024_fmt": fmt_int(val_2024),
+                "2025_fmt": fmt_int(val_2025),
+                "delta": val_2025 - val_2024,
+                "delta_fmt": fmt_int(val_2025 - val_2024)
+            }
+            records.append(entry)
+            total_2024 += val_2024
+            total_2025 += val_2025
+
+        if records:
+            max_row = max(records, key=lambda r: r["2025"])
+            eligible_min = [r for r in records if r["Months"].lower() not in ("dec", "december")]
+            min_source = eligible_min if eligible_min else records
+            min_row = min(min_source, key=lambda r: r["2025"])
+
+    count = len(records) if records else 1
+    comp_summary = {
+        "total_2024": fmt_int(total_2024),
+        "total_2025": fmt_int(total_2025),
+        "avg_2024": fmt_int(total_2024 / count),
+        "avg_2025": fmt_int(total_2025 / count),
+        "max_month": max_row["Months"] if max_row else "-",
+        "max_value": fmt_int(max_row["2025"]) if max_row else "0",
+        "min_month": min_row["Months"] if min_row else "-",
+        "min_value": fmt_int(min_row["2025"]) if min_row else "0",
+    }
+
+    return render_template(
+        "ecom.html",
+        active_tab="comparison",
+        target_columns=[],
+        target_rows=[],
+        target_insight="",
+        comp_rows=records,
+        comp_summary=comp_summary,
+        title="E-commerce Performance"
+    )
+
+
+
+
+@app.route("/strategy_plan")
+def strategy_plan():
+    try:
+        df = gs.sheet_to_df("2026 Strategy plan")
+    except Exception as e:
+        print("Error loading 2026 Strategy plan:", e)
+        df = pd.DataFrame()
+
+    if df.empty:
+        return render_template(
+            "strategy_plan.html",
+            goal_text="2026 Strategy Plan",
+            pillars={},
+            title="2026 Strategy Plan"
+        )
+
+    df.columns = df.columns.astype(str).str.strip()
+    required = ["Goal", "Strategy Pillar", "Phase", "Quarter", "Action", "Photo_URL 1", "Photo_URL 2", "Photo_URL 3"]
+    for col in required:
+        if col not in df.columns:
+            df[col] = ""
+
+    df = df.fillna("")
+
+    current_goal = ""
+    pillars = OrderedDict()
+
+    for _, row in df.iterrows():
+        goal_raw = str(row.get("Goal", "")).strip()
+        if goal_raw:
+            current_goal = goal_raw
+        pillar = str(row.get("Strategy Pillar", "")).strip() or "General"
+        entry = {
+            "goal": current_goal,
+            "phase": row.get("Phase", ""),
+            "quarter": row.get("Quarter", ""),
+            "action": row.get("Action", ""),
+            "photos": [
+                url for url in [row.get("Photo_URL 1", ""), row.get("Photo_URL 2", ""), row.get("Photo_URL 3", "")]
+                if url and str(url).strip()
+            ]
+        }
+        pillars.setdefault(pillar, []).append(entry)
+
+    goal_text = current_goal or "2026 Strategy Plan"
+
+    return render_template(
+        "strategy_plan.html",
+        goal_text=goal_text,
+        pillars=pillars,
+        title="2026 Strategy Plan"
+    )
+
 @app.route("/org_structure")
 def org_structure():
     """
@@ -201,10 +365,11 @@ def org_structure():
 
     Loads org chart data from the 'org_chart' Google Sheet, builds a tree structure based on the 'Reports_To' field, and renders the org_structure.html template with the hierarchy.
     """
+    excel_path = Path(__file__).resolve().parent / "strategic_insight.xlsx"
     try:
-        df = gs.sheet_to_df("org_chart")
+        df = pd.read_excel(excel_path, sheet_name="org_chart")
     except Exception as e:
-        print(f"❌ Error loading org_chart: {e}")
+        print(f"❌ Error loading org_chart from Excel: {e}")
         df = pd.DataFrame()
 
     rows = df.to_dict(orient="records") if not df.empty else []
@@ -862,18 +1027,24 @@ def roadmap_page():
 
     df.columns = [c.strip() for c in df.columns]
 
+    records = df.to_dict(orient="records")
+
+    def get_value(row, *keys):
+        for key in keys:
+            key_lower = key.strip().lower()
+            for actual_key, value in row.items():
+                if actual_key and actual_key.strip().lower() == key_lower:
+                    return "" if value in (None, "") else str(value)
+        return ""
+
     quarters = {}
 
-    for _, row in df.iterrows():
-        q = row["Quarter"]
-
-        if q not in quarters:
-            quarters[q] = []
-
-        quarters[q].append({
-            "Theme": row["Theme"],
-            "Activity_ID": row["Activity_ID"],
-            "Key_Activity": row["Key_Activity"]
+    for row in records:
+        q = get_value(row, "Quarter") or "Unassigned"
+        quarters.setdefault(q, []).append({
+            "Activity_ID": get_value(row, "Activity_ID", "Activity ID"),
+            "Topic": get_value(row, "Key Topic", "Key_Topic", "Key Activity"),
+            "Owner": get_value(row, "Owner"),
         })
 
     quarter_order = sorted(quarters.keys())
@@ -1031,6 +1202,23 @@ def okr_page():
 
     # Build comparison structure
     comparison = []
+
+    def compute_avg(rows, field="Average"):
+        values = []
+        for r in rows:
+            v = r.get(field)
+            if v in (None, ""):
+                continue
+            s = str(v).replace("%", "").strip()
+            try:
+                # Treat sheet values like 0.7 as 70%
+                values.append(float(s) * 100.0)
+            except Exception:
+                continue
+        if not values:
+            return None
+        return round(sum(values) / len(values), 1)
+
     for team in all_teams:
         items_2025 = teams_2025.get(team, [])
         items_2026 = teams_2026.get(team, [])
@@ -1058,7 +1246,9 @@ def okr_page():
                     "items_2026": data["2026"]
                 }
                 for obj, data in obj_map.items()
-            ]
+            ],
+            "avg_2025": compute_avg(items_2025),
+            "avg_2026": compute_avg(items_2026),
         })
 
     return render_template(
@@ -1091,73 +1281,107 @@ def clean_number(val):
     return val
 
 
-
-@app.route("/strategy_hub")
-def strategy_hub():
+def load_fna_performance_from_excel():
+    excel_path = Path(__file__).resolve().parent / "strategic_insight.xlsx"
     try:
-        fna_df = gs.get_fna_performance()
-        op_df = gs.get_operation_health()
-        decisions_df = gs.get_key_decisions()
+        df = pd.read_excel(excel_path, sheet_name="fna_performance")
     except Exception as e:
-        print("Error loading strategy data:", e)
-        fna_df = op_df = decisions_df = pd.DataFrame()
+        print(f"❌ Error reading FNA performance sheet: {e}")
+        return [], Counter()
 
-    def clean_latex(text):
-        if pd.isna(text) or not isinstance(text, str):
-            return text
-        text = re.sub(r'\\rightarrow', '→', text)
-        text = re.sub(r'\$(.*?)\$', r'\1', text)
-        text = re.sub(r'\\mathbf\{([^}]*)\}', r'\1', text)
-        return text
+    if df.empty:
+        return [], Counter()
 
-    fna_rows = []
-    if not fna_df.empty:
-        for _, row in fna_df.iterrows():
-            row = row.to_dict()
-            row = { (str(k) if isinstance(k, (int, float)) else k): v for k, v in row.items() }
-            for k in ["YTD Actual (2025)", "2026 Target", "Variance", "Rationale"]:
-                row[k] = clean_latex(row.get(k, ""))
-            fna_rows.append(row)
-
-    op_rows = []
-    if not op_df.empty:
-        for _, row in op_df.iterrows():
-            row = row.to_dict()
-            row["Metric Value"] = clean_latex(row.get("Metric Value", ""))
-            op_rows.append(row)
-
-    decisions_rows = []
-    if not decisions_df.empty:
-        for _, row in decisions_df.iterrows():
-            row = row.to_dict()
-            for k in ["Decision/Activity", "Rationale (Linked to SWOT/Roadmap)"]:
-                row[k] = clean_latex(row.get(k, ""))
-            decisions_rows.append(row)
-
-    return render_template(
-        "strategy_hub.html",
-        fna=fna_rows,
-        operations=op_rows,
-        decisions=decisions_rows,
-        title="Strategy Hub: Performance, Ops & Decisions"
+    df.columns = (
+        df.columns.astype(str)
+        .str.strip()
+        .str.replace("\u00A0", " ", regex=False)
     )
 
-@app.route("/charts")
-def charts():
+    records = df.fillna("").to_dict(orient="records")
+
+    category_counter = Counter()
+    for row in records:
+        category = str(row.get("KPI Category", "General")).strip() or "General"
+        category_counter[category] += 1
+        for key, value in row.items():
+            if isinstance(value, str):
+                cleaned = re.sub(r"\\mathbf\{([^}]*)\}", r"\1", value)
+                cleaned = re.sub(r"\\rightarrow", "→", cleaned)
+                cleaned = re.sub(r"\$(.*?)\$", r"\1", cleaned)
+                row[key] = cleaned.strip()
+
+    return records, category_counter
+
+
+@app.route("/fna_performance")
+def fna_performance_page():
+    fna_rows, category_counter = load_fna_performance_from_excel()
+
+    palette = [
+        "#1976d2", "#ef6c00", "#2e7d32",
+        "#6a1b9a", "#00838f", "#c62828"
+    ]
+    category_meta = {}
+    for idx, (category, count) in enumerate(category_counter.items()):
+        category_meta[category] = {
+            "color": palette[idx % len(palette)],
+            "count": count
+        }
+
+    return render_template(
+        "fna_performance.html",
+        fna=fna_rows,
+        category_meta=category_meta,
+        title="FNA Performance"
+    )
+
+
+def split_operations(rows):
+    insights = []
+    stages = defaultdict(list)
+    status_counter = Counter()
+    for row in rows:
+        stage = str(row.get("Funnel Stage", "")).strip()
+        status = str(row.get("Status", "")).strip()
+        if stage.lower() == "insight":
+            insights.append(row)
+            continue
+        stages[stage or "Unassigned"].append(row)
+        if status:
+            status_counter[status] += 1
+    return insights, stages, status_counter
+
+
+@app.route("/operation_health")
+def operation_health_page():
     try:
-        df = gs.get_fna_performance()
-        if df.empty:
-            graphJSON = None
-        else:
-            numeric_cols = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c])]
-            if numeric_cols:
-                fig = px.line(df, x=df.columns[0], y=numeric_cols, markers=True, title="FNA Performance Overview")
-                graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-            else:
-                graphJSON = None
-    except Exception:
-        graphJSON = None
-    return render_template("charts.html", graphJSON=graphJSON)
+        df = gs.get_operation_health()
+    except Exception as e:
+        print(f"❌ Error loading operation health: {e}")
+        df = pd.DataFrame()
+
+    if df.empty:
+        return render_template(
+            "operation_health.html",
+            grouped_ops={},
+            insights=[],
+            status_counter={},
+            title="Operations Health"
+        )
+
+    df.columns = df.columns.astype(str).str.strip()
+    records = df.fillna("").to_dict(orient="records")
+    insights, grouped_ops, status_counter = split_operations(records)
+
+    return render_template(
+        "operation_health.html",
+        grouped_ops=grouped_ops,
+        insights=insights,
+        status_counter=status_counter,
+        title="Operations Health"
+    )
+
 
 if __name__ == "__main__":  
     app.run(debug=True, host="0.0.0.0", port=5000)

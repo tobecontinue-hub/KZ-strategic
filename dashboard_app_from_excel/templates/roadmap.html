@@ -1,249 +1,95 @@
-<!-- templates/roadmap.html -->
 {% extends "base.html" %}
 {% block content %}
 
 <style>
-/* ========================= */
-/* GLOBAL STYLING */
-/* ========================= */
-body {
-  background: #f5f7fb;
-  overflow-x: hidden;
-  position: relative;
-}
-
-/* ANIMATED BACKGROUND ORBS */
-.bg-orb {
-  position: fixed;
-  width: 280px;
-  height: 280px;
-  border-radius: 50%;
-  filter: blur(90px);
-  opacity: 0.5;
-  z-index: -10;
-  animation: floatOrb 12s infinite alternate ease-in-out;
-}
-.bg-orb.one { background: #ff6b6b; top: 10%; left: -5%; }
-.bg-orb.two { background: #6a11cb; bottom: 10%; right: -5%; animation-delay: 2s; }
-.bg-orb.three { background: #2575fc; top: 50%; left: 60%; animation-delay: 4s; }
-
-@keyframes floatOrb {
-  from { transform: translateY(0px); }
-  to { transform: translateY(60px); }
-}
-
-/* ========================= */
-/* HERO HEADER */
-/* ========================= */
-.roadmap-hero {
-  background: linear-gradient(135deg, #ff6b6b, #ff9e6d);
-  color: white;
-  padding: 28px;
-  border-radius: 20px;
-  margin-bottom: 40px;
-  box-shadow: 0 12px 36px rgba(255, 107, 107, 0.35);
-  text-align: center;
-  animation: fadeDown 0.6s ease-out;
-}
-
-@keyframes fadeDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ========================= */
-/* TIMELINE CONTAINER */
-/* ========================= */
-.road-container {
-  position: relative;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 16px;
-}
-
-/* TIMELINE LINE */
-.road-line {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 6px;
-  background: linear-gradient(to bottom, #ff6b6b, #ff9e6d, #2575fc, #6a11cb);
-  transform: translateX(-50%);
-  border-radius: 10px;
-  opacity: 0.9;
-}
-
-/* ========================= */
-/* QUARTER BLOCK */
-/* ========================= */
-.quarter-block {
-  width: 100%;
-  display: flex;
-  margin-bottom: 80px;
-  position: relative;
-}
-
-/* SIDE SWITCHING */
-.quarter-block:nth-child(odd) .quarter-card { margin-right: auto; }
-.quarter-block:nth-child(even) .quarter-card { margin-left: auto; }
-
-/* QUARTER CARD */
-.quarter-card {
-  width: 90%;
-  max-width: 480px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(14px);
-  border-radius: 20px;
-  padding: 22px;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.10);
-  position: relative;
-  animation: fadeIn 0.8s ease-out;
-  transition: transform 0.25s ease;
-}
-
-.quarter-card:hover {
-  transform: translateY(-6px);
-}
-
-/* QUARTER TITLE DROPDOWN */
-.dropdown-header {
-  padding: 12px 0;
-  font-size: 24px;
-  font-weight: 700;
-  cursor: pointer;
-  color: #333;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.dropdown-header span {
-  transition: transform 0.3s ease;
-}
-
-/* COLLAPSIBLE CONTENT */
-.dropdown-content {
-  max-height: 0;
+.road-stage {
+  background: #05080f;
+  color: #fff;
+  border-radius: 28px;
+  padding: 30px;
+  box-shadow: 0 30px 60px rgba(0,0,0,.55);
   overflow: hidden;
-  transition: max-height 0.35s ease, opacity 0.3s ease;
-  opacity: 0;
-  margin-top: 10px;
 }
 
-/* TABLE */
-.table {
+.road-bg {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.1);
+}
+.road-bg img {
   width: 100%;
-  border-collapse: collapse;
-  margin-top: 12px;
+  object-fit: cover;
+  filter: saturate(1.2);
 }
 
-.table th {
-  background: #f1f1f1;
-  padding: 10px;
-  text-align: left;
-  font-size: 14px;
-  border-bottom: 1px solid #ddd;
+.glass-panel {
+  background: rgba(4, 9, 18, .72);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 18px;
+  padding: 24px;
+  margin-top: -60px;
+  position: relative;
+  backdrop-filter: blur(16px);
 }
 
-.table td {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-  font-size: 14px;
+.quarter-card {
+  background: rgba(255,255,255,.04);
+  border-radius: 20px;
+  padding: 18px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(255,255,255,.07);
+  transition: transform .2s ease;
 }
 
-/* TABLE COLUMN WIDTHS */
-.table th:nth-child(1),
-.table td:nth-child(1) { width: 25%; }
-.table th:nth-child(2),
-.table td:nth-child(2) { width: 15%; }
-.table th:nth-child(3),
-.table td:nth-child(3) { width: 60%; }
+.quarter-card:hover { transform: translateY(-6px); }
 
-/* MOBILE */
-@media (max-width: 768px) {
-  .road-line { left: 8px; }
-  .quarter-card { width: calc(100% - 30px); margin: 0 !important; }
-  .quarter-block { margin-left: 20px; }
-}
+.entry-table { width:100%; border-collapse:collapse; margin-top:12px; }
+.entry-table th, .entry-table td { padding:12px 10px; border-bottom:1px solid rgba(255,255,255,.1); }
+.entry-table th { text-transform:uppercase; font-size:.75rem; letter-spacing:.6px; color:#9ab2d3; }
+.entry-table td { color:#e7efff; }
+.badge-owner { padding:4px 10px; border-radius:999px; background:rgba(255,255,255,.15); font-size:.8rem; }
 </style>
 
-<!-- BACKGROUND ORBS -->
-<div class="bg-orb one"></div>
-<div class="bg-orb two"></div>
-<div class="bg-orb three"></div>
-
-<div class="container mt-3">
-
-  <!-- HERO -->
-  <div class="roadmap-hero">
-    <h2>2026 Strategic Roadmap</h2>
-    <p>A journey from funnel fixes to market leadership — quarter by quarter.</p>
+<div class="road-stage">
+  <div class="road-bg">
+    <img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1600&q=60" alt="road background">
+  </div>
+  <div class="glass-panel">
+    <h1 style="font-weight:800; margin:0;">Roadmap Journey</h1>
+    <p style="opacity:.7; margin-top:6px;">Every quarter we shift lanes — hover to see owner responsibilities.</p>
   </div>
 
-  <!-- TIMELINE STRUCTURE -->
-  <div class="road-container">
-    <div class="road-line"></div>
-
+  <div class="mt-4">
     {% for q in quarter_order %}
-    <div class="quarter-block">
-      <div class="quarter-card">
-
-        <!-- Quarter dropdown -->
-        <div class="dropdown-header" onclick="toggleDropdown('{{ q }}')">
-          {{ q }}
-          <span id="icon-{{ q }}">▼</span>
-        </div>
-
-        <!-- Collapsible table -->
-        <div class="dropdown-content" id="content-{{ q }}">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Theme</th>
-                <th>Activity ID</th>
-                <th>Key Activity</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in quarters[q] %}
-              <tr>
-                <td>{{ row.Theme }}</td>
-                <td>{{ row.Activity_ID }}</td>
-                <td>
-                  <ul style="padding-left:18px; margin:0;">
-                    {% for bullet in row.Key_Activity.split('|') %}
-                    <li>{{ bullet }}</li>
-                    {% endfor %}
-                  </ul>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-
+    <div class="quarter-card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0; font-weight:700; color:#f4f7ff;">{{ q }}</h3>
+        <span class="badge-owner">{{ quarters[q]|length }} initiatives</span>
+      </div>
+      <div class="table-responsive">
+        <table class="entry-table">
+          <thead>
+            <tr>
+              <th>Activity ID</th>
+              <th>Topic</th>
+              <th>Owner</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in quarters[q] %}
+            <tr>
+              <td>{{ row.Activity_ID or '-' }}</td>
+              <td>{{ row.Topic or 'Unspecified topic' }}</td>
+              <td>{{ row.Owner or 'TBD' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
     {% endfor %}
   </div>
 </div>
-
-<script>
-function toggleDropdown(q) {
-  const content = document.getElementById("content-" + q);
-  const icon = document.getElementById("icon-" + q);
-
-  if (content.style.maxHeight && content.style.maxHeight !== "0px") {
-    content.style.maxHeight = "0px";
-    content.style.opacity = "0";
-    icon.style.transform = "rotate(0deg)";
-  } else {
-    content.style.maxHeight = content.scrollHeight + "px";
-    content.style.opacity = "1";
-    icon.style.transform = "rotate(180deg)";
-  }
-}
-</script>
 
 {% endblock %}

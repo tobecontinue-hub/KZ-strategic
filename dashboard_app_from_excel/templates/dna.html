@@ -240,9 +240,34 @@
           </div>
         </div>
         {% endfor %}
+
       </div>
     </div>
-   </div>
+    <!-- Strategic Insight Section -->
+<div class="dna-section-card dna-section-core"> 
+  <div class="dna-section-header">
+    <div class="dna-header-content">
+      <h3 class="dna-section-title">
+        <span class="dna-section-icon">💡</span>
+        Strategic Insight
+      </h3>
+    </div>
+  </div>
+
+  <div class="dna-section-body" style="padding: 20px;">
+    {% set insight = sections.get("Strategic Insight", []) %}
+    {% if insight %}
+        {% for row in insight %}
+          <p style="font-size:15px; color:#1e293b; line-height:1.6; margin-bottom:12px;">
+            {{ row["Details/Data_Alignment"] }}
+          </p>
+        {% endfor %}
+    {% else %}
+      <p style="font-size:14px; color:#475569;">No strategic insight available.</p>
+    {% endif %}
+  </div>
+</div>
+</div>
   </div>
 
   <script>

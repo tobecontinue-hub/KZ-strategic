@@ -1,0 +1,383 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+:root {
+  --card-bg: #ffffff;
+  --accent: #0a84ff;
+  --accent-soft: rgba(10, 132, 255, 0.12);
+  --text-strong: #04263a;
+  --text-soft: #5f7285;
+}
+
+.fna-container {
+  padding: 1rem 0 3rem;
+}
+
+.fna-hero {
+  background: linear-gradient(135deg, #051937, #154273, #1e7cb0);
+  color: #fff;
+  border-radius: 20px;
+  padding: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 24px;
+  box-shadow: 0 25px 60px rgba(5, 25, 55, 0.35);
+}
+
+.fna-hero h1 {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.fna-hero p {
+  margin: 6px 0 0;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.hero-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+.meta-card {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 16px;
+  backdrop-filter: blur(6px);
+}
+
+.meta-card .label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.meta-card .value {
+  font-size: 1.7rem;
+  font-weight: 700;
+}
+
+.filter-bar {
+  margin: 28px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.filter-bar input {
+  flex: 1;
+  min-width: 240px;
+  border-radius: 999px;
+  border: 1px solid #d3dce6;
+  padding: 12px 18px;
+}
+
+.category-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.category-pill {
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--card-bg);
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
+}
+
+.category-pill.active {
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(10, 132, 255, 0.25);
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 22px;
+}
+
+.kpi-card {
+  background: var(--card-bg);
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid #eef2f7;
+  box-shadow: 0 12px 25px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 35px rgba(15, 23, 42, 0.12);
+}
+
+.kpi-category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.metric-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.metric-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(80px, 1fr));
+  gap: 12px;
+}
+
+.metric-chip {
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: #f8fbff;
+}
+
+.metric-chip .label {
+  font-size: 0.75rem;
+  color: var(--text-soft);
+}
+
+.metric-chip .value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.status-badge {
+  align-self: flex-start;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.status-green { background: #e8f5e9; color: #1b5e20; }
+.status-amber { background: #fff3e0; color: #e65100; }
+.status-red { background: #ffebee; color: #b71c1c; }
+
+.kpi-footer {
+  font-size: 0.9rem;
+  color: var(--text-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.timeline {
+  margin-top: 40px;
+  background: var(--card-bg);
+  border-radius: 20px;
+  padding: 24px;
+  border: 1px solid #eef2f7;
+  box-shadow: 0 12px 25px rgba(15, 23, 42, 0.08);
+}
+
+.timeline h3 {
+  margin-bottom: 18px;
+  font-size: 1.3rem;
+  color: var(--text-strong);
+}
+
+.timeline-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.timeline-table thead th {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  color: var(--text-soft);
+  border-bottom: 1px solid #eef2f7;
+  padding-bottom: 10px;
+}
+
+.timeline-table tbody td {
+  padding: 12px 4px;
+  border-bottom: 1px solid #f3f6fb;
+}
+
+.empty-state {
+  background: #fffbe6;
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  border: 1px dashed #ffe58f;
+}
+
+@media (max-width: 768px) {
+  .metric-row {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+}
+</style>
+
+<div class="container fna-container">
+  <div class="fna-hero">
+    <div>
+      <p class="text-uppercase" style="letter-spacing: 2px; opacity: 0.8">Financial & Customer Intelligence</p>
+      <h1>FNA Performance Control Center</h1>
+      <p>Live operational & financial KPIs with qualitative rationale to keep 2026 ambitions aligned.</p>
+    </div>
+    <div class="hero-meta">
+      <div class="meta-card">
+        <div class="label">Total KPIs</div>
+        <div class="value">{{ fna|length }}</div>
+      </div>
+      <div class="meta-card">
+        <div class="label">KPI Families</div>
+        <div class="value">{{ category_meta|length }}</div>
+      </div>
+      <div class="meta-card">
+        <div class="label">Updated</div>
+        <div class="value" style="font-size:1rem">Strategic Insight.xlsx</div>
+      </div>
+    </div>
+  </div>
+
+  {% if fna %}
+  <div class="filter-bar">
+    <input id="kpiSearch" type="search" placeholder="Search KPI name, category, status…">
+    <div class="category-pills" id="categoryPills">
+      <div class="category-pill active" data-category="all">All KPIs ({{ fna|length }})</div>
+      {% for category, meta in category_meta.items() %}
+        <div class="category-pill" data-category="{{ category }}" style="border-color: {{ meta.color }}; color: {{ meta.color }};">
+          {{ category }} ({{ meta.count }})
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="kpi-grid" id="kpiGrid">
+    {% for item in fna %}
+      {% set category = item.get('KPI Category', 'General') %}
+      {% set meta = category_meta.get(category, {}) %}
+      {% set status = item.get('Status', '') %}
+      {% set yoy = item.get('Variance (YoY Change)', item.get('Variance', '–')) %}
+      <article class="kpi-card" data-category="{{ category }}" data-name="{{ item.get('Metric Name', '') }}" data-status="{{ status }}">
+        <div class="kpi-category-badge" style="background: rgba(255,255,255,0.9); color: {{ meta.color or '#1976d2' }}; border: 1px solid {{ meta.color or '#1976d2' }};">
+          <span style="width:10px;height:10px;border-radius:50%;background:{{ meta.color or '#1976d2' }};"></span>
+          {{ category }}
+        </div>
+        <div class="metric-name">{{ item.get('Metric Name', 'Unnamed Metric') }}</div>
+        <div class="metric-row">
+          <div class="metric-chip">
+            <div class="label">2024</div>
+            <div class="value">{{ item.get('2024', '–') }}</div>
+          </div>
+          <div class="metric-chip">
+            <div class="label">2025</div>
+            <div class="value">{{ item.get('2025', '–') }}</div>
+          </div>
+          <div class="metric-chip">
+            <div class="label">Variance YoY</div>
+            <div class="value" style="color:{% if '+' in yoy %}#1b5e20{% elif '-' in yoy %}#b71c1c{% else %}var(--text-strong){% endif %};">{{ yoy }}</div>
+          </div>
+        </div>
+        {% if item.get('Rationale') %}
+          <p style="margin:0;color:var(--text-soft);font-size:0.9rem;">{{ item.get('Rationale') }}</p>
+        {% endif %}
+        {% if status %}
+          <span class="status-badge {% if 'on' in status|lower %}status-green{% elif 'warning' in status|lower %}status-amber{% elif 'critical' in status|lower or 'high' in status|lower %}status-red{% endif %}">
+            {{ status }}
+          </span>
+        {% endif %}
+        <div class="kpi-footer">
+          <span style="font-weight:600;color:var(--text-strong);">Lead: {{ item.get('Owner', 'Unassigned') }}</span>
+          <span style="font-size:0.8rem;color:var(--text-soft);text-transform:uppercase;">{{ item.get('Time Horizon', 'Rolling 12M') }}</span>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+
+  <section class="timeline">
+    <h3>Structured KPI Timeline</h3>
+    <div class="table-responsive">
+      <table class="timeline-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Category</th>
+            <th>2024</th>
+            <th>2025</th>
+            <th>Variance</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in fna %}
+            <tr>
+              <td>{{ item.get('Metric Name', '—') }}</td>
+              <td>{{ item.get('KPI Category', 'General') }}</td>
+              <td>{{ item.get('2024', '–') }}</td>
+              <td>{{ item.get('2025', '–') }}</td>
+              <td>{{ item.get('Variance (YoY Change)', item.get('Variance', '–')) }}</td>
+              <td>{{ item.get('Status', '—') }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% else %}
+    <div class="empty-state">
+      <h3>No FNA Performance Data</h3>
+      <p>We could not find entries in <strong>strategic_insight.xlsx</strong> &rsaquo; <em>fna_performance</em>. Please populate the sheet and refresh.</p>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+(function() {
+  const searchInput = document.getElementById('kpiSearch');
+  const cards = Array.from(document.querySelectorAll('#kpiGrid .kpi-card'));
+  const pills = Array.from(document.querySelectorAll('.category-pill'));
+  let activeCategory = 'all';
+
+  function applyFilters() {
+    const term = (searchInput.value || '').toLowerCase();
+    cards.forEach(card => {
+      const matchesCategory = activeCategory === 'all' || card.dataset.category === activeCategory;
+      const matchesTerm = card.dataset.name.toLowerCase().includes(term) || card.dataset.status.toLowerCase().includes(term) || card.dataset.category.toLowerCase().includes(term);
+      card.style.display = (matchesCategory && matchesTerm) ? 'flex' : 'none';
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', applyFilters);
+  }
+
+  pills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      pills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      activeCategory = pill.dataset.category;
+      applyFilters();
+    });
+  });
+})();
+</script>
+{% endblock %}
