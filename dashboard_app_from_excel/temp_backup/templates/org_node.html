@@ -1,0 +1,54 @@
+{% macro render_node(node, depth=0, max_depth=6) %}
+
+    {% if depth >= max_depth %}
+        <div class="org-node">
+            <span style="width: 24px;"></span>
+            <div class="org-info">
+                <div class="org-name" style="color: red;">⚠️ Hierarchy too deep</div>
+            </div>
+        </div>
+    {% else %}
+
+        <div class="org-node">
+
+            {% if node.children %}
+                <button class="expand-btn" onclick="toggleChildren(this)">
+                    <i class="bi bi-plus-circle"></i>
+                </button>
+            {% else %}
+                <span style="width: 24px;"></span>
+            {% endif %}
+
+            {% if node.photo_url %}
+                <img class="org-photo" src="{{ node.photo_url }}" alt="{{ node.name }}">
+            {% else %}
+                <div class="org-photo"
+                    style="background: #ddd; display: flex;
+                           align-items: center; justify-content: center;">
+                    <span style="font-size: 1.2rem; color: #555;">👤</span>
+                </div>
+            {% endif %}
+
+            <div class="org-info">
+                <div class="org-name">{{ node.name }}</div>
+                <div class="org-role">{{ node.role }} — {{ node.department }}</div>
+
+                {% if node.status %}
+                    <div class="org-status">{{ node.status }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if node.children %}
+            <div class="org-children" style="display:none; margin-left: 25px;">
+
+                {% for child in node.children %}
+                    {{ render_node(child, depth + 1, max_depth) }}
+                {% endfor %}
+
+            </div>
+        {% endif %}
+
+    {% endif %}
+
+{% endmacro %}

@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<script src="https://cdn.plot.ly/plotly-2.30.1.min.js"></script>
+<style>
+:root {
+  --ink: #041b2d;
+  --muted: #6b7c8f;
+  --surface: #ffffff;
+  --surface-2: #f6f8fb;
+  --accent: #0b63ff;
+  --accent-soft: rgba(11,99,255,.12);
+  --success: #19a974;
+  --danger: #e54848;
+}
+.pl-hero {
+  background: linear-gradient(120deg, #041b2d, #0b63ff);
+  color: #fff;
+  border-radius: 28px;
+  padding: 28px 32px;
+  box-shadow: 0 30px 60px rgba(4,27,45,.35);
+  margin-bottom: 20px;
+}
+.pl-hero h1 { font-weight: 800; margin: 0 0 4px; letter-spacing:-0.03em; }
+.pl-hero p { margin: 0; opacity:.82; }
+.hero-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(140px,1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+.hero-meta .badge-card {
+  background: rgba(255,255,255,.12);
+  border-radius: 16px;
+  padding: 12px 14px;
+  text-transform: uppercase;
+  font-size: .75rem;
+  letter-spacing: 1px;
+}
+.chip-row {
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.4rem;
+  margin-top:0.75rem;
+}
+.chip {
+  padding:0.2rem 0.6rem;
+  border-radius:999px;
+  border:1px solid rgba(148,163,184,0.65);
+  font-size:0.72rem;
+  color:#e5e7eb;
+  background:rgba(15,23,42,0.15);
+}
+.control-bar {
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 36px;
+  box-shadow: 0 12px 28px rgba(4,27,45,.08);
+}
+.control-bar label { font-weight: 600; color: var(--muted); font-size: .85rem; }
+.control-bar select,
+.control-bar input {
+  border-radius: 14px;
+  border: 1px solid #dbe3ee;
+  padding: 10px 14px;
+  min-width: 180px;
+}
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.kpi-card {
+  background: var(--surface);
+  border-radius: 22px;
+  padding: 20px;
+  box-shadow: 0 18px 32px rgba(4,27,45,.08);
+  transition: transform .2s ease;
+}
+.kpi-card:hover { transform: translateY(-3px); }
+.kpi-label { font-size: .85rem; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+.kpi-value { font-size: 2rem; font-weight: 800; margin: 6px 0; color: var(--ink); }
+.kpi-trend { font-size: .85rem; display: flex; gap: 6px; align-items: center; }
+.kpi-trend i { font-size: 1rem; }
+.dashboard-panels {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 18px;
+}
+@media(max-width: 992px){ .dashboard-panels { grid-template-columns: 1fr; } }
+.panel {
+  background: var(--surface);
+  border-radius: 22px;
+  padding: 24px;
+  box-shadow: 0 18px 32px rgba(4,27,45,.08);
+}
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.panel-header h3 { margin: 0; font-size: 1.3rem; color: var(--ink); }
+.sparkline { height: 280px; }
+.table-responsive { margin-top: 24px; }
+table { width: 100%; border-collapse: collapse; }
+thead { text-transform: uppercase; font-size: .75rem; color: var(--muted); }
+tbody tr { border-top: 1px solid #edf1f7; }
+td, th { padding: 12px 6px; }
+.status-dot { width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px; }
+.timeline-card {
+  background: var(--surface-2);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+  border: 1px solid #e5eaf2;
+}
+</style>
+
+<div class="pl-hero">
+  <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+    <div>
+      <p>Financial Intelligence</p>
+      <h1>Profit & Loss Summarize</h1>
+      <p>Live view of topline growth, margin pressure, and efficiency.</p>
+      <div class="chip-row">
+        <span class="chip">Revenue & Margin</span>
+        <span class="chip">Cost Structure</span>
+        <span class="chip">Monthly Trend</span>
+      </div>
+    </div>
+    <div class="hero-meta">
+      <div class="badge-card">Data Source<br><strong>strategic_insight.xlsx</strong></div>
+      <div class="badge-card">Sheet<br><strong>P&amp;L</strong></div>
+      <div class="badge-card">Refresh<br><strong>Live pull</strong></div>
+    </div>
+  </div>
+</div>
+
+<div class="control-bar">
+  <div>
+    <label for="yearFilter">Year</label>
+    <select id="yearFilter" class="form-select">
+      <option value="all">All</option>
+    </select>
+  </div>
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-label">Total Revenue</div>
+    <div class="kpi-value" id="kpiRevenue">0</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Cost of Sales</div>
+    <div class="kpi-value" id="kpiCostSales">0</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Gross Profit</div>
+    <div class="kpi-value" id="kpiGross">0</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Total Expense</div>
+    <div class="kpi-value" id="kpiExpense">0</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Net Profit Margin</div>
+    <div class="kpi-value" id="kpiNetMargin">0%</div>
+  </div>
+</div>
+
+<div class="dashboard-panels">
+  <div class="panel">
+    <div class="panel-header">
+      <div>
+        <h3>Revenue vs Profit Trajectory</h3>
+        <small class="text-muted">Spline chart for Revenue, Gross Profit, Net Profit</small>
+      </div>
+      <button class="btn btn-outline-primary btn-sm" id="downloadCsv"><i class="bi bi-download"></i> CSV</button>
+    </div>
+    <div id="revenueChart" class="sparkline"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-header">
+      <h3>Cost Composition</h3>
+      <small class="text-muted">Stacked bars of Cost of Sales vs Expense</small>
+    </div>
+    <div id="costChart" class="sparkline" style="height:260px"></div>
+  </div>
+</div>
+
+<div class="panel mt-4">
+  <div class="panel-header">
+    <h3>Monthly Performance Table</h3>
+    <div class="text-muted">Sorted view with growth indicators</div>
+  </div>
+  <div class="table-responsive">
+    <table id="plTable">
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Month</th>
+          <th>Revenue</th>
+          <th>Cost of Sales</th>
+          <th>Gross Profit</th>
+          <th>Expense</th>
+          <th>Net Profit</th>
+          <th>Margin %</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const rawData = {{ rows | tojson | safe }};
+const formatNumber = (val) => new Intl.NumberFormat('en-US',{minimumFractionDigits:0}).format(val || 0);
+const formatCurrency = (val) => new Intl.NumberFormat('en-US',{minimumFractionDigits:0, maximumFractionDigits:0}).format(val || 0);
+const formatPercent = (val) => `${(val || 0).toFixed(2)}%`;
+
+const filters = {
+  year: document.getElementById('yearFilter')
+};
+
+const charts = {
+  revenue: document.getElementById('revenueChart'),
+  cost: document.getElementById('costChart')
+};
+
+function statusColor(val){
+  if(val > 0) return '#19a974';
+  if(val < 0) return '#e54848';
+  return '#6b7c8f';
+}
+
+function toDate(row){
+  const year = row['Year'] || '2000';
+  const month = row['Month'] || '01';
+  const tryText = Date.parse(`${month} 1, ${year}`);
+  if(!isNaN(tryText)) return new Date(tryText);
+  const numericMonth = String(month).padStart(2,'0');
+  return new Date(`${year}-${numericMonth}-01`);
+}
+
+function sortChronological(data){
+  return [...data].sort((a,b) => toDate(a) - toDate(b));
+}
+
+function enrichData(data){
+  return data.map(item => {
+    const revenue = item['Revenue'] || 0;
+    const costSales = item['Cost of Sales'] || 0;
+    const grossProfit = item['Gross Profit'] || 0;
+    const expense = item['Expense'] || 0;
+    const net = item['Net Profit'] || 0;
+    const margin = revenue ? (grossProfit / revenue) * 100 : 0;
+    return {
+      ...item,
+      revenue,
+      costSales,
+      grossProfit,
+      expense,
+      net,
+      margin,
+      label: item['Label'] || `${item['Month']} ${item['Year']}`
+    };
+  });
+}
+
+function filterData(){
+  const enriched = enrichData(rawData);
+  let filtered = enriched;
+  const year = filters.year.value;
+  if(year !== 'all') filtered = filtered.filter(r => String(r['Year']).includes(year));
+  const sortedChrono = sortChronological(filtered);
+  return { data: sortedChrono, timeline: sortedChrono };
+}
+
+function updateKPIs(data){
+  const totalRevenue = data.reduce((sum,r) => sum + r.revenue,0);
+  const totalGross = data.reduce((sum,r) => sum + r.grossProfit,0);
+  const totalNet = data.reduce((sum,r) => sum + r.net,0);
+  const totalCost = data.reduce((sum,r) => sum + r.costSales + r.expense,0);
+  const margin = totalRevenue ? (totalGross / totalRevenue) * 100 : 0;
+  const totalCostSales = data.reduce((sum,r) => sum + r.costSales,0);
+  const totalExpense = data.reduce((sum,r) => sum + r.expense,0);
+  const netMargin = totalRevenue ? (totalNet / totalRevenue) * 100 : 0;
+  document.getElementById('kpiRevenue').textContent = formatCurrency(totalRevenue);
+  document.getElementById('kpiCostSales').textContent = formatCurrency(totalCostSales);
+  document.getElementById('kpiGross').textContent = formatCurrency(totalGross);
+  document.getElementById('kpiExpense').textContent = formatCurrency(totalExpense);
+  document.getElementById('kpiNetMargin').textContent = formatPercent(netMargin);
+}
+
+function updateCharts(data){
+  if(!data.length){ Plotly.purge(charts.revenue); Plotly.purge(charts.cost); return; }
+  const labels = data.map(r => r.label);
+  const revenue = data.map(r => r.revenue);
+  const gross = data.map(r => r.grossProfit);
+  const net = data.map(r => r.net);
+  Plotly.newPlot(charts.revenue, [
+    { x: labels, y: revenue, name: 'Revenue', type: 'scatter', mode:'lines+markers', line:{color:'#0b63ff', width:4, shape:'spline'} },
+    { x: labels, y: gross, name: 'Gross Profit', type: 'scatter', mode:'lines+markers', line:{color:'#ffc107', width:3, dash:'dash'} },
+    { x: labels, y: net, name: 'Net Profit', type: 'scatter', mode:'lines+markers', line:{color:'#19a974', width:4} }
+  ], { margin:{l:40,r:20,t:20,b:90}, xaxis:{tickangle: -30}, yaxis:{title:'MMK'}, legend:{orientation:'h', y:-0.25}, plot_bgcolor:'#fff', paper_bgcolor:'#fff' });
+  Plotly.newPlot(charts.cost, [
+    { x: labels, y: data.map(r => r.costSales), type:'bar', name:'Cost of Sales', marker:{color:'#0bbcd6'} },
+    { x: labels, y: data.map(r => r.expense), type:'bar', name:'Expense', marker:{color:'#e54848'} }
+  ], { barmode:'stack', margin:{l:40,r:20,t:20,b:80}, xaxis:{tickangle:-30}, yaxis:{title:'MMK'}, plot_bgcolor:'#fff', paper_bgcolor:'#fff' });
+}
+
+function updateTable(data){
+  const tbody = document.querySelector('#plTable tbody');
+  tbody.innerHTML = '';
+  data.forEach(row => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${row['Year']}</td>
+      <td>${row['Month']}</td>
+      <td>${formatCurrency(row.revenue)}</td>
+      <td>${formatCurrency(row.costSales)}</td>
+      <td>${formatCurrency(row.grossProfit)}</td>
+      <td>${formatCurrency(row.expense)}</td>
+      <td class="fw-semibold" style="color:${statusColor(row.net)}">${formatCurrency(row.net)}</td>
+      <td>${formatPercent(row.margin)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function refresh(){
+  const view = filterData();
+  updateKPIs(view.data);
+  updateCharts(view.timeline);
+  updateTable(view.data);
+}
+
+function populateYearFilter(){
+  const years = [...new Set(rawData.map(r => r['Year']).filter(Boolean))].sort();
+  years.forEach(year => {
+    const option = document.createElement('option');
+    option.value = year;
+    option.textContent = year;
+    filters.year.appendChild(option);
+  });
+}
+
+filters.year.addEventListener('change', refresh);
+
+document.getElementById('downloadCsv').addEventListener('click', () => {
+  const view = filterData();
+  const data = view.data;
+  const header = ['Year','Month','Revenue','Cost of Sales','Gross Profit','Expense','Net Profit'];
+  const rows = data.map(row => [row['Year'],row['Month'],row.revenue,row.costSales,row.grossProfit,row.expense,row.net]);
+  const csv = [header.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const blob = new Blob([csv], {type: 'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'profit_n_loss.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+window.addEventListener('resize', () => refresh());
+
+populateYearFilter();
+refresh();
+</script>
+{% endblock %}

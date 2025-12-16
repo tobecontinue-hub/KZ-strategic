@@ -1,0 +1,330 @@
+<!-- templates/executive_summary.html -->
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  :root { color-scheme: light dark; }
+
+  /* Layout shell for the page */
+  .es-shell {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 2.5rem;
+    display: grid;
+    grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.4fr);
+    gap: 1.75rem;
+  }
+
+  @media (max-width: 992px) {
+    .es-shell {
+      grid-template-columns: minmax(0, 1fr);
+      padding-top: 1rem;
+    }
+  }
+
+  /* Hero / left side */
+  .es-hero {
+    position: relative;
+    border-radius: 20px;
+    padding: 1.8rem 1.6rem 1.6rem;
+    background: radial-gradient(circle at top left,#e0f2fe,#eef2ff);
+    box-shadow: 0 18px 40px rgba(15,23,42,0.16);
+    overflow: hidden;
+  }
+
+  .es-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 0% 0%, rgba(59,130,246,0.18), transparent 60%),
+                radial-gradient(circle at 100% 0%, rgba(56,189,248,0.15), transparent 55%);
+    opacity: 0.9;
+    pointer-events: none;
+  }
+
+  .es-hero-inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  .es-chip {
+    display:inline-flex;
+    align-items:center;
+    gap:0.4rem;
+    padding:0.28rem 0.9rem;
+    border-radius:999px;
+    background:rgba(15,23,42,0.04);
+    color:#0f172a;
+    font-size:0.78rem;
+    font-weight:600;
+    letter-spacing:0.13em;
+    text-transform:uppercase;
+  }
+
+  .es-chip-dot {
+    width:9px;
+    height:9px;
+    border-radius:999px;
+    background:#22c55e;
+  }
+
+  .es-title {
+    margin:0.65rem 0 0.35rem;
+    font-size:2.15rem;
+    line-height:1.05;
+    font-weight:800;
+    letter-spacing:-0.04em;
+    background:linear-gradient(135deg,#1f2937,#0f172a);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+
+  .es-subtitle {
+    margin:0;
+    margin-bottom:0.9rem;
+    color:#4b5563;
+    font-size:0.98rem;
+    max-width:40rem;
+  }
+
+  .es-meta-row {
+    display:flex;
+    flex-wrap:wrap;
+    gap:0.6rem;
+    margin-top:0.5rem;
+  }
+
+  .es-meta-pill {
+    padding:0.25rem 0.7rem;
+    border-radius:999px;
+    background:rgba(15,23,42,0.03);
+    color:#334155;
+    font-size:0.78rem;
+    font-weight:600;
+    display:inline-flex;
+    align-items:center;
+    gap:0.35rem;
+  }
+
+  .es-meta-pill svg {
+    width:14px;
+    height:14px;
+  }
+
+  .es-section-title {
+    margin:1.1rem 0 0.4rem;
+    font-size:0.8rem;
+    letter-spacing:0.17em;
+    text-transform:uppercase;
+    color:#6b7280;
+  }
+
+  .es-promise-block {
+    margin-top:0.3rem;
+    padding:0.95rem 0.9rem 1rem;
+    border-radius:14px;
+    background:rgba(255,255,255,0.78);
+    box-shadow:0 12px 28px rgba(15,23,42,0.14);
+    border:1px solid rgba(148,163,184,0.45);
+  }
+
+  .es-promise-label {
+    font-size:0.8rem;
+    text-transform:uppercase;
+    letter-spacing:0.16em;
+    color:#6b7280;
+    margin-bottom:0.35rem;
+  }
+
+  .es-promise-text {
+    margin:0;
+    font-size:1.08rem;
+    line-height:1.55;
+    color:#111827;
+  }
+
+  /* Right column cards */
+  .es-right-col {
+    display:flex;
+    flex-direction:column;
+    gap:1rem;
+  }
+
+  .es-card {
+    border-radius:18px;
+    padding:1.1rem 1rem 1.0rem;
+    background:#0f172a;
+    color:#e5e7eb;
+    box-shadow:0 18px 45px rgba(15,23,42,0.7);
+    position:relative;
+    overflow:hidden;
+  }
+
+  .es-card::before {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:radial-gradient(circle at 0 0, rgba(59,130,246,0.35), transparent 55%),
+               radial-gradient(circle at 100% 0, rgba(56,189,248,0.2), transparent 45%);
+    opacity:0.7;
+    pointer-events:none;
+  }
+
+  .es-card-inner {
+    position:relative;
+    z-index:1;
+  }
+
+  .es-card-heading {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:0.75rem;
+    margin-bottom:0.45rem;
+  }
+
+  .es-card-title {
+    margin:0;
+    font-size:0.88rem;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:#9ca3af;
+  }
+
+  .es-card-chip {
+    font-size:0.7rem;
+    padding:0.2rem 0.6rem;
+    border-radius:999px;
+    border:1px solid rgba(148,163,184,0.6);
+    color:#e5e7eb;
+    background:rgba(15,23,42,0.35);
+  }
+
+  .es-card-body {
+    font-size:0.92rem;
+    line-height:1.6;
+    color:#e5e7eb;
+    white-space:pre-line;
+  }
+
+  .es-summary-card {
+    background:#ffffff;
+    color:#111827;
+    box-shadow:0 12px 30px rgba(15,23,42,0.16);
+  }
+
+  .es-summary-card::before {
+    background:radial-gradient(circle at 0 0, rgba(59,130,246,0.12), transparent 50%),
+               radial-gradient(circle at 100% 0, rgba(56,189,248,0.08), transparent 40%);
+  }
+
+  .es-summary-card .es-card-title { color:#64748b; }
+  .es-summary-card .es-card-body { color:#334155; }
+
+  /* Small helper */
+  .es-muted { color:#9ca3af; font-size:0.78rem; }
+</style>
+
+<div class="es-shell">
+  <!-- LEFT: Hero and Brand Promise -->
+  <div class="es-hero">
+    <div class="es-hero-inner">
+      <div class="es-chip">
+        <span class="es-chip-dot"></span>
+        Executive Summary
+      </div>
+      <h1 class="es-title">Brand Promise & Strategic Direction</h1>
+
+      {% if dashboard_subtitle %}
+        <p class="es-subtitle">{{ dashboard_subtitle }}</p>
+      {% else %}
+        <p class="es-subtitle">High‑level view of what we promise to customers and how that informs our strategic focus.</p>
+      {% endif %}
+
+      <div class="es-meta-row">
+        {% if mission_statement %}
+          <div class="es-meta-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Mission‑led
+          </div>
+        {% endif %}
+        {% if strategic_insight %}
+          <div class="es-meta-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2A9 9 0 113 12a9 9 0 0118 0z"/></svg>
+            Insight‑driven
+          </div>
+        {% endif %}
+        {% if summary %}
+          <div class="es-meta-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-4 4v-4z"/></svg>
+            Storyline
+          </div>
+        {% endif %}
+      </div>
+
+      {% if mission_statement %}
+        <div class="es-section-title">Mission Statement</div>
+        <div class="es-promise-block">
+          <p class="es-promise-text">{{ mission_statement }}</p>
+        </div>
+      {% endif %}
+
+      {% if brand_promise %}
+        <div class="es-section-title" style="margin-top:1.2rem;">Brand Promise</div>
+        <div class="es-promise-block">
+          <div class="es-promise-label">What we commit to our customers</div>
+          <p class="es-promise-text">“{{ brand_promise }}”</p>
+        </div>
+      {% else %}
+        <div class="es-section-title" style="margin-top:1.2rem;">Brand Promise</div>
+        <div class="es-promise-block">
+          <p class="es-promise-text es-muted">Configure the <strong>Brand_Promise</strong> row in the <em>brand_promise</em> sheet to show it here.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- RIGHT: Strategic Insight & Summary -->
+  <div class="es-right-col">
+    {% if strategic_insight %}
+      <section class="es-card">
+        <div class="es-card-inner">
+          <div class="es-card-heading">
+            <h2 class="es-card-title">Strategic Insight</h2>
+            <span class="es-card-chip">From brand_promise sheet</span>
+          </div>
+          <div class="es-card-body">{{ strategic_insight }}</div>
+        </div>
+      </section>
+    {% endif %}
+
+    {% if summary %}
+      <section class="es-card es-summary-card">
+        <div class="es-card-inner">
+          <div class="es-card-heading">
+            <h2 class="es-card-title">Executive Narrative</h2>
+            <span class="es-card-chip">Summary</span>
+          </div>
+          <div class="es-card-body">{{ summary }}</div>
+        </div>
+      </section>
+    {% endif %}
+
+    {% if not strategic_insight and not summary %}
+      <section class="es-card es-summary-card">
+        <div class="es-card-inner">
+          <div class="es-card-heading">
+            <h2 class="es-card-title">Executive Narrative</h2>
+          </div>
+          <div class="es-card-body es-muted">
+            Add <strong>Strategic Insight</strong> and <strong>Summary</strong> rows in the <em>brand_promise</em> sheet (Content_Key / Content_Value)
+            to surface your key story points here.
+          </div>
+        </div>
+      </section>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

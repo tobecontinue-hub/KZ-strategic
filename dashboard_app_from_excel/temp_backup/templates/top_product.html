@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<style>
+:root {
+  --card-bg: #0b1220;
+  --card-glow: linear-gradient(135deg, rgba(99,102,241,.35), rgba(16,185,129,.25));
+}
+.top-product-stage {
+  background: radial-gradient(circle at top, #1c2540, #04070f);
+  padding: 32px 20px 60px;
+  border-radius: 28px;
+  box-shadow: 0 35px 80px rgba(3,7,18,.65);
+}
+.top-product-stage h1 { color:#f8fbff; font-weight:800; letter-spacing:-.4px; margin-bottom:6px; }
+.top-product-stage p { color:#9fb4d9; margin-bottom:24px; }
+.product-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(310px,1fr)); gap:22px; }
+.product-card {
+  border-radius:20px;
+  background: var(--card-bg);
+  border:1px solid rgba(255,255,255,.08);
+  position:relative;
+  overflow:visible;
+  cursor:pointer;
+  transition:transform .35s ease, box-shadow .35s ease;
+}
+.product-card::before {
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background:var(--card-glow);
+  opacity:0;
+  transition:opacity .35s ease;
+  filter:blur(12px);
+}
+.product-card:hover { transform:translateY(-6px) scale(1.01); box-shadow:0 25px 50px rgba(0,0,0,.45); }
+.product-card:hover::before { opacity:1; }
+.card-inner { position:relative; z-index:1; }
+.product-img { height:210px; background:rgba(255,255,255,.05); display:flex; align-items:center; justify-content:center; }
+.product-img img { max-height:100%; max-width:100%; object-fit:contain; padding:18px; filter:drop-shadow(0 12px 18px rgba(0,0,0,.55)); }
+.product-body { padding:20px 20px 0; color:#e5edff; }
+.rank-badge { width:30px; height:30px; border-radius:50%; background:rgba(99,102,241,.85); display:inline-flex; align-items:center; justify-content:center; font-weight:700; margin-right:10px; }
+.product-name { font-size:1.2rem; font-weight:700; }
+.stat-row { display:flex; justify-content:space-between; margin:14px 0 18px; }
+.stat-box { flex:1; text-align:center; }
+.stat-label { text-transform:uppercase; font-size:.7rem; letter-spacing:.4px; color:#8ea2cc; }
+.stat-value { font-size:1rem; font-weight:700; color:#38bdf8; }
+.section-label { font-size:.75rem; color:#8ea2cc; text-transform:uppercase; letter-spacing:.4px; margin-top:10px; }
+.section-text { font-size:.95rem; color:#e2e8f0; margin-bottom:6px; }
+.offers-toggle { position:absolute; top:16px; right:16px; width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.08); color:#d4dbee; display:flex; align-items:center; justify-content:center; transition:transform .3s ease, background .3s ease; }
+.product-card.open .offers-toggle { transform:rotate(135deg); background:rgba(16,185,129,.6); }
+.offer-panel { padding:0 18px 18px; max-height:0; overflow:hidden; opacity:0; transition:max-height .4s ease, opacity .35s ease; }
+.product-card.open .offer-panel { max-height:500px; opacity:1; }
+.offer-panel h5 { color:#93c5fd; font-size:.85rem; letter-spacing:.5px; }
+.offer-list { display:flex; gap:12px; flex-wrap:wrap; }
+.offer-item { flex:1 1 calc(33% - 8px); min-width:120px; border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,.08); background:rgba(15,23,42,.8); animation:fadeUp .4s ease forwards; }
+.offer-item img { width:100%; height:90px; object-fit:cover; }
+.offer-item div { padding:8px 10px; font-size:.8rem; color:#f8fafc; }
+@keyframes fadeUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
+@media(max-width:768px){ .offer-list { flex-direction:column; } }
+</style>
+
+{% set sample_offers = [
+  {"title":"Bundle + Free Delivery","img":"https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=60"},
+  {"title":"Flash Sale Placement","img":"https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=600&q=60"},
+  {"title":"Value Pack Upgrade","img":"https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=600&q=60"}
+] %}
+
+<section class="top-product-stage">
+  <h1>Top Product — Full Price</h1>
+  <p>Tap any card to reveal three curated offer ideas (bundle, flash, retention) inspired from market playbooks.</p>
+
+  <div class="product-grid">
+    {% for row in rows %}
+    <article class="product-card" onclick="toggleOffer({{ loop.index }})" id="card-{{ loop.index }}">
+      <div class="offers-toggle" id="icon-{{ loop.index }}">+</div>
+      <div class="card-inner">
+        <div class="product-img">
+          {% if row.Image_URL and row.Image_URL != 'Placeholder' %}
+            <img src="{{ row.Image_URL }}" alt="{{ row.Product }}">
+          {% else %}
+            <img src="https://images.unsplash.com/photo-1527004013197-933c4bb611b3?auto=format&fit=crop&w=600&q=60" alt="product">
+          {% endif %}
+        </div>
+        <div class="product-body">
+          <div class="d-flex align-items-center">
+            <span class="rank-badge">{{ row.No }}</span>
+            <div class="product-name">{{ row.Product }}</div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-box">
+              <div class="stat-label">Sold Qty</div>
+              <div class="stat-value">{{ "{:,.0f}".format(row.Current_Qty) if row.Current_Qty else "–" }}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Sales (MMK)</div>
+              <div class="stat-value" style="color:#f472b6;">{{ "{:,.0f}".format(row.Sale_Total) if row.Sale_Total else "–" }}</div>
+            </div>
+          </div>
+          <div class="section-label">Insight</div>
+          <div class="section-text">{{ row.Insight or 'No insight shared' }}</div>
+          <div class="section-label">Strategy</div>
+          <div class="section-text">{{ row.Strategy_Focus or 'Upcoming strategy TBD' }}</div>
+        </div>
+        <div class="offer-panel" id="offers-{{ loop.index }}">
+          <h5>Sample Offers</h5>
+          <div class="offer-list">
+            {% for offer in sample_offers %}
+            <div class="offer-item">
+              <img src="{{ offer.img }}" alt="offer">
+              <div>{{ offer.title }}</div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<script>
+function toggleOffer(idx){
+  const card=document.getElementById('card-'+idx);
+  const panel=document.getElementById('offers-'+idx);
+  const icon=document.getElementById('icon-'+idx);
+  const isOpen=card.classList.toggle('open');
+  if(isOpen){ icon.textContent='×'; panel.style.display='block'; }
+  else { icon.textContent='+'; panel.style.display=''; }
+}
+</script>
+{% endblock %}

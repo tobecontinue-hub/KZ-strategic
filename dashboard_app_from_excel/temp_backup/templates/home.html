@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+:root {
+  --night: #04070f;
+  --ink: #dfe6f9;
+  --muted: #9fb0cc;
+  --card: rgba(6,12,24,0.85);
+}
+.hero-canvas {
+  height: 85vh;
+  border-radius: 28px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 40px;
+  background: #000;
+}
+.hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.65);
+}
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(2,6,23,.78), rgba(8,27,58,.45));
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  text-align: center;
+  padding: 0 40px;
+}
+.hero-content h1 {
+  font-size: 3.2rem;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  margin-bottom: 8px;
+}
+.hero-content p { color: var(--muted); font-size: 1.1rem; }
+.scrolling-wall {
+  display: flex;
+  gap: 16px;
+  margin-top: 30px;
+  animation: marquee 30s linear infinite;
+}
+.wall-card {
+  width: 220px;
+  height: 140px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.08);
+  flex-shrink: 0;
+}
+.wall-card img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(0.1); }
+.quick-links { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 20px; }
+.quick-card {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 20px;
+  color: var(--ink);
+  border: 1px solid rgba(255,255,255,.05);
+  box-shadow: 0 20px 45px rgba(0,0,0,.35);
+  transition: transform .3s ease, border-color .3s ease;
+}
+.quick-card:hover { transform: translateY(-6px); border-color: rgba(147,197,253,.6); }
+.quick-card i { font-size: 2rem; color: #7cbbff; }
+@keyframes marquee { from { transform: translateX(0%); } to { transform: translateX(-50%); } }
+</style>
+
+<div class="hero-canvas">
+  <video class="hero-video" autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1400&q=60">
+    <source src="https://storage.googleapis.com/coverr-main/mp4/Mt_Baker.mp4" type="video/mp4">
+  </video>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1>Khit Zay Strategy 2026</h1>
+    <p>Bring planning, operations, and growth squads together in one connected workspace.</p>
+    <div class="scrolling-wall">
+      {% for _ in range(2) %}
+        {% for img in [
+          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=60',
+          'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=600&q=60',
+          'https://images.unsplash.com/photo-1474631245212-32dc3c8310c6?auto=format&fit=crop&w=600&q=60',
+          'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=600&q=60'
+        ] %}
+        <div class="wall-card"><img src="{{ img }}" alt="team collaboration"/></div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="quick-links">
+  {% for link in [
+    {'href':'/org_structure','icon':'bi-diagram-3-fill','label':'Organizational Structure'},
+    {'href':'/dna','icon':'bi-fingerprint','label':'Organizational DNA'},
+    {'href':'/executive_summary','icon':'bi-file-earmark-text','label':'Executive Summary'},
+    {'href':'/value_map','icon':'bi-diagram-3','label':'Value Map (Full Price)'},
+    {'href':'/value_map_promo','icon':'bi-badge-ad','label':'Value Map (Promo)'},
+    {'href':'/swot','icon':'bi-intersect','label':'SWOT'},
+    {'href':'/segments','icon':'bi-people','label':'Segments'},
+    {'href':'/trajectories','icon':'bi-shuffle','label':'Trajectories'},
+    {'href':'/financial_review','icon':'bi-clipboard-data','label':'Financial Review'},
+    {'href':'/profit_n_loss','icon':'bi-cash-coin','label':'Profit & Loss'},
+    {'href':'/profit_x','icon':'bi-percent','label':'Profit per X'},
+    {'href':'/cost_per_x','icon':'bi-activity','label':'Cost per X'},
+    {'href':'/roadmap','icon':'bi-map','label':'Roadmap'},
+    {'href':'/strategy_plan','icon':'bi-easel3','label':'Strategy Plan'},
+    {'href':'/ecom','icon':'bi-cart-check','label':'Sales Target Ecom'},
+    {'href':'/okr','icon':'bi-bullseye','label':'OKR'},
+    {'href':'/strategy_hub','icon':'bi-collection','label':'Strategy Hub'},
+    {'href':'/top_product','icon':'bi-box','label':'Top Product (Full Price)'},
+    {'href':'/top_product_promo','icon':'bi-box-seam','label':'Top Product (Promo)'}
+  ] %}
+  <a class="quick-card" href="{{ link.href }}">
+    <i class="bi {{ link.icon }}"></i>
+    <div style="margin-top:10px; font-weight:600;">{{ link.label }}</div>
+  </a>
+  {% endfor %}
+</div>
+{% endblock %}

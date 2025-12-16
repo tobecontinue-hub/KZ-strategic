@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* ---------- MD3 BASE ---------- */
+:root {
+  --md-bg: #ffffff;
+  --md-card: #ffffff;
+  --md-outline: #d9dce2;
+  --md-header-bg: #e3edff;
+  --md-primary: #0b57d0;
+}
+
+/* CONTAINER */
+.main-container {
+  padding: 28px;
+  max-width: 900px;
+  margin: auto;
+}
+
+.bp-list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.bp-list li {
+  font-size: .88rem;
+  line-height: 1.35;
+  margin-bottom: 4px;
+  color: #4d5257;
+}
+
+
+/* PAGE TITLE */
+.page-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.page-header h1 {
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: #0c2440;
+}
+.page-header .subtitle {
+  font-size: .95rem;
+  color: #5c6269;
+}
+
+/* SECTION */
+.section-box {
+  margin-bottom: 32px;
+  border-radius: 16px;
+  border: 1px solid var(--md-outline);
+  background: var(--md-card);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+/* SECTION HEADER */
+.section-title {
+  background: var(--md-header-bg);
+  padding: 16px 22px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--md-primary);
+  border-bottom: 1px solid var(--md-outline);
+}
+
+/* ROW CARD */
+.review-item {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--md-outline);
+
+  opacity: 0;
+  transform: translateX(-20px);
+  animation: slideIn 0.45s ease-out forwards;
+}
+
+.review-item:last-child {
+  border-bottom: none;
+}
+
+/* ANIMATION */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* TITLES */
+.item-key {
+  font-size: .95rem;
+  font-weight: 600;
+  color: #0c2e45;
+  margin-bottom: 6px;
+}
+
+/* TEXT */
+.item-rational {
+  font-size: .88rem;
+  line-height: 1.35;
+  color: #4d5257;
+  white-space: pre-line; /* preserve new lines */
+}
+</style>
+
+
+<div class="main-container">
+
+  <div class="page-header">
+    <h1>Financial Performance Review</h1>
+    <div class="subtitle">Summary of financial signals, profit drivers, and cost insights.</div>
+  </div>
+
+  {% if sections %}
+    {% for section, items in sections.items() %}
+      <div class="section-box">
+
+        <div class="section-title">
+          {{ section }}
+        </div>
+
+        {% for row in items %}
+          <div class="review-item" style="animation-delay: {{ loop.index0 * 0.05 }}s;">
+            
+            <div class="item-key">
+              {{ row["Content_Key"] if row["Content_Key"] else "—" }}
+            </div>
+
+            <div class="item-rational">
+              {{ row["Rational"] if row["Rational"] else "No details" }}
+            </div>
+
+          </div>
+        {% endfor %}
+
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="alert alert-warning text-center">
+      No data found in <b>Financial Review 25</b> sheet.
+    </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}

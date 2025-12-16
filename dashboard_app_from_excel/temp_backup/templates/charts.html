@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="v-banner">
+  <div>
+    <h3>Charts Gallery</h3>
+    <div class="muted">Auto-generated charts from FNA Performance sheet</div>
+  </div>
+  <div><a class="btn btn-light" href="/">Home</a></div>
+</div>
+
+<div class="section">
+  {% if graphJSON %}
+    <div class="card p-3">
+      <div id="mainChart" style="height:420px"></div>
+    </div>
+    <script> var fig = {{ graphJSON | safe }}; Plotly.newPlot('mainChart', fig.data, fig.layout || {}); </script>
+  {% else %}
+    <div class="card p-3 muted">No numeric data available for charts in the 'fna_perfomance' sheet.</div>
+  {% endif %}
+</div>
+{% endblock %}

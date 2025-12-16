@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- ===== STYLES ===== -->
+<style>
+
+:root {
+  --primary: #0B8AFF;
+  --secondary: #4ADE80;
+  --surface: #ffffff;
+  --text-dark: #0f172a;
+  --text-medium: #334155;
+  --border-soft: #e2e8f0;
+}
+
+/* Page container */
+.main-wrapper {
+  max-width: 1250px;
+  margin: auto;
+  padding: 32px;
+}
+
+/* Title */
+.page-title {
+  font-size: 2.3rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+}
+
+.page-subtitle {
+  font-size: 1rem;
+  color: #64748b;
+  margin-bottom: 35px;
+}
+
+/* Cards */
+.segment-card {
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 26px 30px;
+  margin-bottom: 26px;
+  border: 1.5px solid var(--border-soft);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+
+  /* animation */
+  opacity: 0;
+  transform: translateX(-32px);
+  animation: slideIn 0.55s ease forwards;
+}
+
+/* Left green stripe for Insight card */
+.segment-card.insight {
+  border-left: 6px solid var(--secondary);
+}
+
+/* Section label */
+.section-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.4px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+/* Segment Title */
+.segment-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 18px;
+}
+
+/* 4-column grid */
+.segment-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+}
+
+.col-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-medium);
+  margin-bottom: 6px;
+}
+
+/* Bullet list */
+.bp-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.bp-list li {
+  font-size: 0.92rem;
+  line-height: 1.35;
+  margin-bottom: 4px;
+  color: var(--text-dark);
+}
+
+/* Animation */
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+}
+
+</style>
+
+
+<!-- ===== CONTENT ===== -->
+<div class="main-wrapper">
+
+  <div class="page-header">
+    <div class="page-title">Customer Segments Overview</div>
+    <div class="page-subtitle">Core segments, new emerging audiences, and strategic insights.</div>
+  </div>
+
+  {% for row in data %}
+
+  <!-- Card container -->
+  <div class="segment-card
+    {% if row['Section'] == 'Core Segments' %} core
+    {% elif row['Section'] == 'New Segments' %} newseg
+    {% else %} insight {% endif %}"
+    style="animation-delay: {{ loop.index * 0.12 }}s">
+
+    <!-- Section label -->
+    <div class="section-label">{{ row["Section"] }}</div>
+
+    <!-- Segment title -->
+    <div class="segment-title">{{ row["Segment"] }}</div>
+
+
+    {% if row["Section"] == "Insight" %}
+    
+      <!-- INSIGHT CARD (single text only) -->
+      <p style="font-size:1rem; line-height:1.45; color:var(--text-medium); margin-top:10px;">
+        {{ row["Who they are"] }}
+      </p>
+
+    {% else %}
+
+      <!-- NORMAL 4-COLUMN GRID -->
+      <div class="segment-grid">
+
+        <!-- Who -->
+        <div>
+          <div class="col-title">Who they are</div>
+          <ul class="bp-list">
+            {% for line in (row["Who they are"] or "").split("\n") %}
+            {% if line.strip() %}
+            <li>{{ line.strip() }}</li>
+            {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+
+        <!-- Where -->
+        <div>
+          <div class="col-title">Where they are</div>
+          <ul class="bp-list">
+            {% for line in (row["Where they are"] or "").split("\n") %}
+            {% if line.strip() %}
+            <li>{{ line.strip() }}</li>
+            {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+
+        <!-- Why -->
+        <div>
+          <div class="col-title">Why</div>
+          <ul class="bp-list">
+            {% for line in (row["Why"] or "").split("\n") %}
+            {% if line.strip() %}
+            <li>{{ line.strip() }}</li>
+            {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+
+        <!-- Priority Rationale -->
+        <div>
+          <div class="col-title">Priority Rationale</div>
+          <ul class="bp-list">
+            {% for line in (row["Priority Rationale"] or "").split("\n") %}
+            {% if line.strip() %}
+            <li>{{ line.strip() }}</li>
+            {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+
+      </div>
+    {% endif %}
+  </div>
+
+  {% endfor %}
+
+</div>
+
+{% endblock %}

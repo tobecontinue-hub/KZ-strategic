@@ -1,0 +1,274 @@
+<!-- templates/top_product_promo.html -->
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.promo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 10px 0 30px;
+}
+
+.promo-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(255, 87, 34, 0.12);
+  border: 1px solid #ffebee;
+  transition: all 0.25s ease;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s forwards;
+}
+
+.promo-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(255, 87, 34, 0.18);
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+{% for i in range(rows|length) %}
+  .promo-card:nth-child({{ i + 1 }}) {
+    animation-delay: {{ i * 0.08 }}s;
+  }
+{% endfor %}
+
+/* Image */
+.promo-img {
+  width: 100%;
+  height: 180px;
+  background: #fff8f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.promo-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 12px;
+  background: white;
+}
+
+/* Product header */
+.product-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #fff9ed;
+  border-bottom: 1px solid #ffd28a;
+}
+
+.rank-badge {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background: #ff6b6b;
+  color: white;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 24px;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+.product-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #c62828;
+  margin: 0;
+}
+
+/* Stats */
+.stats-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+.stat-item {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #555;
+}
+.stat-value {
+  font-weight: 700;
+  color: #d32f2f;
+  font-size: 1rem;
+}
+
+/* Section headers */
+.section-title {
+  font-size: 0.8rem;
+  color: #9e9e9e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 12px 16px 6px;
+}
+
+/* Insight */
+.insight-box {
+  padding: 12px 16px;
+  background: #f8fbff;
+  border-left: 3px solid #0b63ff;
+  margin: 6px 16px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.promo-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 4px 8px;
+  background: #ff6b6b;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 4px;
+  z-index: 10;
+}
+
+/* Strategy */
+.strategy-box {
+  padding: 12px 16px;
+  background: #fff3e0;
+  border-left: 3px solid #ff6b6b;
+  margin: 6px 16px;
+  font-weight: 600;
+  color: #c62828;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Forecast */
+.forecast-box {
+  padding: 12px 16px;
+  background: #ffebee;
+  border-left: 3px solid #dc3545;
+  margin: 6px 16px;
+  font-size: 0.9rem;
+  color: #c62828;
+}
+.forecast-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+}
+.forecast-item .q-label {
+  color: #ef9a9a;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+.forecast-item .q-value {
+  font-weight: 700;
+  color: #d32f2f;
+  font-size: 1rem;
+}
+
+/* Annual total */
+.annual-total {
+  text-align: center;
+  padding: 6px;
+  background: #ffebee;
+  border-radius: 6px;
+  font-weight: 700;
+  color: #c62828;
+  font-size: 0.95rem;
+}
+
+/* Campaign notes */
+.notes-box {
+  padding: 12px 16px;
+  background: #f3e5f5;
+  border-left: 3px solid #9c27b0;
+  margin: 6px 16px;
+  font-size: 0.9rem;
+  color: #4a148c;
+}
+
+</style>
+
+<div class="main-container">
+  {% if rows %}
+    <div class="promo-grid">
+      {% for row in rows %}
+        <div class="promo-card">
+          <!-- Image -->
+          <div class="promo-img">
+            {% if row.Campaign or row.Promo_Tag %}
+        <div class="promo-badge">{{ row.Campaign or row.Promo_Tag }}</div>
+        {% endif %}
+            {% if row.Image_URL and row.Image_URL != "Placeholder" and row.Image_URL|length > 5 %}
+              <img src="{{ row.Image_URL }}" alt="{{ row.Product }}" loading="lazy" onerror="this.onerror=null;this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgdmlld0JveD0iMCAwIDYwIDYwIj4KICA8cmVjdCB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIGZpbGw9IiNmOGY5ZmEiLz4KICA8dGV4dCB4PSIzMCIgeT0iMzAiIGZvbnQtc2l6ZT0iMjAiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNWM3NTc3Ij58PC90ZXh0Pgo8L3N2Zz4=';">
+            {% else %}
+              <div style="display:flex; align-items:center; justify-content:center; height:100%; background:#f8f9fa;">
+                <span style="font-size:2rem; color:#6c757d;">📦</span>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Product Header -->
+          <div class="product-header">
+            <span class="rank-badge">{{ row.No }}</span>
+            <span class="product-name">{{ row.Product }}</span>
+          </div>
+
+          <!-- Stats -->
+          <div class="stats-row">
+            <div class="stat-item">
+              <div><i class="bi bi-fire"></i> Sold Qty</div>
+              <div class="stat-value">{{ "{:,.0f}".format(row.Current_Qty) if row.Current_Qty else "–" }}</div>
+            </div>
+            <div class="vr"></div>
+            <div class="stat-item">
+              <div><i class="bi bi-currency-dollar"></i> Sales (MMK)</div>
+              <div class="stat-value">{{ "{:,.0f}".format(row.Sale_Total) if row.Sale_Total else "–" }}</div>
+            </div>
+          </div>
+
+          <!-- Insight -->
+          <div class="section-title">INSIGHT</div>
+          <div class="insight-box">{{ row.Insight }}</div>
+
+          <!-- Strategy -->
+          <div class="section-title">STRATEGY</div>
+          <div class="strategy-box">{{ row.Strategy_Focus }}</div>
+
+          <!-- Forecast -->
+          <div class="section-title">FORECAST</div>
+          <div class="forecast-box">
+            <div class="forecast-grid">
+              {% for q in ['Q1_Forecast', 'Q2_Forecast', 'Q3_Forecast', 'Q4_Forecast'] %}
+                <div class="forecast-item">
+                  <div class="q-label">{{ q[0:2] }}</div>
+                  <div class="q-value">{{ "{:,.0f}".format(row[q]) if row[q] else "–" }}</div>
+                </div>
+              {% endfor %}
+            </div>
+            
+          </div>
+
+          <!-- Campaign Notes -->
+          {% if row.Forecast_Notes %}
+            <div class="section-title">CAMPAIGN NOTES</div>
+            <div class="notes-box">{{ row.Forecast_Notes }}</div>
+          {% endif %}
+
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-warning">No promo product data available.</div>
+  {% endif %}
+</div>
+
+{% endblock %}

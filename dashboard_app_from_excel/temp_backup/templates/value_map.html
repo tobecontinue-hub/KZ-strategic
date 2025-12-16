@@ -1,0 +1,325 @@
+<!-- templates/value_map.html -->
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+:root {
+  --bg-muted: #f8fafc;
+  --card-bg: #ffffff;
+  --text-1: #073047;
+  --text-2: #475569;
+  --shadow-1: 0 6px 20px rgba(0,0,0,0.08);
+  --shadow-2: 0 10px 28px rgba(0,0,0,0.12);
+}
+
+.value-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  padding: 20px 0 30px;
+}
+
+.value-section {
+  background: var(--card-bg);
+  border-radius: 16px;
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s forwards;
+}
+
+.value-section:hover { transform: translateY(-6px); box-shadow: var(--shadow-2); }
+
+@keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+/* Stagger animation */
+.value-section:nth-child(1) { animation-delay: 0s; }
+.value-section:nth-child(2) { animation-delay: 0.08s; }
+.value-section:nth-child(3) { animation-delay: 0.16s; }
+.value-section:nth-child(4) { animation-delay: 0.24s; }
+
+.section-header { padding: 16px 20px; font-weight: 700; font-size: 1.05rem; color: white; display: flex; align-items: center; gap: 10px; }
+
+/* Color coding */
+.pains { background: linear-gradient(90deg, #ff5252, #ff8a80); }
+.relievers { background: linear-gradient(90deg, #00c853, #69f0ae); }
+.gains { background: linear-gradient(90deg, #ffc107, #ffd180); }
+.creators { background: linear-gradient(90deg, #2962ff, #40c4ff); }
+.products { background: linear-gradient(90deg,#8e24aa,#ce93d8); }
+.services { background: linear-gradient(90deg,#0097a7,#4dd0e1); }
+.demo { background: linear-gradient(90deg,#6a1b9a,#9575cd); }
+.jtbd { background: linear-gradient(90deg,#ef6c00,#ffb74d); }
+
+.card-item { padding: 16px 20px; border-bottom: 1px solid #f0f4f8; transition: background 0.2s ease; }
+.card-item:last-child { border-bottom: none; }
+.card-item:hover { background: #f8fbff; }
+
+.item-title { font-weight: 700; margin: 0 0 6px; font-size: 0.95rem; color: var(--text-1); line-height: 1.3; display: flex; align-items: center; gap: 8px; }
+.item-detail { font-size: 0.88rem; color: var(--text-2); line-height: 1.5; }
+
+/* Collapsible body */
+.section-body { display: block; }
+.section-body.collapsed { display: none; }
+
+.section-toggle { margin-left: auto; background: rgba(255,255,255,0.25); color: #fff; border: none; border-radius: 8px; font-weight: 600; font-size: 0.85rem; padding: 6px 10px; cursor: pointer; transition: transform 0.2s ease; }
+.section-toggle:hover { transform: translateY(-2px); }
+
+/* Key Activities */
+.key-activities { margin-top: 32px; padding: 20px; background: var(--bg-muted); border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); }
+.key-activities h4 { font-size: 1.1rem; color: var(--text-1); margin-bottom: 16px; }
+.activity-card { background: #fff; padding: 14px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid #1976d2; }
+.activity-title { font-weight: 700; color: var(--text-1); margin: 0 0 6px; }
+.activity-detail { font-size: 0.88rem; color: var(--text-2); }
+
+/* Responsive */
+@media (max-width: 992px) { .value-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="main-container">
+
+  <!-- 2x2 Grid -->
+  <div class="value-grid">
+
+    <!-- 1. Customer Pains -->
+    <div class="value-section">
+      <div class="section-header pains">
+        <i class="bi bi-exclamation-triangle-fill"></i> Customer Pains
+        <button class="section-toggle" onclick="toggleSection(this)">Toggle</button>
+      </div>
+      <div class="section-body">
+      {% if pains %}
+        {% for item in pains %}
+          <div class="card-item">
+            {% for key, value in item.items() %}
+              {% if value and key not in ["Content_Category", "Content_Area"] %}
+                {% if loop.first %}
+                  <div class="item-title"><i class="bi bi-record-fill text-danger"></i><b>{{ key.replace('_',' ') }}:</b> {{ value }}</div>
+                {% else %}
+                  <div class="item-detail"><b>{{ key.replace('_',' ') }}:</b> {{ value }}</div>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="card-item text-muted">No pains defined.</div>
+      {% endif %}
+      </div>
+    </div>
+
+    <!-- 2. Pain Relievers -->
+    <div class="value-section">
+      <div class="section-header relievers">
+        <i class="bi bi-check-circle-fill"></i> Pain Relievers
+        <button class="section-toggle" onclick="toggleSection(this)">Toggle</button>
+      </div>
+      <div class="section-body">
+      {% if relievers %}
+        {% for item in relievers %}
+          <div class="card-item">
+            {% for key, value in item.items() %}
+              {% if value and key not in ["Content_Category", "Content_Area"] %}
+                {% if loop.first %}
+                  <div class="item-title"><i class="bi bi-check2-circle"></i><b>{{ key.replace('_',' ') }}:</b> {{ value }}</div>
+                {% else %}
+                  <div class="item-detail"><b>{{ key.replace('_',' ') }}:</b> {{ value }}</div>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="card-item text-muted">No relievers defined.</div>
+      {% endif %}
+      </div>
+    </div>
+
+    <!-- 3. Gain Point -->
+    <div class="value-section">
+      <div class="section-header gains">
+        <i class="bi bi-star-fill"></i> Gain Point
+        <button class="section-toggle" onclick="toggleSection(this)">Toggle</button>
+      </div>
+      <div class="section-body">
+      {% if gains %}
+        {% for item in gains %}
+          <div class="card-item">
+            {% for key, value in item.items() %}
+              {% if value and key not in ["Content_Category", "Content_Area"] %}
+                {% if loop.first %}
+                  <div class="item-title"><i class="bi bi-star"></i><b>{{ key.replace('_',' ') }}:</b> {{ value }}</div>
+                {% else %}
+                  <div class="item-detail"><b>{{ key.replace('_',' ') }}:</b> {{ value }}</div>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="card-item text-muted">No gains defined.</div>
+      {% endif %}
+      </div>
+    </div>
+
+    <!-- 4. Gain Creators -->
+    <div class="value-section">
+      <div class="section-header creators">
+        <i class="bi bi-lightbulb-fill"></i> Gain Creators
+        <button class="section-toggle" onclick="toggleSection(this)">Toggle</button>
+      </div>
+      <div class="section-body">
+      {% if creators %}
+        {% for item in creators %}
+          <div class="card-item">
+            {% for key, value in item.items() %}
+              {% if value and key not in ["Content_Category", "Content_Area"] %}
+                {% if loop.first %}
+                  <div class="item-title"><i class="bi bi-lightning-charge"></i><b>{{ key.replace('_',' ') }}:</b> {{ value }}</div>
+                {% else %}
+                  <div class="item-detail"><b>{{ key.replace('_',' ') }}:</b> {{ value }}</div>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="card-item text-muted">No gain creators defined.</div>
+      {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Products -->
+  <div class="value-section">
+    <div class="section-header products">
+      <i class="bi bi-box-seam"></i> Products
+      <button class="section-toggle" onclick="toggleSection(this)">Toggle</button>
+    </div>
+    <div class="section-body">
+    {% if products %}
+      {% for item in products %}
+        <div class="card-item">
+          {% for key, value in item.items() %}
+            {% if value and key not in ["Content_Category", "Content_Area"] %}
+              {% if loop.first %}
+                <div class="item-title"><b>{{ key.replace('_',' ') }}:</b> {{ value }}</div>
+              {% else %}
+                <div class="item-detail"><b>{{ key.replace('_',' ') }}:</b> {{ value }}</div>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="card-item text-muted">No product items defined.</div>
+    {% endif %}
+    </div>
+  </div>
+
+  <!-- 6. Services -->
+  <div class="value-section">
+    <div class="section-header services">
+      <i class="bi bi-tools"></i> Services
+      <button class="section-toggle" onclick="toggleSection(this)">Toggle</button>
+    </div>
+    <div class="section-body">
+    {% if services %}
+      {% for item in services %}
+        <div class="card-item">
+          {% for key, value in item.items() %}
+            {% if value and key not in ["Content_Category", "Content_Area"] %}
+              {% if loop.first %}
+                <div class="item-title"><b>{{ key.replace('_',' ') }}:</b> {{ value }}</div>
+              {% else %}
+                <div class="item-detail"><b>{{ key.replace('_',' ') }}:</b> {{ value }}</div>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="card-item text-muted">No service items defined.</div>
+    {% endif %}
+    </div>
+  </div>
+
+  <!-- 7. Demo / Geo -->
+  <div class="value-section">
+    <div class="section-header demo">
+      <i class="bi bi-people-fill"></i> Demo / Geo
+      <button class="section-toggle" onclick="toggleSection(this)">Toggle</button>
+    </div>
+    <div class="section-body">
+    {% if demo %}
+      {% for item in demo %}
+        <div class="card-item">
+          {% for key, value in item.items() %}
+            {% if value and key not in ["Content_Category", "Content_Area"] %}
+              {% if loop.first %}
+                <div class="item-title"><b>{{ key.replace('_',' ') }}:</b> {{ value }}</div>
+              {% else %}
+                <div class="item-detail"><b>{{ key.replace('_',' ') }}:</b> {{ value }}</div>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="card-item text-muted">No demo/geo items defined.</div>
+    {% endif %}
+    </div>
+  </div>
+
+  <!-- 8. Just To Be Done (JTBD) -->
+  <div class="value-section">
+    <div class="section-header jtbd">
+      <i class="bi bi-clipboard-check"></i> Job To Be Done
+      <button class="section-toggle" onclick="toggleSection(this)">Toggle</button>
+    </div>
+    <div class="section-body">
+    {% if justtobedone %}
+      {% for item in justtobedone %}
+        <div class="card-item">
+          {% for key, value in item.items() %}
+            {% if value and key not in ["Content_Category", "Content_Area"] %}
+              {% if loop.first %}
+                <div class="item-title"><b>{{ key.replace('_',' ') }}:</b> {{ value }}</div>
+              {% else %}
+                <div class="item-detail"><b>{{ key.replace('_',' ') }}:</b> {{ value }}</div>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="card-item text-muted">No JTBD items defined.</div>
+    {% endif %}
+    </div>
+  </div>
+
+  <!-- Key Activities -->
+  {% if activities %}
+    <div class="key-activities">
+      <h4><i class="bi bi-gear-fill me-2"></i>Key Activities</h4>
+      {% for item in activities %}
+        <div class="activity-card">
+          <div class="activity-title">{{ item['Value/Headline'] }}</div>
+          <div class="activity-detail">{{ item['Details/Rationale'] }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+</div>
+
+<script>
+  function toggleSection(btn) {
+    const body = btn.closest('.value-section').querySelector('.section-body');
+    body.classList.toggle('collapsed');
+    btn.textContent = body.classList.contains('collapsed') ? 'Expand' : 'Collapse';
+  }
+</script>
+
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="v-banner">
+  <div>
+    <h3 style="margin:0">Executive Summary — 2026 Plan</h3>
+    <div style="color:var(--muted)">Smarter conversion · Segment experience · Trusted logistics</div>
+  </div>
+  <div>
+    <button class="btn btn-light">Share</button>
+    <button class="btn btn-outline-light">Export</button>
+  </div>
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi card-compact">
+    <div class="label">Total Shoppers</div>
+    <div class="value">{{ kpis.shoppers or "-" }}</div>
+  </div>
+  <div class="kpi card-compact">
+    <div class="label">Purchasers</div>
+    <div class="value">{{ kpis.purchasers or "-" }}</div>
+  </div>
+  <div class="kpi card-compact">
+    <div class="label">Conversion Rate</div>
+    <div class="value">{{ kpis.conversion or "-" }}</div>
+  </div>
+  <div class="kpi card-compact">
+    <div class="label">Revenue</div>
+    <div class="value">{{ kpis.revenue or "-" }}</div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-7">
+    <div class="section">
+      <div class="section-title"><h5>Top Insights</h5></div>
+      <div class="card">
+        {% if executive %}
+          <ul class="list-group list-group-flush">
+            {% for e in executive[:6] %}
+              <li class="list-group-item">
+                <strong>{{ e.get('Point') or e.get('section') or e.get('title') }}</strong>
+                <div class="muted">{{ e.get('Highlight') or e.get('Content') or e.get('description') }}</div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="p-3 muted">No executive insights available.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><h5>Brand Promise</h5></div>
+      <div class="card p-3">
+        {% if brand %}
+          <p class="lead">{{ brand[0].get('Content') or brand[0].get('Description') or brand[0].get('brand_promise') }}</p>
+        {% else %}
+          <div class="muted">No brand promise available.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="section">
+      <div class="section-title"><h5>Quick Charts</h5></div>
+      <div class="card p-3">
+        <div id="miniChart" style="height:260px;"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><h5>Highlights</h5></div>
+      <div class="card p-3">
+        <ul>
+          <li>Mobile-first: 88% of traffic on mobile</li>
+          <li>New users 79.9% → retention required</li>
+          <li>Purchase rate 1.97% → target 3% in 2026</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // small static demo mini chart (replace later with dynamic data)
+  var data = [{
+    x: ['Jan','Feb','Mar','Apr','May','Jun'],
+    y: [1200,1100,1300,900,1500,1700],
+    type:'scatter',
+    fill:'tozeroy',
+    line:{color:'#0b63ff'}
+  }];
+  Plotly.newPlot('miniChart', data, {margin:{t:20,l:30,r:20,b:30},font:{size:12}});
+</script>
+{% endblock %}

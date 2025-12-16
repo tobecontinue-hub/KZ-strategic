@@ -1,0 +1,338 @@
+<!-- templates/base.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ title if title else "Khit Zay Dashboard" }}</title>
+
+  <!-- Bootstrap CSS + Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+  <!-- Custom CSS -->
+  <style>
+    :root {
+      --brand-blue: #0b63ff;
+      --brand-teal: #00b3a6;
+      --brand-gradient: linear-gradient(90deg, var(--brand-blue), var(--brand-teal));
+      --nav-hover-bg: rgba(11, 99, 255, 0.08);
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background-color: #f8fafc;
+      padding-top: 64px; /* space for fixed navbar */
+    }
+
+    .navbar-brand {
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: #073047 !important;
+      letter-spacing: .2px;
+    }
+
+    .navbar-brand span {
+      background: var(--brand-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .navbar-nav .nav-link {
+      position: relative;
+      font-weight: 600;
+      color: #334155 !important;
+      padding: .5rem .9rem;
+      border-radius: 8px;
+      transition: color .2s ease, background-color .2s ease;
+    }
+
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link.active {
+      color: var(--brand-blue) !important;
+      background-color: var(--nav-hover-bg) !important;
+    }
+
+    /* Animated underline */
+    .nav-underline::after {
+      content: "";
+      position: absolute; left: .6rem; right: .6rem; bottom: 4px;
+      height: 2px; border-radius: 2px; background: var(--brand-gradient);
+      transform: scaleX(0); transform-origin: right; transition: transform .25s ease;
+    }
+    .nav-underline:hover::after,
+    .nav-underline.active::after { transform: scaleX(1); transform-origin: left; }
+
+    .dropdown-menu {
+      border: none;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      padding: .5rem 0;
+      margin-top: .6rem;
+      animation: dd-fade .18s ease-out;
+    }
+    @keyframes dd-fade { from { opacity: 0; transform: translateY(-4px);} to {opacity:1; transform: translateY(0);} }
+
+    .dropdown-item { padding: .55rem 1.1rem; color: #334155; font-weight: 500; }
+    .dropdown-item i { width: 18px; margin-right: 8px; color: #64748b; }
+    .dropdown-item:hover { background-color: var(--nav-hover-bg); color: var(--brand-blue); }
+    .dropdown-header { font-size: .78rem; color: #94a3b8; text-transform: uppercase; letter-spacing: .5px; }
+
+    .main-container { max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; }
+
+    .page-header {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+      margin-bottom: 1.5rem;
+    }
+
+    .page-header h1 { font-weight: 800; color: #073047; margin: 0; }
+    .page-header .subtitle { color: #6b7e88; font-size: 1rem; margin-top: 0.25rem; }
+
+    footer { margin-top: 3rem; padding: 1.5rem 0; color: #6b7e88; text-align: center; font-size: 0.9rem; }
+
+    .nav-icon { width: 18px; height: 18px; margin-right: 6px; color: #475569; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+    <div class="container-fluid">
+      <!-- Logo -->
+      <a class="navbar-brand d-flex align-items-center" href="/home">
+        <i class="bi bi-compass nav-icon" style="color:#0b63ff"></i>
+        Khit Zay <span>&nbsp;Strategy</span>
+      </a>
+
+      <!-- Mobile Toggle -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Nav Links -->
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <!-- Home -->
+          <li class="nav-item">
+            <a class="nav-link nav-underline {{ 'active' if request.path == '/home' else '' }}" href="/home">
+              <i class="bi bi-house-door"></i> Home
+            </a>
+          </li>
+
+<!-- Core Strategy -->
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle nav-underline 
+    {{ 'active' if request.path.startswith(('/executive_summary', '/dna', '/org_structure')) else '' }}" 
+    href="#" id="coreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="bi bi-bezier2"></i> Our Organization
+  </a>
+
+  <ul class="dropdown-menu" aria-labelledby="coreDropdown">
+
+    <li><h6 class="dropdown-header">Core Strategy</h6></li>
+
+    <li><a class="dropdown-item {{ 'active' if request.path == '/org_structure' else '' }}" href="/org_structure">
+      <i class="bi bi-diagram-3-fill"></i> Organization Structure
+    </a></li>
+
+    <li><a class="dropdown-item {{ 'active' if request.path == '/dna' else '' }}" href="/dna">
+      <i class="bi bi-fingerprint"></i> Organizational DNA
+    </a></li>
+
+    <li><a class="dropdown-item {{ 'active' if request.path == '/executive_summary' else '' }}" href="/executive_summary">
+      <i class="bi bi-file-earmark-text"></i> Executive Summary
+    </a></li>
+
+  </ul>
+</li>
+
+
+<!-- Customer & Market -->
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle nav-underline 
+    {{ 'active' if request.path.startswith(('/value_map','/value_map_promo','/segments','/swot','/trajectories')) else '' }}" 
+    href="#" id="customerDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="bi bi-people"></i> Customer & Market
+  </a>
+
+  <ul class="dropdown-menu" aria-labelledby="customerDropdown">
+
+    <!-- Value Map section -->
+    <li><h6 class="dropdown-header">Value Map</h6></li>
+    <li>
+      <a class="dropdown-item {{ 'active' if request.path == '/value_map' else '' }}" href="/value_map">
+        <i class="bi bi-diagram-3"></i> Full Price
+      </a>
+    </li>
+    <li>
+      <a class="dropdown-item {{ 'active' if request.path == '/value_map_promo' else '' }}" href="/value_map_promo">
+        <i class="bi bi-badge-ad"></i> Promo Price
+      </a>
+    </li>
+
+    <li><hr class="dropdown-divider"></li>
+
+    <!-- Insights section -->
+    <li><h6 class="dropdown-header">Insights & Analysis</h6></li>
+    <li><a class="dropdown-item {{ 'active' if request.path == '/swot' else '' }}" href="/swot">
+      <i class="bi bi-intersect"></i> SWOT
+    </a></li>
+
+    <li><a class="dropdown-item {{ 'active' if request.path == '/segments' else '' }}" href="/segments">
+      <i class="bi bi-people-fill"></i> Segments
+    </a></li>
+
+    <li><a class="dropdown-item {{ 'active' if request.path == '/trajectories' else '' }}" href="/trajectories">
+      <i class="bi bi-shuffle"></i> Trajectories
+    </a></li>
+
+  </ul>
+</li>
+
+<!-- Operations -->
+<li class="nav-item">
+  <a class="nav-link nav-underline {{ 'active' if request.path == '/operation_health' else '' }}" href="/operation_health">
+    <i class="bi bi-speedometer2"></i> Operations Health
+  </a>
+</li>
+
+<!-- Financial Factors -->
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle nav-underline 
+    {{ 'active' if request.path in ['/fna_performance', '/profit_n_loss'] else '' }}"
+    href="#" id="financeDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="bi bi-currency-dollar"></i> Financial Factors
+  </a>
+
+  <ul class="dropdown-menu" aria-labelledby="financeDropdown">
+    <li><h6 class="dropdown-header">Financial Health</h6></li>
+    <li>
+      <a class="dropdown-item {{ 'active' if request.path == '/fna_performance' else '' }}" href="/fna_performance">
+        <i class="bi bi-graph-up-arrow"></i> FNA Performance
+      </a>
+    </li>
+    <li>
+      <a class="dropdown-item {{ 'active' if request.path == '/profit_n_loss' else '' }}" href="/profit_n_loss">
+        <i class="bi bi-file-earmark-spreadsheet"></i> P&amp;L Overview
+      </a>
+    </li>
+  </ul>
+</li>
+
+<!-- Top Sale Product -->
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle nav-underline 
+    {{ 'active' if request.path.startswith(('/top_product','/top_product_promo')) else '' }}" 
+    href="#" id="productDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="bi bi-box-seam"></i> Top Sale Product
+  </a>
+
+  <ul class="dropdown-menu" aria-labelledby="productDropdown">
+
+    <li><h6 class="dropdown-header">Top Product</h6></li>
+
+    <li><a class="dropdown-item {{ 'active' if request.path == '/top_product' else '' }}" href="/top_product">
+      <i class="bi bi-box-seam-fill"></i> Full Price
+    </a></li>
+
+    <li><a class="dropdown-item {{ 'active' if request.path == '/top_product_promo' else '' }}" href="/top_product_promo">
+      <i class="bi bi-tag-fill"></i> Promo Price
+    </a></li>
+
+  </ul>
+</li>
+
+<!-- Planning & Execution -->
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle nav-underline 
+    {{ 'active' if request.path.startswith(('/roadmap','/ecom','/okr','/top_product','/top_product_promo')) else '' }}" 
+    href="#" id="planningDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="bi bi-rocket-takeoff"></i> Planning & Execution
+  </a>
+
+  <ul class="dropdown-menu" aria-labelledby="planningDropdown">
+
+    <li><h6 class="dropdown-header">Planning & Execution</h6></li>
+
+    <li><a class="dropdown-item {{ 'active' if request.path == '/ecom' else '' }}" href="/ecom">
+      <i class="bi bi-cart-check"></i> Sales Target Ecom
+    </a></li>
+    <li><a class="dropdown-item {{ 'active' if request.path == '/ecom_comp' else '' }}" href="/ecom_comp">
+      <i class="bi bi-columns-gap"></i> 2024 vs 2025 Comparison
+    </a></li>
+    <li><a class="dropdown-item {{ 'active' if request.path == '/strategy_plan' else '' }}" href="/strategy_plan">
+      <i class="bi bi-easel3"></i> Strategy Plan
+    </a></li>
+
+    <li><a class="dropdown-item {{ 'active' if request.path == '/roadmap' else '' }}" href="/roadmap">
+      <i class="bi bi-map"></i> Roadmap
+    </a></li>
+
+    <li><a class="dropdown-item {{ 'active' if request.path == '/okr' else '' }}" href="/okr">
+      <i class="bi bi-bullseye"></i> OKR
+    </a></li>
+
+  </ul>
+</li>
+
+
+        <!-- Right-side status -->
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-success">Live Data</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-container">
+    {% if title and title != "Khit Zay Dashboard" %}
+      <div class="page-header">
+        <h1>{{ title }}</h1>
+        {% if description %}
+          <div class="subtitle">{{ description }}</div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+      © {{ now.year if now is defined else '2025' }} Khit Zay — Strategy 2026
+    </footer>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Hover intent for dropdowns on large screens -->
+  <script>
+    (function(){
+      const mq = window.matchMedia('(hover: hover) and (pointer: fine)');
+      if (!mq.matches) return;
+      const dropdowns = document.querySelectorAll('.nav-item.dropdown');
+      dropdowns.forEach(dd => {
+        const toggle = dd.querySelector('[data-bs-toggle="dropdown"]');
+        if (!toggle) return;
+        dd.addEventListener('mouseenter', () => {
+          const inst = bootstrap.Dropdown.getOrCreateInstance(toggle);
+          inst.show();
+        });
+        dd.addEventListener('mouseleave', () => {
+          const inst = bootstrap.Dropdown.getOrCreateInstance(toggle);
+          inst.hide();
+        });
+      });
+    })();
+  </script>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
