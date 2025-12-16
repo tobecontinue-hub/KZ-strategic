@@ -16,13 +16,25 @@ env/
 service_account.json
 /dashboard_app_from_excel/service_account.json
 
+# Logs and temporary files
+errorlogs.txt
+*.log
+
+# Temporary files
+*.tmp
+F9D08810
+
+# System files
+.DS_Store
+Thumbs.db
+
 # IDE/editor
 .vscode/
 .idea/
 
-# OS files
-.DS_Store
-Thumbs.db
+# Git status files
+git status.txt
 
-# Logs
-*.log
+# Other text files
+info.txt
+table_sample.txt
