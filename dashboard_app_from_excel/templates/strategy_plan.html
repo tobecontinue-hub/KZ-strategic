@@ -26,7 +26,7 @@
 }
 .plan-hero > * { position:relative; z-index:1; }
 .plan-hero h1 { margin:0; font-weight:800; letter-spacing:-.4px; }
-.plan-hero p { margin-top:6px; color:#cdd7ef; }
+.plan-hero p { margin-top:6px; color:#cdd7ef; font-size:1.18rem; font-weight:600; }
 .timeline-wrapper { display:grid; gap:26px; }
 .pillar-card {
   background:var(--plan-card);
@@ -107,8 +107,8 @@ action-grid { margin-top:18px; display:grid; grid-template-columns: repeat(auto-
 {% set fallback_img = 'https://images.unsplash.com/photo-1487017159836-4e23ece2e4cf?auto=format&fit=crop&w=1200&q=60' %}
 
 <div class="plan-hero">
-  <h1>{{ goal_text }}</h1>
-  <p>Each pillar highlights a key action, click the photo to open it in a full presentation view.</p>
+  <h1>Goal</h1>
+  <p>{{ goal_text }}</p>
 </div>
 
 <div class="timeline-wrapper">
@@ -130,7 +130,9 @@ action-grid { margin-top:18px; display:grid; grid-template-columns: repeat(auto-
             <span>Pillar: {{ pillar }}</span>
           </div>
           <h3>{{ entry.action or 'Action TBD' }}</h3>
-          <p>{{ entry.goal }}</p>
+          {% if entry.description %}
+          <p>{{ entry.description }}</p>
+          {% endif %}
         </article>
       {% endfor %}
     </div>

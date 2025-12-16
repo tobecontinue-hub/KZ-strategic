@@ -925,7 +925,53 @@ def top_product():
         df = pd.DataFrame()
 
     rows = df.to_dict(orient="records") if not df.empty else []
-    return render_template("top_product.html", rows=rows, title="Top 10 Product Forecast")
+
+    # helper to normalize product names for matching between sheets
+    def normalize_name(name):
+        return str(name).strip().lower()
+
+    # attach normalized key to each top product row
+    for r in rows:
+        r["ProductKey"] = normalize_name(r.get("Product", ""))
+
+    # Load three_offer sheet for per-product offers
+    offers_by_product = defaultdict(list)
+    try:
+        offers_df = gs.sheet_to_df("three_offer")
+    except Exception as e:
+        print("Error loading three_offer:", e)
+        offers_df = pd.DataFrame()
+
+    if not offers_df.empty:
+        offers_df.columns = offers_df.columns.astype(str).str.strip()
+
+        for col in ["Product", "Offer_Product", "Offer", "Photo_URL"]:
+            if col not in offers_df.columns:
+                offers_df[col] = ""
+
+        for _, r in offers_df.iterrows():
+            product_name = str(r.get("Product", "")).strip()
+            if not product_name:
+                continue
+            key = normalize_name(product_name)
+            offer_text = str(r.get("Offer", "")).strip()
+            offer_label = str(r.get("Offer_Product", "")).strip()
+            photo_url = str(r.get("Photo_URL", "")).strip()
+
+            offers_by_product[key].append({
+                "title": offer_text or "Offer details coming soon",
+                "img": photo_url,
+                "label": offer_label or "Offer",
+            })
+
+        # only keep first three items per product to match UI expectation
+        for product_key, product_offers in offers_by_product.items():
+            offers_by_product[product_key] = product_offers[:3]
+
+    # convert defaultdict to plain dict for safe JSON serialization in the template
+    offers_by_product = dict(offers_by_product)
+
+    return render_template("top_product.html", rows=rows, offers_by_product=offers_by_product, title="Top 10 Product Forecast")
 
 
 
@@ -967,19 +1013,22 @@ def dna_page():
     sections = {
         "I. Core Values": [],
         "II. Hygiene Factors": [],
-        "III. Motivation Factors": []
+        "III. Motivation Factors": [],
+        "Strategic Insight": []
     }
 
     area_to_section = {
-        "Core Values": "I. Core Values",
-        "Hygiene Factors": "II. Hygiene Factors",
-        "Motivation Factors": "III. Motivation Factors"
+        "core values": "I. Core Values",
+        "hygiene factors": "II. Hygiene Factors",
+        "motivation factors": "III. Motivation Factors",
+        "strategic insight": "Strategic Insight"
     }
 
     for row in rows:
-        content_area = row.get("Content_Area", "").strip()
-        if content_area in area_to_section:
-            section = area_to_section[content_area]
+        content_area = str(row.get("Content_Area", "")).strip()
+        section_key = content_area.lower()
+        if section_key in area_to_section:
+            section = area_to_section[section_key]
             cleaned_row = {
                 "Point_ID": row.get("Point_ID", ""),
                 "Key_Item": row.get("Key_Item", ""),

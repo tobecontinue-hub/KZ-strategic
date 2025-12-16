@@ -300,11 +300,6 @@
         {% if item.get('Rationale') %}
           <p style="margin:0;color:var(--text-soft);font-size:0.9rem;">{{ item.get('Rationale') }}</p>
         {% endif %}
-        {% if status %}
-          <span class="status-badge {% if 'on' in status|lower %}status-green{% elif 'warning' in status|lower %}status-amber{% elif 'critical' in status|lower or 'high' in status|lower %}status-red{% endif %}">
-            {{ status }}
-          </span>
-        {% endif %}
         <div class="kpi-footer">
           <span style="font-weight:600;color:var(--text-strong);">Lead: {{ item.get('Owner', 'Unassigned') }}</span>
           <span style="font-size:0.8rem;color:var(--text-soft);text-transform:uppercase;">{{ item.get('Time Horizon', 'Rolling 12M') }}</span>
@@ -324,7 +319,6 @@
             <th>2024</th>
             <th>2025</th>
             <th>Variance</th>
-            <th>Status</th>
           </tr>
         </thead>
         <tbody>
@@ -335,7 +329,6 @@
               <td>{{ item.get('2024', '–') }}</td>
               <td>{{ item.get('2025', '–') }}</td>
               <td>{{ item.get('Variance (YoY Change)', item.get('Variance', '–')) }}</td>
-              <td>{{ item.get('Status', '—') }}</td>
             </tr>
           {% endfor %}
         </tbody>

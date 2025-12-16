@@ -1,306 +1,414 @@
 <!-- templates/dna.html -->
 {% extends "base.html" %}
 {% block content %}
-  <style>
-    /* Keep styles scoped; do not target html/body so base navbar/tabs remain intact */
-    .dna-app-wrapper {
-      width: 100%;
-      min-height: 100%;
-      overflow-y: auto;
-      padding: 24px 16px;
-      position: relative;
-    }
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
-    /* Floating particles background */
-    .dna-particles {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
+<style>
+:root {
+  --dna-bg: #050914;
+  --dna-card: rgba(13, 21, 37, 0.72);
+  --dna-border: rgba(148, 163, 184, 0.3);
+  --dna-glow: rgba(59, 130, 246, 0.6);
+}
 
-    .dna-particle {
-      position: absolute;
-      width: 4px;
-      height: 4px;
-      background: rgba(0, 0, 0, 0.06);
-      border-radius: 50%;
-      animation: dna-float 15s infinite ease-in-out;
-    }
+.dna-shell {
+  position: relative;
+  padding: 32px 12px 60px;
+  background: radial-gradient(circle at top, rgba(37,99,235,0.25), rgba(15,23,42,0.9)), url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1350&q=60') center/cover;
+  background-attachment: fixed;
+}
 
-    @keyframes dna-float {
-      0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
-    }
+.dna-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 9, 20, 0.88);
+  z-index: 0;
+}
 
-    .dna-section-card {
-      background: white;
-      border-radius: 16px;
-      margin-bottom: 20px;
-      overflow: hidden;
-      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
+.dna-shell-content {
+  position: relative;
+  z-index: 1;
+}
 
-    .dna-section-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
-    }
+.dna-hero {
+  background: rgba(6, 11, 25, 0.9);
+  border: 1px solid var(--dna-border);
+  border-radius: 28px;
+  padding: 32px;
+  color: #f8fafc;
+  box-shadow: 0 30px 80px rgba(2,6,23,0.8);
+  backdrop-filter: blur(18px);
+}
 
-    .dna-section-core { --sec: #3b82f6; --sec-dark: #2563eb; --sec-light: #dbeafe; }
-    .dna-section-hygiene { --sec: #8b5cf6; --sec-dark: #7c3aed; --sec-light: #ede9fe; }
-    .dna-section-motivation { --sec: #f59e0b; --sec-dark: #d97706; --sec-light: #fef3c7; }
+.dna-hero h1 {
+  font-weight: 800;
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  margin-bottom: 12px;
+}
 
-    .dna-section-header {
-      background: linear-gradient(135deg, var(--sec) 0%, var(--sec-dark) 100%);
-      padding: 16px 24px;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      color: #fff;
-    }
+.dna-hero p {
+  color: #cbd5f5;
+  max-width: 720px;
+  margin-bottom: 24px;
+}
 
-    .dna-header-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+.dna-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
 
-    .dna-section-title {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+.dna-metric-card {
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(59,130,246,0.18), rgba(6,182,212,0.12));
+  border: 1px solid rgba(59,130,246,0.25);
+}
 
-    .dna-section-icon {
-      width: 28px;
-      height: 28px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-    }
+.dna-metric-label {
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #93c5fd;
+}
 
-    .dna-chevron svg { width: 16px; height: 16px; }
-    .dna-chevron svg path { stroke: white; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.dna-metric-value {
+  font-size: 1.9rem;
+  font-weight: 700;
+}
 
-    .dna-section-body { overflow: hidden; }
-    .dna-section-body.collapsed { display: none; }
+.dna-grid {
+  margin-top: 40px;
+  display: grid;
+  gap: 24px;
+}
 
-    .dna-value-item { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; display: flex; gap: 16px; }
-    .dna-value-item:last-child { border-bottom: none; }
+.section-card {
+  border-radius: 26px;
+  border: 1px solid var(--dna-border);
+  background: var(--dna-card);
+  box-shadow: 0 20px 50px rgba(2,6,23,0.55);
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+}
 
-    .dna-point-badge {
-      width: 48px; height: 48px; min-width: 48px; border-radius: 12px;
-      background: var(--sec-light); border: 3px solid var(--sec);
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 16px; color: var(--sec);
-    }
+.section-card[data-tone="core"] { --tone: #3b82f6; --tone-dark: #1d4ed8; }
+.section-card[data-tone="hygiene"] { --tone: #a855f7; --tone-dark: #7c3aed; }
+.section-card[data-tone="motivation"] { --tone: #f97316; --tone-dark: #c2410c; }
+.section-card[data-tone="insight"] { --tone: #0ea5e9; --tone-dark: #0369a1; }
 
-    .dna-value-content { flex: 1; min-width: 0; }
-    .dna-key-title { font-size: 16px; font-weight: 700; color: #1e293b; margin: 0 0 8px; }
-    .dna-signal-list { list-style: none; padding: 0; margin: 0; }
-    .dna-signal-list li { padding: 6px 0 6px 24px; color: #475569; font-size: 14px; position: relative; }
-    .dna-signal-list li::before { content: '✓'; position: absolute; left: 0; top: 4px; width: 18px; height: 18px; background: var(--sec-light); color: var(--sec); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.section-header {
+  padding: 20px 26px;
+  background: linear-gradient(120deg, var(--tone), var(--tone-dark));
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
 
-    .dna-details-toggle { background: var(--sec); color: #fff; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
-    .dna-details-box { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.3s ease; margin-top: 0; }
-    .dna-details-box.expanded { max-height: 800px; opacity: 1; margin-top: 12px; }
+.section-header-title {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
 
-    .dna-details-content { background: linear-gradient(135deg, var(--sec-light) 0%, white 100%); border-left: 4px solid var(--sec); border-radius: 12px; padding: 16px; }
-  </style>
+.section-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
 
-  <!-- Optional decorative layer under the content -->
-  <div class="dna-particles" id="particles"></div>
+.section-title-text {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
 
-  <div class="dna-app-wrapper">
-   <div class="main-container">
-    <!-- Core Values Section -->
-    <div class="dna-section-card dna-section-core">
-      <div class="dna-section-header" onclick="toggleSection('core')">
-        <div class="dna-header-content">
-          <h3 class="dna-section-title"><span class="dna-section-icon">💎</span> <span id="coreSectionTitle">I. Core Values</span></h3>
-          <div class="dna-chevron">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" /></svg>
-          </div>
+.section-pill {
+  font-size: 0.85rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.15);
+}
+
+.section-body {
+  padding: 10px 26px 26px;
+}
+
+.section-body.collapsed { display: none; }
+
+.dna-item {
+  margin-top: 16px;
+  padding: 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(148,163,184,0.25);
+  background: rgba(15,23,42,0.6);
+  transition: border 0.2s ease, transform 0.2s ease;
+}
+
+.dna-item:hover {
+  border-color: rgba(148,163,184,0.5);
+  transform: translateY(-2px);
+}
+
+.dna-item-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.point-badge {
+  padding: 10px 18px;
+  border-radius: 14px;
+  background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.5);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #bfdbfe;
+}
+
+.key-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.signal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.signal-list li {
+  padding-left: 26px;
+  color: #cbd5f5;
+  font-size: 0.95rem;
+  position: relative;
+}
+.signal-list li::before {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  left: 0;
+  top: 6px;
+  border: 3px solid rgba(59,130,246,0.4);
+}
+
+.details-toggle {
+  border: none;
+  margin-top: 14px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  color: #e2e8f0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.details-toggle:hover { background: rgba(255,255,255,0.15); }
+
+.details-panel {
+  margin-top: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(59,130,246,0.35);
+  background: rgba(15,23,42,0.8);
+  padding: 16px;
+  display: none;
+}
+
+.details-panel.show { display: block; }
+
+.insight-stream {
+  display: grid;
+  gap: 16px;
+}
+
+.insight-entry {
+  background: rgba(8,47,73,0.6);
+  border: 1px solid rgba(14,165,233,0.4);
+  border-radius: 16px;
+  padding: 18px;
+  color: #e0f2fe;
+  display: flex;
+  gap: 16px;
+}
+
+.insight-marker {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(14,165,233,0.2);
+  border: 1px solid rgba(14,165,233,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .section-header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .dna-item-top { flex-direction: column; align-items: flex-start; }
+}
+</style>
+
+<div class="dna-shell">
+  <div class="dna-shell-content">
+    <div class="dna-hero">
+      <p class="text-uppercase" style="letter-spacing:0.2em; color:#7dd3fc; font-weight:600; font-size:0.85rem;">Organizational DNA</p>
+      <h1>Culture signals, hygiene factors & motivational fuel</h1>
+      <p>Interactive view of the implicit rules and explicit commitments that shape how we work,  operate, and grow. Drill into each layer to reveal the behavioral signals, data-backed validation, and the strategic insight powering 2025 focus.</p>
+      <div class="dna-metrics">
+        <div class="dna-metric-card">
+          <div class="dna-metric-label">Core Values</div>
+          <div class="dna-metric-value">{{ sections['I. Core Values']|length }}</div>
+        </div>
+        <div class="dna-metric-card">
+          <div class="dna-metric-label">Hygiene</div>
+          <div class="dna-metric-value">{{ sections['II. Hygiene Factors']|length }}</div>
+        </div>
+        <div class="dna-metric-card">
+          <div class="dna-metric-label">Motivation</div>
+          <div class="dna-metric-value">{{ sections['III. Motivation Factors']|length }}</div>
+        </div>
+        <div class="dna-metric-card">
+          <div class="dna-metric-label">Strategic Insight Items</div>
+          <div class="dna-metric-value">{{ sections['Strategic Insight']|length }}</div>
         </div>
       </div>
-      <div class="dna-section-body" id="coreBody">
-        {% for item in sections["I. Core Values"] %}
-        <div class="dna-value-item">
-          <div class="dna-point-badge">{{ item.Point_ID }}</div>
-          <div class="dna-value-content">
-            <h4 class="dna-key-title">{{ item.Key_Item }}</h4>
+    </div>
+
+    <div class="dna-grid">
+      {% macro section_block(code, title, icon, tone) -%}
+      <div class="section-card" data-tone="{{ tone }}">
+        <div class="section-header" data-section-toggle="{{ tone }}">
+          <div class="section-header-title">
+            <div class="section-icon">{{ icon }}</div>
+            <div>
+              <div class="section-pill">{{ code }}</div>
+              <div class="section-title-text">{{ title }}</div>
+            </div>
+          </div>
+          <button class="details-toggle" type="button">
+            <span>Toggle</span>
+            <i class="bi bi-chevron-down"></i>
+          </button>
+        </div>
+        <div class="section-body collapsed" id="section-{{ tone }}">
+          {% for item in sections[code] %}
+          <div class="dna-item">
+            <div class="dna-item-top">
+              <span class="point-badge">{{ item.Point_ID }}</span>
+              <div class="key-title">{{ item.Key_Item }}</div>
+            </div>
             {% if item.DNA %}
-              {% set lines = item.DNA.split('✔') | map('trim') | list %}
-              <ul class="dna-signal-list">
-                {% for ln in lines if ln %}
-                <li>{{ ln }}</li>
-                {% endfor %}
-              </ul>
+            {% set lines = item.DNA.split('✔') | map('trim') | list %}
+            <ul class="signal-list">
+              {% for ln in lines if ln %}
+              <li>{{ ln }}</li>
+              {% endfor %}
+            </ul>
             {% endif %}
-            {% set details = item["Details/Data_Alignment"] %}
+            {% set details = item['Details/Data_Alignment'] %}
             {% if details %}
-              <button class="dna-details-toggle" onclick="toggleDetails(this)"><span>Show Details</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" /></svg>
-              </button>
-              <div class="dna-details-box">
-                <div class="dna-details-content"><p>{{ details }}</p></div>
+            <button class="details-toggle" type="button" onclick="toggleDetailsPanel(this)">
+              <span>Show evidence</span>
+              <i class="bi bi-chevron-right"></i>
+            </button>
+            <div class="details-panel">
+              <p class="mb-0">{{ details }}</p>
+            </div>
+            {% endif %}
+          </div>
+          {% else %}
+          <p style="color:#94a3b8;">No entries configured for this section.</p>
+          {% endfor %}
+        </div>
+      </div>
+      {%- endmacro %}
+
+      {{ section_block('I. Core Values', 'Core Values', '💎', 'core') }}
+      {{ section_block('II. Hygiene Factors', 'Hygiene Factors', '🛡️', 'hygiene') }}
+      {{ section_block('III. Motivation Factors', 'Motivation Factors', '🚀', 'motivation') }}
+
+      <div class="section-card" data-tone="insight">
+        <div class="section-header" data-section-toggle="insight">
+          <div class="section-header-title">
+            <div class="section-icon">💡</div>
+            <div>
+              <div class="section-pill">Strategic Callouts</div>
+              <div class="section-title-text">Strategic Insight</div>
+            </div>
+          </div>
+          <button class="details-toggle" type="button">
+            <span>Toggle</span>
+            <i class="bi bi-chevron-down"></i>
+          </button>
+        </div>
+        <div class="section-body collapsed" id="section-insight">
+          {% if sections['Strategic Insight'] %}
+          <div class="insight-stream">
+            {% for entry in sections['Strategic Insight'] %}
+            <div class="insight-entry">
+              <div class="insight-marker">SI</div>
+              <div>
+                <h5 class="mb-2" style="color:#bae6fd; font-weight:600;">{{ entry.Key_Item or '' }}</h5>
+                <p class="mb-0">{{ entry['Details/Data_Alignment'] }}</p>
               </div>
-            {% endif %}
+            </div>
+            {% endfor %}
           </div>
+          {% else %}
+          <p style="color:#94a3b8;">No strategic insight available.</p>
+          {% endif %}
         </div>
-        {% endfor %}
       </div>
-    </div>
 
-    <!-- Hygiene Factors Section -->
-    <div class="dna-section-card dna-section-hygiene">
-      <div class="dna-section-header" onclick="toggleSection('hygiene')">
-        <div class="dna-header-content">
-          <h3 class="dna-section-title"><span class="dna-section-icon">🛡️</span> <span id="hygieneSectionTitle">II. Hygiene Factors</span></h3>
-          <div class="dna-chevron">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" /></svg>
-          </div>
-        </div>
-      </div>
-      <div class="dna-section-body" id="hygieneBody">
-        {% for item in sections["II. Hygiene Factors"] %}
-        <div class="dna-value-item">
-          <div class="dna-point-badge">{{ item.Point_ID }}</div>
-          <div class="dna-value-content">
-            <h4 class="dna-key-title">{{ item.Key_Item }}</h4>
-            {% if item.DNA %}
-              {% set lines = item.DNA.split('✔') | map('trim') | list %}
-              <ul class="dna-signal-list">
-                {% for ln in lines if ln %}
-                <li>{{ ln }}</li>
-                {% endfor %}
-              </ul>
-            {% endif %}
-            {% set details = item["Details/Data_Alignment"] %}
-            {% if details %}
-              <button class="dna-details-toggle" onclick="toggleDetails(this)"><span>Show Details</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" /></svg>
-              </button>
-              <div class="dna-details-box">
-                <div class="dna-details-content"><p>{{ details }}</p></div>
-              </div>
-            {% endif %}
-          </div>
-        </div>
-        {% endfor %}
-      </div>
     </div>
-
-    <!-- Motivation Factors Section -->
-    <div class="dna-section-card dna-section-motivation">
-      <div class="dna-section-header" onclick="toggleSection('motivation')">
-        <div class="dna-header-content">
-          <h3 class="dna-section-title"><span class="dna-section-icon">🚀</span> <span id="motivationSectionTitle">III. Motivation Factors</span></h3>
-          <div class="dna-chevron">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" /></svg>
-          </div>
-        </div>
-      </div>
-      <div class="dna-section-body" id="motivationBody">
-        {% for item in sections["III. Motivation Factors"] %}
-        <div class="dna-value-item">
-          <div class="dna-point-badge">{{ item.Point_ID }}</div>
-          <div class="dna-value-content">
-            <h4 class="dna-key-title">{{ item.Key_Item }}</h4>
-            {% if item.DNA %}
-              {% set lines = item.DNA.split('✔') | map('trim') | list %}
-              <ul class="dna-signal-list">
-                {% for ln in lines if ln %}
-                <li>{{ ln }}</li>
-                {% endfor %}
-              </ul>
-            {% endif %}
-            {% set details = item["Details/Data_Alignment"] %}
-            {% if details %}
-              <button class="dna-details-toggle" onclick="toggleDetails(this)"><span>Show Details</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" /></svg>
-              </button>
-              <div class="dna-details-box">
-                <div class="dna-details-content"><p>{{ details }}</p></div>
-              </div>
-            {% endif %}
-          </div>
-        </div>
-        {% endfor %}
-
-      </div>
-    </div>
-    <!-- Strategic Insight Section -->
-<div class="dna-section-card dna-section-core"> 
-  <div class="dna-section-header">
-    <div class="dna-header-content">
-      <h3 class="dna-section-title">
-        <span class="dna-section-icon">💡</span>
-        Strategic Insight
-      </h3>
-    </div>
-  </div>
-
-  <div class="dna-section-body" style="padding: 20px;">
-    {% set insight = sections.get("Strategic Insight", []) %}
-    {% if insight %}
-        {% for row in insight %}
-          <p style="font-size:15px; color:#1e293b; line-height:1.6; margin-bottom:12px;">
-            {{ row["Details/Data_Alignment"] }}
-          </p>
-        {% endfor %}
-    {% else %}
-      <p style="font-size:14px; color:#475569;">No strategic insight available.</p>
-    {% endif %}
   </div>
 </div>
-</div>
-  </div>
 
-  <script>
-    function toggleSection(sectionId) {
-      const body = document.getElementById(sectionId + 'Body');
-      const header = body.previousElementSibling;
-      body.classList.toggle('collapsed');
-      header.classList.toggle('collapsed');
-    }
+<script>
+const sectionToggles = document.querySelectorAll('[data-section-toggle]');
+sectionToggles.forEach(toggle => {
+  toggle.addEventListener('click', () => {
+    const target = toggle.getAttribute('data-section-toggle');
+    const body = document.getElementById(`section-${target}`);
+    if (!body) return;
+    body.classList.toggle('collapsed');
+    const icon = toggle.querySelector('.bi');
+    if (icon) icon.classList.toggle('bi-chevron-down');
+    if (icon) icon.classList.toggle('bi-chevron-up');
+  });
+});
 
-    function toggleDetails(button) {
-      const detailsBox = button.nextElementSibling;
-      detailsBox.classList.toggle('expanded');
-      button.classList.toggle('expanded');
-      const span = button.querySelector('span');
-      span.textContent = detailsBox.classList.contains('expanded') ? 'Hide Details' : 'Show Details';
-    }
-
-    function createParticles() {
-      const container = document.getElementById('particles');
-      if (!container) return;
-      for (let i = 0; i < 20; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'dna-particle';
-        particle.style.left = Math.random() * 100 + '%';
-        particle.style.animationDelay = Math.random() * 15 + 's';
-        particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
-        container.appendChild(particle);
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      createParticles();
-    });
-  </script>
+function toggleDetailsPanel(button) {
+  const panel = button.nextElementSibling;
+  if (!panel) return;
+  panel.classList.toggle('show');
+  const icon = button.querySelector('.bi');
+  if (icon) icon.classList.toggle('bi-chevron-right');
+  if (icon) icon.classList.toggle('bi-chevron-down');
+  const span = button.querySelector('span');
+  if (span) span.textContent = panel.classList.contains('show') ? 'Hide evidence' : 'Show evidence';
+}
+</script>
 {% endblock %}

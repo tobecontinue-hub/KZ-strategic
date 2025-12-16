@@ -1,342 +1,330 @@
 <!-- templates/okr.html -->
 {% extends "base.html" %}
 {% block content %}
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+{% set stats = namespace(objectives=0, rows_2025=0, rows_2026=0) %}
+{% if comparison %}
+  {% for team in comparison %}
+    {% set stats.objectives = stats.objectives + (team.objectives|length) %}
+    {% for obj in team.objectives %}
+      {% set stats.rows_2025 = stats.rows_2025 + (obj.items_2025|length if obj.items_2025 else 0) %}
+      {% set stats.rows_2026 = stats.rows_2026 + (obj.items_2026|length if obj.items_2026 else 0) %}
+    {% endfor %}
+  {% endfor %}
+{% endif %}
 <style>
-.okr-container {
-  padding: 14px 20px 26px;
-  max-width: 1200px;
-  margin: auto;
+:root {
+  --okr-bg: #010a16;
+  --okr-card: rgba(15,23,42,0.85);
+  --okr-border: rgba(148,163,184,0.3);
+  --okr-highlight: #34d399;
 }
 
-.okr-header {
-  text-align: center;
-  margin-bottom: 24px;
-}
-.okr-header h1 {
-  font-size: 1.9rem;
-  color: #073047;
-  margin: 0;
-  letter-spacing:-0.03em;
-}
-.okr-header .subtitle {
-  color: #6b7280;
-  font-size: 0.93rem;
-  margin-top: 4px;
-  letter-spacing:0.14em;
-  text-transform:uppercase;
+.okr-shell {
+  min-height: calc(100vh - 120px);
+  background: radial-gradient(circle at top, rgba(52,211,153,0.2), rgba(2,6,23,0.95));
+  padding: 38px 12px 70px;
 }
 
-.team-section {
-  margin-bottom: 16px;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(15,23,42,0.12);
+.okr-board {
+  max-width: 1300px;
+  margin: 0 auto;
+  border-radius: 40px;
+  border: 1px solid rgba(52,211,153,0.35);
+  box-shadow: 0 45px 140px rgba(2,6,23,0.85);
+  background: rgba(2,6,23,0.92);
   overflow: hidden;
-  opacity: 0;
-  transform: translateX(-25px);
-  animation: slideInLeft 0.45s forwards ease-out;
 }
 
-@keyframes slideInLeft {
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+.okr-hero {
+  padding: 34px 42px 28px;
+  color: #f8fafc;
+  background: linear-gradient(135deg, rgba(52,211,153,0.2), rgba(56,189,248,0.25));
 }
-{% for i in range(10) %}
-.team-section:nth-of-type({{ i + 1 }}) {
-  animation-delay: {{ i * 0.08 }}s;
+
+.okr-hero h1 {
+  font-size: clamp(2.1rem, 3vw, 2.9rem);
+  font-weight: 800;
+  margin-bottom: 12px;
 }
-{% endfor %}
+
+.okr-hero p {
+  color: #cbd5f5;
+  max-width: 820px;
+  margin-bottom: 18px;
+}
+
+.okr-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.okr-stat {
+  border-radius: 22px;
+  border: 1px solid rgba(148,163,184,0.35);
+  background: rgba(2,6,23,0.6);
+  padding: 14px 16px;
+}
+
+.okr-stat label {
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #d1fae5;
+}
+
+.okr-stat span {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #ecfccb;
+}
+
+.okr-body {
+  padding: 30px 36px 46px;
+  display: grid;
+  gap: 22px;
+}
+
+.team-card {
+  border-radius: 26px;
+  border: 1px solid var(--okr-border);
+  background: var(--okr-card);
+  overflow: hidden;
+}
 
 .team-header {
-  padding: 12px 18px;
-  background: linear-gradient(90deg, #0b63ff, #00a6a1);
-  color: white;
-  font-size: 1.02rem;
-  font-weight: 700;
-  cursor: pointer;
+  padding: 18px 22px;
   display: flex;
   justify-content: space-between;
+  gap: 12px;
   align-items: center;
-  transition: background 0.25s;
-}
-.team-header:hover {
-  background: linear-gradient(90deg, #084dcc, #008b89);
-}
-.team-header i {
-  transition: transform 0.3s;
-}
-.team-header-meta {
-  display:flex;
-  align-items:center;
-  gap:0.75rem;
-  font-size:0.8rem;
-}
-.team-header-chip {
-  padding:0.18rem 0.6rem;
-  border-radius:999px;
-  background:rgba(255,255,255,0.16);
-  font-size:0.78rem;
-}
-.team-header-score {
-  font-size:0.9rem;
-  font-weight:600;
+  cursor: pointer;
+  background: rgba(15,23,42,0.9);
 }
 
-.team-content {
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  transition: max-height 0.4s ease, opacity 0.3s ease;
+.team-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #f8fafc;
 }
-.team-content.expanded {
-  max-height: 2000px;
+
+.team-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.team-chip {
+  border-radius: 999px;
+  padding: 4px 12px;
+  border: 1px solid rgba(148,163,184,0.35);
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #cbd5f5;
+}
+
+.team-score { font-weight: 700; font-size: 0.9rem; color: #ecfccb; }
+
+.team-body {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.35s ease;
+}
+
+.team-body.expanded {
+  max-height: 3000px;
   opacity: 1;
 }
 
-.objective-card {
-  padding: 18px 22px;
-  border-bottom: 1px solid #f0f4f8;
-}
-.objective-card:last-child {
-  border-bottom: none;
-}
-.objective-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin-bottom: 16px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid #e5e7eb;
-  color: #073047;
+.objective-panel {
+  padding: 22px;
+  border-bottom: 1px solid rgba(148,163,184,0.2);
 }
 
-.okr-full-table {
+.objective-panel:last-child { border-bottom: none; }
+
+.objective-title {
+  margin: 0 0 14px;
+  color: #ecfeff;
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+
+.year-tag {
+  margin: 18px 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.78rem;
+  color: #a5f3fc;
+}
+
+.okr-table-wrapper {
+  border: 1px solid rgba(148,163,184,0.25);
+  border-radius: 18px;
+  overflow-x: auto;
+}
+
+.okr-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 12px;
+  color: #f8fafc;
+  font-size: 0.92rem;
 }
-.okr-full-table th {
-  background: #f8fafc;
-  padding: 10px 12px;
-  text-align: left;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #4b5563;
-  border-bottom: 1px solid #e5e7eb;
+
+.okr-table thead {
+  background: rgba(15,23,42,0.9);
 }
-.okr-full-table td {
-  padding: 12px;
+
+.okr-table th,
+.okr-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(148,163,184,0.15);
   vertical-align: top;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  border-bottom: 1px solid #f0f4f8;
-  max-width: 200px;
-}
-.okr-full-table td p {
-  margin: 0 0 6px;
-  padding-left: 16px;
-  position: relative;
-}
-.okr-full-table td p::before {
-  content: "•";
-  position: absolute;
-  left: 0;
-  color: #0b63ff;
 }
 
-/* Scrollable container for long content */
-.scrollable-cell {
-  max-height: 180px;
-  overflow-y: auto;
-  padding-right: 8px;
-}
-.scrollable-cell::-webkit-scrollbar {
-  width: 6px;
-}
-.scrollable-cell::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
+.okr-table th {
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #bae6fd;
 }
 
-/* Year Colors */
-.year-2025 { color: #0288d1; }
-.year-2026 { color: #2e7d32; }
+.okr-table td ul {
+  margin: 0;
+  padding-left: 18px;
+}
 
-/* Responsive */
 @media (max-width: 768px) {
-  .okr-full-table {
-    display: block;
-    overflow-x: auto;
-  }
-  .okr-full-table th,
-  .okr-full-table td {
-    white-space: nowrap;
-  }
+  .okr-body { padding: 24px; }
+  .team-header { flex-direction: column; align-items: flex-start; }
 }
 </style>
 
-<div class="okr-container">
+<div class="okr-shell">
+  <div class="okr-board">
+    <section class="okr-hero">
+      <p class="text-uppercase" style="letter-spacing:0.3em; color:#fcd34d; font-weight:600; font-size:0.85rem;">Unified OKR Console</p>
+      <h1>Team objectives and measurable key results.</h1>
+      <p>Every block below aligns 2025 and 2026 plans in one spot. Expand a team to review their full Functional POVs, outcomes, and lead actions.</p>
+      <div class="okr-stats">
+        <div class="okr-stat"><label>Teams</label><span>{{ comparison|length if comparison else 0 }}</span></div>
+        <div class="okr-stat"><label>Objectives</label><span>{{ stats.objectives }}</span></div>
+        <div class="okr-stat"><label>2025 Rows</label><span>{{ stats.rows_2025 }}</span></div>
+        <div class="okr-stat"><label>2026 Rows</label><span>{{ stats.rows_2026 }}</span></div>
+      </div>
+    </section>
 
-  {% if comparison %}
-    {% for team_data in comparison %}
-      <div class="team-section">
-        {% set avg_2025 = (team_data.avg_2025 if team_data.avg_2025 is defined else None) %}
-        {% set avg_2026 = (team_data.avg_2026 if team_data.avg_2026 is defined else None) %}
-        <div class="team-header" onclick="toggleTeam(this)">
-          <div>{{ team_data.team }}</div>
-          <div class="team-header-meta">
-            {% if avg_2025 %}
-              <span class="team-header-chip">2025 Avg</span>
-              <span class="team-header-score">{{ avg_2025 }}%</span>
-            {% endif %}
-            {% if avg_2026 %}
-              <span class="team-header-chip">2026 Avg</span>
-              <span class="team-header-score">{{ avg_2026 }}%</span>
-            {% endif %}
-            <i class="bi bi-chevron-right"></i>
+    <section class="okr-body">
+      {% if comparison %}
+        {% for team in comparison %}
+        <article class="team-card">
+          <div class="team-header" onclick="toggleTeam(this)">
+            <h3>{{ team.team }}</h3>
+            <div class="team-meta">
+              {% if team.avg_2025 %}
+              <span class="team-chip">2025 Avg</span>
+              <span class="team-score">{{ team.avg_2025 }}%</span>
+              {% endif %}
+              {% if team.avg_2026 %}
+              <span class="team-chip">2026 Avg</span>
+              <span class="team-score">{{ team.avg_2026 }}%</span>
+              {% endif %}
+              <i class="bi bi-chevron-down"></i>
+            </div>
           </div>
-        </div>
-
-        <div class="team-content">
-          {% for obj in team_data.objectives %}
-            <div class="objective-card">
+          <div class="team-body">
+            {% for obj in team.objectives %}
+            <div class="objective-panel">
               <div class="objective-title">{{ obj.objective }}</div>
 
-              <!-- 2025 Table -->
               {% if obj.items_2025 %}
-                <h5 class="year-2025"><i class="bi bi-calendar-check"></i> 2025</h5>
-                <div class="table-responsive">
-                  <table class="okr-full-table">
-                    <thead>
-                      <tr>
-                        <th>Functional POVs</th>
-                        <th>Objective</th>
-                        <th>Key Results</th>
-                        <th>Lead Outcomes</th>
-                        <th>Lead Actions</th>
-                        <th>Average</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for kr in obj.items_2025 %}
-                        <tr>
-                          <td>{{ kr['Functional POVs'] or '' }}</td>
-                          <td>{{ kr['Objective'] or '' }}</td>
-                          <td>{{ kr['Key Results'] or '' }}</td>
-                          <td class="scrollable-cell">
-                            {% set lo = kr['Lead Outcomes'] or '' %}
-                            {% if '\n' in lo %}
-                              <ul style="padding-left:18px;margin:0;">
-                                {% for line in lo.split('\n') if line|trim %}
-                                  <li>{{ line|trim }}</li>
-                                {% endfor %}
-                              </ul>
-                            {% else %}
-                              {{ lo }}
-                            {% endif %}
-                          </td>
-                          <td class="scrollable-cell">
-                            {% set la = kr['Lead Actions'] or '' %}
-                            {% if '\n' in la %}
-                              <ul style="padding-left:18px;margin:0;">
-                                {% for line in la.split('\n') if line|trim %}
-                                  <li>{{ line|trim }}</li>
-                                {% endfor %}
-                              </ul>
-                            {% else %}
-                              {{ la }}
-                            {% endif %}
-                          </td>
-                          <td>{{ kr['Average'] or '' }}%</td>
-                        </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                </div>
+              <div class="year-tag">2025 focus</div>
+              <div class="okr-table-wrapper">
+                <table class="okr-table">
+                  <thead>
+                    <tr>
+                      <th>Functional POVs</th>
+                      <th>Objective</th>
+                      <th>Key Results</th>
+                      <th>Lead Outcomes</th>
+                      <th>Lead Actions</th>
+                      <th>Average</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for row in obj.items_2025 %}
+                    <tr>
+                      <td>{{ row['Functional POVs'] or '' }}</td>
+                      <td>{{ row['Objective'] or '' }}</td>
+                      <td>{{ row['Key Results'] or '' }}</td>
+                      <td>{% set lo = row['Lead Outcomes'] or '' %}{% if '\n' in lo %}<ul>{% for line in lo.split('\n') if line|trim %}<li>{{ line|trim }}</li>{% endfor %}</ul>{% else %}{{ lo }}{% endif %}</td>
+                      <td>{% set la = row['Lead Actions'] or '' %}{% if '\n' in la %}<ul>{% for line in la.split('\n') if line|trim %}<li>{{ line|trim }}</li>{% endfor %}</ul>{% else %}{{ la }}{% endif %}</td>
+                      <td>{{ row['Average'] or '' }}%</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
               {% endif %}
 
-              <!-- 2026 Table -->
               {% if obj.items_2026 %}
-                <h5 class="year-2026 mt-4"><i class="bi bi-calendar-plus"></i> 2026</h5>
-                <div class="table-responsive">
-                  <table class="okr-full-table">
-                    <thead>
-                      <tr>
-                        <th>Functional POVs</th>
-                        <th>Objective</th>
-                        <th>Key Results</th>
-                        <th>Lead Outcomes</th>
-                        <th>Lead Actions</th>
-                        <th>Average</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for kr in obj.items_2026 %}
-                        <tr>
-                          <td>{{ kr['Functional POVs'] or '' }}</td>
-                          <td>{{ kr['Objective'] or '' }}</td>
-                          <td>{{ kr['Key Results'] or '' }}</td>
-                          <td class="scrollable-cell">
-                            {% set lo2 = kr['Lead Outcomes'] or '' %}
-                            {% if '\n' in lo2 %}
-                              <ul style="padding-left:18px;margin:0;">
-                                {% for line in lo2.split('\n') if line|trim %}
-                                  <li>{{ line|trim }}</li>
-                                {% endfor %}
-                              </ul>
-                            {% else %}
-                              {{ lo2 }}
-                            {% endif %}
-                          </td>
-                          <td class="scrollable-cell">
-                            {% set la2 = kr['Lead Actions'] or '' %}
-                            {% if '\n' in la2 %}
-                              <ul style="padding-left:18px;margin:0;">
-                                {% for line in la2.split('\n') if line|trim %}
-                                  <li>{{ line|trim }}</li>
-                                {% endfor %}
-                              </ul>
-                            {% else %}
-                              {{ la2 }}
-                            {% endif %}
-                          </td>
-                          <td>{{ kr['Average'] or '' }}%</td>
-                        </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                </div>
+              <div class="year-tag" style="color:#c4b5fd;">2026 plan</div>
+              <div class="okr-table-wrapper">
+                <table class="okr-table">
+                  <thead>
+                    <tr>
+                      <th>Functional POVs</th>
+                      <th>Objective</th>
+                      <th>Key Results</th>
+                      <th>Lead Outcomes</th>
+                      <th>Lead Actions</th>
+                      <th>Average</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for row in obj.items_2026 %}
+                    <tr>
+                      <td>{{ row['Functional POVs'] or '' }}</td>
+                      <td>{{ row['Objective'] or '' }}</td>
+                      <td>{{ row['Key Results'] or '' }}</td>
+                      <td>{% set lo2 = row['Lead Outcomes'] or '' %}{% if '\n' in lo2 %}<ul>{% for line in lo2.split('\n') if line|trim %}<li>{{ line|trim }}</li>{% endfor %}</ul>{% else %}{{ lo2 }}{% endif %}</td>
+                      <td>{% set la2 = row['Lead Actions'] or '' %}{% if '\n' in la2 %}<ul>{% for line in la2.split('\n') if line|trim %}<li>{{ line|trim }}</li>{% endfor %}</ul>{% else %}{{ la2 }}{% endif %}</td>
+                      <td>{{ row['Average'] or '' }}%</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
               {% endif %}
             </div>
-          {% endfor %}
-        </div>
-      </div>
-    {% endfor %}
-  {% else %}
-    <div class="alert alert-warning text-center">No OKR data found in <code>okr</code> sheet.</div>
-  {% endif %}
+            {% endfor %}
+          </div>
+        </article>
+        {% endfor %}
+      {% else %}
+        <div class="alert alert-warning text-center">No OKR data available.</div>
+      {% endif %}
+    </section>
+  </div>
 </div>
 
 <script>
-function toggleTeam(header) {
-  const content = header.nextElementSibling;
-  const icon = header.querySelector("i");
-
-  content.classList.toggle("expanded");
-
-  if (content.classList.contains("expanded")) {
-    icon.style.transform = "rotate(90deg)";
-  } else {
-    icon.style.transform = "rotate(0)";
-  }
+function toggleTeam(header){
+  const body = header.nextElementSibling;
+  const icon = header.querySelector('i');
+  body.classList.toggle('expanded');
+  icon.classList.toggle('bi-chevron-down');
+  icon.classList.toggle('bi-chevron-up');
 }
 
-// Default = all collapsed
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".team-content").forEach(c => c.classList.remove("expanded"));
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.team-body').forEach(body => body.classList.remove('expanded'));
 });
 </script>
-
 {% endblock %}

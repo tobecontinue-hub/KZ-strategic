@@ -164,29 +164,14 @@
           <th>Metric</th>
           <th>Current</th>
           <th>Target</th>
-          <th>Status</th>
         </tr>
       </thead>
       <tbody>
         {% for item in items %}
-        {% set s = (item.get('Status') or '')|lower %}
         <tr>
           <td>{{ item.get('Metric Name','Unnamed Metric') }}</td>
           <td>{{ item.get('Metric Value','No metric provided') }}</td>
           <td>{{ item.get('Target','--') }}</td>
-          <td>
-            {% if item.get('Status') %}
-              <span class="status-chip
-                {% if 'done' in s or 'completed' in s %} status-done
-                {% elif 'risk' in s or 'delay' in s %} status-risk
-                {% elif 'block' in s %} status-blocked
-                {% endif %}">
-                {{ item['Status'] }}
-              </span>
-            {% else %}
-              --
-            {% endif %}
-          </td>
         </tr>
         {% endfor %}
       </tbody>

@@ -1,203 +1,269 @@
 <!-- templates/trajectories.html -->
 {% extends "base.html" %}
 {% block content %}
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 <style>
 :root {
-  --md-surface: #ffffff;
-  --md-surface-variant: #f3f6fa;
-  --md-on-surface: #1c1b1f;
-  --md-outline: #c5c7d0;
-  --md-primary: #0b57d0;
-  --md-primary-container: #d6e3ff;
-  --md-on-primary: #ffffff;
+  --traj-bg: #020617;
+  --traj-surface: rgba(15, 23, 42, 0.8);
+  --traj-border: rgba(148, 163, 184, 0.3);
+  --traj-highlight: #38bdf8;
+  --traj-secondary: #f472b6;
 }
 
-.main-container {
-  padding: 26px 20px 32px;
-  max-width: 980px;
-  margin: auto;
+.trajectory-shell {
+  background: radial-gradient(circle at top, rgba(59,130,246,0.25), rgba(2,6,23,0.95));
+  min-height: calc(100vh - 120px);
+  padding: 40px 16px 64px;
 }
 
-.page-header {
-  text-align: center;
-  margin-bottom: 26px;
+.trajectory-card {
+  max-width: 1100px;
+  margin: 0 auto;
+  background: rgba(2, 6, 23, 0.92);
+  border-radius: 32px;
+  border: 1px solid rgba(59,130,246,0.2);
+  box-shadow: 0 40px 120px rgba(2,6,23,0.85);
+  overflow: hidden;
 }
 
-.page-header h1 {
-  font-size: 1.9rem;
+.traj-hero {
+  padding: 36px 40px 28px;
+  color: #f8fafc;
+  background: linear-gradient(135deg, rgba(13,110,253,0.25), rgba(248,113,113,0.25));
+  border-bottom: 1px solid rgba(148,163,184,0.25);
+}
+
+.traj-hero h1 {
+  font-size: clamp(2rem, 3vw, 2.7rem);
   font-weight: 800;
-  color: var(--md-on-surface);
-  margin-bottom: 4px;
-  letter-spacing: -0.03em;
+  margin-bottom: 12px;
 }
 
-.page-header .subtitle {
-  color: #5d6268;
-  font-size: 0.92rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+.traj-hero p {
+  max-width: 800px;
+  color: #c7d2fe;
+  margin-bottom: 20px;
 }
 
-.chip-row {
-  display:flex;
-  justify-content:center;
-  flex-wrap:wrap;
-  gap:0.5rem;
-  margin-top:0.75rem;
-}
-.chip {
-  padding:0.22rem 0.7rem;
-  border-radius:999px;
-  border:1px solid rgba(148,163,184,0.7);
-  font-size:0.75rem;
-  color:#4b5563;
-  background:#f9fafb;
+.traj-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
 }
 
-.section-container {
-  background: var(--md-surface);
+.stat-chip {
+  padding: 14px 18px;
   border-radius: 18px;
-  box-shadow: 0px 14px 40px rgba(15,23,42,0.12);
-  margin-bottom: 26px;
-  border: 1px solid var(--md-outline);
-  overflow:hidden;
+  background: rgba(15,23,42,0.8);
+  border: 1px solid rgba(59,130,246,0.35);
 }
 
-.section-header {
-  padding: 16px 22px;
-  font-size: 0.9rem;
+.stat-chip label {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  color: #94a3b8;
+}
+
+.stat-chip span {
+  display: block;
+  font-size: 1.9rem;
   font-weight: 700;
-  background: var(--md-primary-container);
-  color: #083b91;
-  letter-spacing: .16em;
-  text-transform:uppercase;
-  border-bottom: 1px solid var(--md-outline);
+  color: #f0f9ff;
 }
 
-.card-item {
-  padding: 16px 22px 16px 28px;
-  border-bottom: 1px solid var(--md-outline);
-  transition: background 0.15s, transform 0.12s;
-  position:relative;
+.traj-body {
+  padding: 32px 40px 46px;
+  display: grid;
+  gap: 36px;
 }
 
-.card-item:last-child {
-  border-bottom: none;
+.section-block {
+  border-radius: 28px;
+  border: 1px solid var(--traj-border);
+  background: var(--traj-surface);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
 }
 
-.card-item::before {
-  content:"";
-  position:absolute;
-  left:14px;
-  top:22px;
-  width:6px;
-  height:6px;
-  border-radius:999px;
-  background:#0b57d0;
+.section-block::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid transparent;
+  background: linear-gradient(120deg, rgba(59,130,246,0.4), rgba(236,72,153,0.3));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.section-block:hover::before { opacity: 1; }
+
+.section-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #cbd5f5;
 }
 
-.card-item:hover {
-  background: var(--md-surface-variant);
-  transform: translateY(-1px);
-}
-
-.sub-header {
-  font-size: 0.96rem;
+.section-title {
+  font-size: 1.6rem;
   font-weight: 700;
-  color: #0a2e45;
-  margin-bottom: 4px;
-  letter-spacing: .15px;
+  color: #f1f5f9;
+  margin: 10px 0 22px;
 }
 
-.key-finding {
-  font-size: 0.88rem;
-  line-height: 1.4;
-  color: #50565c;
-}
-
-.bullet-list {
+.timeline {
+  position: relative;
+  margin-left: 12px;
   padding-left: 18px;
-  margin: 4px 0;
-  list-style-type: disc;
 }
 
-.bullet-list li {
-  margin-bottom: 2px;
-  line-height: 1.35;
-  font-size: 0.88rem;
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 10px;
+  width: 2px;
+  background: linear-gradient(180deg, rgba(59,130,246,0), rgba(59,130,246,0.65));
 }
 
+.timeline-card {
+  background: rgba(15,23,42,0.85);
+  border: 1px solid rgba(148,163,184,0.35);
+  border-radius: 18px;
+  padding: 18px 20px 18px 22px;
+  margin-bottom: 18px;
+  position: relative;
+}
+
+.timeline-card:last-child { margin-bottom: 0; }
+
+.timeline-card::before {
+  content: '';
+  position: absolute;
+  left: -22px;
+  top: 22px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--traj-highlight);
+  box-shadow: 0 0 0 6px rgba(56,189,248,0.18);
+}
+
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.meta-badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(59,130,246,0.4);
+  color: #bae6fd;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+}
+
+.meta-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.card-content {
+  color: #cbd5f5;
+  line-height: 1.55;
+  font-size: 0.95rem;
+}
+
+.card-content ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.card-content li { margin-bottom: 6px; }
+
+@media (max-width: 768px) {
+  .traj-hero, .traj-body { padding: 24px; }
+  .timeline::before { left: -8px; }
+  .timeline-card::before { left: -26px; }
+}
 </style>
 
-<div class="main-container">
-  <header class="page-header">
-    <p class="subtitle">From current position to future direction</p>
-    <div class="chip-row">
-      <span class="chip">Trajectories</span>
-      <span class="chip">Key Themes</span>
-      <span class="chip">Executive Summary</span>
+<div class="trajectory-shell">
+  <div class="trajectory-card">
+    <div class="traj-hero">
+      <p class="text-uppercase" style="letter-spacing:0.3em; color:#a5b4fc; font-weight:600; font-size:0.85rem;">Trajectory Dashboard</p>
+      <h1>Where we are, where we bet, and how we get there.</h1>
+      <p>Signals and summaries mapped as a premium executive timeline. Each card captures the move, the proof behind it, and the next lever to pull.</p>
+      <div class="traj-stats">
+        <div class="stat-chip">
+          <label>Trajectories</label>
+          <span>{{ sections['I. Trajectories']|length }}</span>
+        </div>
+        <div class="stat-chip">
+          <label>Summaries</label>
+          <span>{{ sections['II. Summary']|length }}</span>
+        </div>
+        <div class="stat-chip">
+          <label>Total Signals</label>
+          <span>{{ sections['I. Trajectories']|length + sections['II. Summary']|length }}</span>
+        </div>
+      </div>
     </div>
-  </header>
 
-  <!-- SECTION I -->
-  {% if sections["I. Trajectories"] %}
-  <div class="section-container">
-    <div class="section-header">I. Trajectories</div>
+    <div class="traj-body">
+      {% macro render_section(code, title, tone) -%}
+      {% if sections[code] %}
+      <section class="section-block" data-tone="{{ tone }}">
+        <div class="section-tag">
+          <i class="bi bi-record-circle"></i>
+          {{ code }}
+        </div>
+        <div class="section-title">{{ title }}</div>
+        <div class="timeline">
+          {% for item in sections[code] %}
+          <div class="timeline-card">
+            <div class="card-meta">
+              <span class="meta-badge">{{ item.Section_ID }}</span>
+              <span class="meta-title">{{ item.Section_Name }}</span>
+            </div>
+            {% set key_finding = item.Key_Finding %}
+            <div class="card-content">
+              {% if key_finding %}
+                {% if '•' in key_finding or '✓' in key_finding %}
+                  <ul>
+                    {% for line in key_finding.replace('✓','•').split('•') if line|trim %}
+                      <li>{{ line|trim }}</li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <p class="mb-0">{{ key_finding }}</p>
+                {% endif %}
+              {% else %}
+                <p class="text-muted mb-0">No key finding captured.</p>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+      {%- endmacro %}
 
-    {% for item in sections["I. Trajectories"] %}
-      <div class="card-item">
-        <div class="sub-header">{{ item.Section_ID }} — {{ item.Section_Name }}</div>
-
-        {% set key_finding = item.Key_Finding %}
-        {% if key_finding %}
-          {% if '•' in key_finding or '✓' in key_finding %}
-            <ul class="bullet-list">
-              {% for line in key_finding.replace('✓','•').split('•') if line|trim %}
-                <li>{{ line|trim }}</li>
-              {% endfor %}
-            </ul>
-          {% else %}
-            <div class="key-finding">{{ key_finding }}</div>
-          {% endif %}
-        {% else %}
-          <div class="key-finding text-muted">No key finding</div>
-        {% endif %}
-      </div>
-    {% endfor %}
-
+      {{ render_section('I. Trajectories', 'Trajectories', 'primary') }}
+      {{ render_section('II. Summary', 'Executive Summary', 'secondary') }}
+    </div>
   </div>
-  {% endif %}
-
-  <!-- SECTION II -->
-  {% if sections["II. Summary"] %}
-  <div class="section-container">
-    <div class="section-header">II. Summary</div>
-
-    {% for item in sections["II. Summary"] %}
-      <div class="card-item">
-        <div class="sub-header">{{ item.Section_ID }} — {{ item.Section_Name }}</div>
-
-        {% set key_finding = item.Key_Finding %}
-        {% if key_finding %}
-          {% if '•' in key_finding or '✓' in key_finding %}
-            <ul class="bullet-list">
-              {% for line in key_finding.replace('✓','•').split('•') if line|trim %}
-                <li>{{ line|trim }}</li>
-              {% endfor %}
-            </ul>
-          {% else %}
-            <div class="key-finding">{{ key_finding }}</div>
-          {% endif %}
-        {% else %}
-          <div class="key-finding text-muted">No key finding</div>
-        {% endif %}
-      </div>
-    {% endfor %}
-
-  </div>
-  {% endif %}
-
 </div>
-
 {% endblock %}

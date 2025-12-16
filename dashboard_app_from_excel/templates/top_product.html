@@ -24,6 +24,7 @@
   cursor:pointer;
   transition:transform .35s ease, box-shadow .35s ease;
 }
+.product-card-body-click { cursor:default; }
 .product-card::before {
   content:"";
   position:absolute;
@@ -47,34 +48,102 @@
 .stat-value { font-size:1rem; font-weight:700; color:#38bdf8; }
 .section-label { font-size:.75rem; color:#8ea2cc; text-transform:uppercase; letter-spacing:.4px; margin-top:10px; }
 .section-text { font-size:.95rem; color:#e2e8f0; margin-bottom:6px; }
-.offers-toggle { position:absolute; top:16px; right:16px; width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.08); color:#d4dbee; display:flex; align-items:center; justify-content:center; transition:transform .3s ease, background .3s ease; }
-.product-card.open .offers-toggle { transform:rotate(135deg); background:rgba(16,185,129,.6); }
-.offer-panel { padding:0 18px 18px; max-height:0; overflow:hidden; opacity:0; transition:max-height .4s ease, opacity .35s ease; }
-.product-card.open .offer-panel { max-height:500px; opacity:1; }
+.forecast-panel { margin-top:12px; background:rgba(15,23,42,.72); border:1px solid rgba(148,163,184,.25); border-radius:16px; padding:14px 16px 16px; }
+.forecast-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:12px; }
+.forecast-cell { background:rgba(15,23,42,.92); border-radius:12px; padding:10px 12px; border:1px solid rgba(148,163,184,.2); text-align:center; }
+.forecast-label { font-size:.7rem; text-transform:uppercase; color:#9fb4d9; letter-spacing:.08em; }
+.forecast-value { font-size:1.1rem; font-weight:700; color:#fbbf24; margin-top:4px; }
+.offers-toggle { position:absolute; top:16px; right:16px; width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.08); color:#d4dbee; display:flex; align-items:center; justify-content:center; transition:transform .3s ease, background .3s ease; cursor:pointer; }
+.offer-toggle-label { font-size:0.7rem; margin-right:6px; color:#cbd5f5; text-transform:uppercase; letter-spacing:0.08em; }
 .offer-panel h5 { color:#93c5fd; font-size:.85rem; letter-spacing:.5px; }
 .offer-list { display:flex; gap:12px; flex-wrap:wrap; }
 .offer-item { flex:1 1 calc(33% - 8px); min-width:120px; border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,.08); background:rgba(15,23,42,.8); animation:fadeUp .4s ease forwards; }
 .offer-item img { width:100%; height:90px; object-fit:cover; }
 .offer-item div { padding:8px 10px; font-size:.8rem; color:#f8fafc; }
+
+/* Modal for offers */
+.offer-modal {
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,0.82);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+.offer-modal-inner {
+  background:#020617;
+  border-radius:20px;
+  max-width:900px;
+  width:96vw;
+  max-height:90vh;
+  overflow:auto;
+  box-shadow:0 30px 90px rgba(0,0,0,0.9);
+  border:1px solid rgba(148,163,184,0.3);
+}
+.offer-modal-header {
+  padding:16px 20px 10px;
+  border-bottom:1px solid rgba(30,64,175,0.7);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.offer-modal-header h4 { margin:0; color:#e5e7eb; }
+.offer-modal-header small { color:#9ca3af; }
+.offer-modal-close {
+  border:none;
+  background:transparent;
+  color:#9ca3af;
+  font-size:1.4rem;
+  cursor:pointer;
+}
+.offer-modal-body {
+  padding:14px 18px 18px;
+}
+.offer-modal-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
+}
+.offer-modal-item {
+  border-radius:14px;
+  overflow:hidden;
+  background:rgba(15,23,42,0.95);
+  border:1px solid rgba(148,163,184,0.4);
+}
+.offer-modal-item img {
+  width:100%; height:180px; object-fit:cover;
+}
+.offer-modal-item-body {
+  padding:10px 12px 12px;
+}
+.offer-modal-label {
+  font-size:0.7rem;
+  text-transform:uppercase;
+  letter-spacing:0.12em;
+  color:#93c5fd;
+  margin-bottom:4px;
+}
+.offer-modal-title {
+  font-size:0.9rem;
+  color:#e5e7eb;
+}
 @keyframes fadeUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
 @media(max-width:768px){ .offer-list { flex-direction:column; } }
 </style>
 
-{% set sample_offers = [
-  {"title":"Bundle + Free Delivery","img":"https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=60"},
-  {"title":"Flash Sale Placement","img":"https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=600&q=60"},
-  {"title":"Value Pack Upgrade","img":"https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=600&q=60"}
-] %}
-
 <section class="top-product-stage">
   <h1>Top Product — Full Price</h1>
-  <p>Tap any card to reveal three curated offer ideas (bundle, flash, retention) inspired from market playbooks.</p>
+  <p>Tap any card to reveal up to three offer ideas per product from the <strong>three_offer</strong> sheet.</p>
 
   <div class="product-grid">
     {% for row in rows %}
-    <article class="product-card" onclick="toggleOffer({{ loop.index }})" id="card-{{ loop.index }}">
-      <div class="offers-toggle" id="icon-{{ loop.index }}">+</div>
-      <div class="card-inner">
+    <article class="product-card" id="card-{{ loop.index }}" data-product="{{ row.ProductKey }}" onclick="openOfferModalFromElement(this);">
+      <div class="offers-toggle">
+        <span class="offer-toggle-label">Offers</span>
+        <span>+</span>
+      </div>
+      <div class="card-inner product-card-body-click">
         <div class="product-img">
           {% if row.Image_URL and row.Image_URL != 'Placeholder' %}
             <img src="{{ row.Image_URL }}" alt="{{ row.Product }}">
@@ -101,32 +170,92 @@
           <div class="section-text">{{ row.Insight or 'No insight shared' }}</div>
           <div class="section-label">Strategy</div>
           <div class="section-text">{{ row.Strategy_Focus or 'Upcoming strategy TBD' }}</div>
-        </div>
-        <div class="offer-panel" id="offers-{{ loop.index }}">
-          <h5>Sample Offers</h5>
-          <div class="offer-list">
-            {% for offer in sample_offers %}
-            <div class="offer-item">
-              <img src="{{ offer.img }}" alt="offer">
-              <div>{{ offer.title }}</div>
+
+          <div class="section-label">Forecast</div>
+          <div class="forecast-panel">
+            <div class="forecast-grid">
+              {% for q in ['Q1_Forecast', 'Q2_Forecast', 'Q3_Forecast', 'Q4_Forecast'] %}
+              <div class="forecast-cell">
+                <div class="forecast-label">{{ q[0:2] }}</div>
+                <div class="forecast-value">{{ "{:,.0f}".format(row[q]) if row[q] else "–" }}</div>
+              </div>
+              {% endfor %}
             </div>
-            {% endfor %}
           </div>
         </div>
+        {# offers are now shown in a modal, not inline #}
       </div>
     </article>
     {% endfor %}
   </div>
 </section>
 
+{# Offer modal #}
+<div class="offer-modal" id="offerModal">
+  <div class="offer-modal-inner">
+    <div class="offer-modal-header">
+      <div>
+        <h4 id="offerModalTitle">Offers</h4>
+        <small id="offerModalSubtitle"></small>
+      </div>
+      <button class="offer-modal-close" onclick="closeOfferModal()">&times;</button>
+    </div>
+    <div class="offer-modal-body">
+      <div class="offer-modal-grid" id="offerModalGrid"></div>
+    </div>
+  </div>
+</div>
+
 <script>
-function toggleOffer(idx){
-  const card=document.getElementById('card-'+idx);
-  const panel=document.getElementById('offers-'+idx);
-  const icon=document.getElementById('icon-'+idx);
-  const isOpen=card.classList.toggle('open');
-  if(isOpen){ icon.textContent='×'; panel.style.display='block'; }
-  else { icon.textContent='+'; panel.style.display=''; }
-}
+  // Offers data passed from backend as mapping: product -> list of offers
+  const offersByProduct = {{ offers_by_product | tojson | safe }} || {};
+
+  function openOfferModalFromElement(el){
+    const productName = el.getAttribute('data-product') || '';
+    openOfferModal(productName);
+  }
+
+  function openOfferModal(productName){
+    const modal = document.getElementById('offerModal');
+    const grid = document.getElementById('offerModalGrid');
+    const titleEl = document.getElementById('offerModalTitle');
+    const subtitleEl = document.getElementById('offerModalSubtitle');
+
+    const offers = offersByProduct[productName] || [];
+
+    titleEl.textContent = productName || 'Offers';
+    subtitleEl.textContent = offers.length ? `${offers.length} configured offer(s)` : 'No offers configured in three_offer sheet.';
+
+    grid.innerHTML = '';
+    offers.forEach(off => {
+      const card = document.createElement('div');
+      card.className = 'offer-modal-item';
+      card.innerHTML = `
+        ${off.img ? `<img src="${off.img}" alt="offer">` : ''}
+        <div class="offer-modal-item-body">
+          ${off.label ? `<div class="offer-modal-label">${off.label}</div>` : ''}
+          <div class="offer-modal-title">${off.title}</div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    modal.style.display = 'flex';
+  }
+
+  function closeOfferModal(){
+    const modal = document.getElementById('offerModal');
+    modal.style.display = 'none';
+  }
+
+  // close modal when clicking directly on the overlay (outside the inner card)
+  const offerModalEl = document.getElementById('offerModal');
+  if (offerModalEl) {
+    offerModalEl.addEventListener('click', (event) => {
+      if (event.target === offerModalEl) {
+        closeOfferModal();
+      }
+    });
+  }
 </script>
 {% endblock %}

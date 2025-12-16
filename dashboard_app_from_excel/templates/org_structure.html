@@ -1,128 +1,370 @@
 {% extends "base.html" %}
 {% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 <style>
-  :root { color-scheme: light dark; }
-  .org-wrapper { max-width: 1400px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
-  .org-header { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-end; gap:1rem; margin-bottom:1.5rem; }
-  .org-header-left h2 { margin:0; font-weight:800; letter-spacing:-0.03em; }
-  .org-header-left p { margin:0.3rem 0 0; font-size:0.85rem; color:#64748b; }
-  .org-controls { display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center; }
-  .org-controls button { border-radius:999px; border:1px solid rgba(148,163,184,0.6); padding:0.3rem 0.75rem; font-size:0.8rem; background:#fff; color:#0f172a; display:inline-flex; align-items:center; gap:0.25rem; cursor:pointer; box-shadow:0 8px 18px rgba(148,163,184,0.25); }
-  .org-controls button:hover { background:#eff6ff; border-color:#2563eb; }
-  .org-viewport { position:relative; border-radius:18px; background:radial-gradient(circle at top left,#e0f2fe,#f9fafb); box-shadow:0 22px 60px rgba(15,23,42,0.18); overflow:auto; min-height:420px; }
-  .org-canvas { transform-origin:50% 0; transition:transform 0.18s ease-out; cursor:grab; min-width:1600px; }
-  .org-canvas:active { cursor:grabbing; }
-  .tree { padding:2rem 2.5rem 3rem; min-width:1600px; }
-  .tree ul { padding-top: 1rem; position: relative; padding-left: 0; display: flex; justify-content: center; flex-wrap: nowrap; }
-  .tree li { list-style-type: none; margin: 0 1.4rem; text-align: center; position: relative; padding: 1.2rem 0 0 0; }
-  .tree li::before,
-  .tree li::after { content: ''; position: absolute; top: 0; border-top: 1px dashed rgba(148,163,184,0.7); width: 50%; height: 1rem; }
-  .tree li::before { right: 50%; }
-  .tree li::after { left: 50%; border-left: 1px dashed rgba(148,163,184,0.7); }
-  .tree li:only-child::after,
-  .tree li:only-child::before { display: none; }
-  .tree li:only-child { padding-top: 0; }
-  .tree li:first-child::before,
-  .tree li:last-child::after { border: none; }
-  .tree li:last-child::before { border-right: 1px dashed rgba(148,163,184,0.7); border-radius: 0 0 0.75rem 0; }
-  .tree li:first-child::after { border-radius: 0 0 0 0.75rem; }
-  .node-card {
-    --dept-color: #94a3b8;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.85rem;
-    border-radius: 16px;
-    border: 1px solid rgba(148,163,184,0.5);
-    padding: 0.85rem 1rem;
-    min-width: 220px;
-    max-width: 260px;
-    background: rgba(255,255,255,0.96);
-    box-shadow: 0 16px 40px rgba(15,23,42,0.18);
-    position: relative;
-    transform-origin: center;
-    transform: translateY(10px);
-    opacity: 0;
-    animation: node-fade-in 0.45s ease-out forwards;
-  }
-  .node-card::before {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    border-radius: 18px;
-    background: linear-gradient(135deg, rgba(37,99,235,0.6), rgba(45,212,191,0.7));
-    opacity: 0;
-    z-index:-1;
-    transition:opacity 0.18s ease-out;
-  }
-  .node-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 16px;
-    border: 2px solid var(--dept-color);
-    opacity: 0.22;
-    pointer-events: none;
-  }
-  .node-card:hover::before { opacity: 0.12; }
-  .photo-frame {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 3px solid rgba(148,163,184,0.5);
-    background: linear-gradient(145deg,#e2e8f0,#f8fafc);
-    flex-shrink: 0;
-  }
-  .photo-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .node-name { font-weight: 700; color: #0f172a; margin-bottom: 0.1rem; font-size:0.98rem; }
-  .node-role { font-size: 0.78rem; color: #475569; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.12em; }
-  .node-meta { display: flex; gap: 0.35rem; flex-wrap: wrap; font-size: 0.7rem; }
-  .badge { padding: 0.18rem 0.5rem; border-radius: 999px; background: #f1f5f9; color: #475569; font-weight: 600; display:inline-flex; align-items:center; gap:0.25rem; }
-  .badge-dot { width:8px; height:8px; border-radius:999px; background:#22c55e; }
-  .badge.status-vacant { background: #fee2e2; color: #b91c1c; }
-  .badge.status-vacant .badge-dot { background:#ef4444; }
-  .badge.status-active { background: #dcfce7; color: #15803d; }
-  .zoom-indicator { font-size:0.8rem; color:#64748b; }
-  @media (max-width: 768px) {
-    .tree { padding:1.25rem 1rem 2rem; min-width:auto; }
-    .tree ul { flex-direction: column; align-items: center; flex-wrap: nowrap; }
-    .tree li::before,
-    .tree li::after { display: none; }
-    .node-card { min-width: 220px; max-width: 98vw; }
-  }
-  @keyframes node-fade-in {
-    from { opacity:0; transform: translateY(18px) scale(0.97); }
-    to { opacity:1; transform: translateY(0) scale(1); }
-  }
+:root {
+  --org-bg: #010a18;
+  --org-card: rgba(15,23,42,0.85);
+  --org-border: rgba(148,163,184,0.35);
+  --org-highlight: #38bdf8;
+}
+
+.org-shell {
+  min-height: calc(100vh - 120px);
+  background: radial-gradient(circle at top, rgba(56,189,248,0.22), rgba(2,6,23,0.95));
+  padding: 40px 12px 60px;
+}
+
+.org-board {
+  max-width: 1400px;
+  margin: 0 auto;
+  border-radius: 40px;
+  border: 1px solid rgba(56,189,248,0.35);
+  box-shadow: 0 50px 140px rgba(2,6,23,0.85);
+  background: rgba(2,6,23,0.92);
+  overflow: hidden;
+}
+
+.org-hero {
+  padding: 38px 44px 30px;
+  color: #f8fafc;
+  background: linear-gradient(120deg, rgba(59,130,246,0.25), rgba(14,165,233,0.25));
+}
+
+.org-hero h1 {
+  font-size: clamp(2.1rem, 3vw, 3rem);
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.org-hero p {
+  color: #cbd5f5;
+  max-width: 780px;
+  margin-bottom: 20px;
+}
+
+.org-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.org-stat {
+  border-radius: 22px;
+  border: 1px solid rgba(148,163,184,0.35);
+  background: rgba(2,6,23,0.65);
+  padding: 14px 18px;
+}
+
+.org-stat label {
+  font-size: 0.75rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #a5b4fc;
+}
+
+.org-stat span {
+  display: block;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #dcfce7;
+}
+
+.org-body {
+  padding: 30px 36px 40px;
+}
+
+.org-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.org-toolbar button {
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,0.35);
+  background: rgba(15,23,42,0.7);
+  color: #f8fafc;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.org-toolbar button:hover {
+  background: rgba(56,189,248,0.25);
+  border-color: rgba(56,189,248,0.5);
+}
+
+.org-legend {
+  margin-left: auto;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.org-legend span {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.org-viewport {
+  position: relative;
+  border-radius: 26px;
+  border: 1px solid rgba(148,163,184,0.18);
+  background: radial-gradient(circle at top, rgba(56,189,248,0.18), rgba(2,6,23,0.95));
+  min-height: 420px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+
+.org-canvas {
+  transform-origin: 50% 0;
+  transition: transform 0.2s ease-out;
+  cursor: grab;
+  padding: 30px 40px 60px;
+  width: 100%;
+}
+
+.org-canvas:active { cursor: grabbing; }
+
+.org-tree {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.org-tree ul {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 32px;
+  position: relative;
+}
+
+.org-tree ul::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 0;
+  bottom: 0;
+  border-left: 1px dashed rgba(148,163,184,0.35);
+}
+
+.org-tree > ul { padding-left: 0; }
+.org-tree > ul::before { display: none; }
+
+.org-tree li {
+  position: relative;
+  margin: 0 0 12px;
+  padding-left: 32px;
+}
+
+.org-tree li::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 36px;
+  width: 18px;
+  border-top: 1px dashed rgba(148,163,184,0.35);
+}
+
+.org-tree li:only-child::before { display: none; }
+
+.node-card {
+  --dept-color: #38bdf8;
+  display: inline-flex;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 16px;
+  min-width: 240px;
+  max-width: 420px;
+  width: 100%;
+  background: rgba(15,23,42,0.85);
+  border: 1px solid rgba(148,163,184,0.4);
+  border-radius: 24px;
+  box-shadow: 0 20px 55px rgba(2,6,23,0.55);
+  position: relative;
+  color: #f8fafc;
+  transform-origin: center;
+  opacity: 0;
+  transform: translateY(12px) scale(0.97);
+  animation: nodeIn 0.4s ease forwards;
+}
+
+.node-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 24px;
+  border: 1px solid transparent;
+  background: linear-gradient(135deg, rgba(56,189,248,0.4), rgba(244,114,182,0.35));
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.node-card:hover::before { opacity: 1; }
+
+.node-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  border: 2px solid var(--dept-color);
+  opacity: 0.25;
+}
+
+.node-photo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: rgba(15,118,110,0.2);
+  border: 3px solid rgba(148,163,184,0.4);
+  flex-shrink: 0;
+}
+
+.node-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.node-role {
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.node-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 2px 0;
+}
+
+.node-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.72rem;
+}
+
+.node-tag {
+  border-radius: 999px;
+  padding: 3px 10px;
+  border: 1px solid rgba(148,163,184,0.35);
+  background: rgba(15,23,42,0.6);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.node-tag .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dept-color);
+}
+
+.status-vacant { color: #fda4af; border-color: rgba(244,114,182,0.5); }
+.status-active { color: #bbf7d0; border-color: rgba(52,211,153,0.5); }
+
+.zoom-indicator {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: #94a3b8;
+}
+
+@media (max-width: 768px) {
+  .org-body { padding: 24px; }
+  .org-canvas { min-width: 1000px; }
+  .org-tree ul { flex-direction: column; align-items: center; }
+  .org-tree li::before, .org-tree li::after { display: none; }
+}
+
+@keyframes nodeIn {
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.org-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(2,6,23,0.75);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.org-modal-inner {
+  background: rgba(2,6,23,0.95);
+  border: 1px solid rgba(148,163,184,0.4);
+  border-radius: 28px;
+  max-width: 720px;
+  width: 92vw;
+  box-shadow: 0 40px 120px rgba(0,0,0,0.6);
+  color: #f8fafc;
+  position: relative;
+  overflow: hidden;
+}
+
+.org-modal-header {
+  padding: 24px 28px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.org-modal-body {
+  padding: 24px 28px 32px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.org-modal-photo {
+  width: 220px;
+  height: 220px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 4px solid rgba(148,163,184,0.45);
+  background: rgba(15,118,110,0.2);
+  margin-bottom: 12px;
+}
+
 </style>
 
 {% macro render_node(node, dept_colors, depth) %}
-  {% set dept_color = dept_colors.get(node.department, '#94a3b8') %}
+  {% set dept_color = dept_colors.get(node.department, '#38bdf8') %}
   <li>
     <div class="node-card"
-         style="--dept-color: {{ dept_color }}; animation-delay: {{ depth * 0.06 }}s;"
+         style="--dept-color: {{ dept_color }}; animation-delay: {{ depth * 0.05 }}s;"
          data-name="{{ node.original_name or node.name }}"
          data-role="{{ node.role or 'Role TBD' }}"
          data-department="{{ node.department or 'Department' }}"
          data-status="{{ node.status or 'Status' }}"
          data-photo="{{ node.photo_url or '' }}">
-      <div class="photo-frame">
+      <div class="node-photo">
         {% if node.photo_url %}
           <img src="{{ node.photo_url }}" alt="{{ node.original_name or node.name }}" onerror="this.style.display='none';">
         {% else %}
-          <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#475569;">
-            {{ (node.original_name or node.name)[:1] }}
-          </div>
+          <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#94a3b8;">{{ (node.original_name or node.name)[:1] }}</div>
         {% endif %}
       </div>
       <div>
         <div class="node-role">{{ node.role or 'Role TBD' }}</div>
         <div class="node-name">{{ node.original_name or node.name }}</div>
-        <div class="node-meta">
-          <span class="badge"><span class="badge-dot" style="background: {{ dept_color }}"></span>{{ node.department or 'Department' }}</span>
-          {% set status = node.status or '' %}
-          <span class="badge {{ 'status-vacant' if 'vacant' in status|lower else 'status-active' }}">
-            <span class="badge-dot"></span>{{ status or 'Status' }}
+        <div class="node-tags">
+          <span class="node-tag"><span class="dot"></span>{{ node.department or 'Department' }}</span>
+          {% set status = node.status or 'Active' %}
+          <span class="node-tag {{ 'status-vacant' if 'vacant' in status.lower() else 'status-active' }}">
+            {{ status }}
           </span>
         </div>
       </div>
@@ -137,170 +379,181 @@
   </li>
 {% endmacro %}
 
-<div class="org-wrapper">
-  <div class="org-header">
-    <div class="org-header-left">
-      <h2>Organization Chart</h2>
-      <p>Interactive view built from <strong>strategic_insight.xlsx › org_chart</strong></p>
-    </div>
-    <div class="org-controls">
-      <button type="button" id="zoomOutBtn">− Zoom out</button>
-      <button type="button" id="zoomInBtn">+ Zoom in</button>
-      <button type="button" id="resetViewBtn">Reset view</button>
-      <span class="zoom-indicator" id="zoomIndicator">100%</span>
-    </div>
-  </div>
+<div class="org-shell">
+  <div class="org-board">
+    <section class="org-hero">
+      <p class="text-uppercase" style="letter-spacing:0.32em; color:#fcd34d; font-weight:600; font-size:0.82rem;">Org Chart</p>
+      <h1>Meet the structure powering our roadmap.</h1>
+      <p>Pan, zoom, and tap any badge to open a profile card. Everything is sourced directly from <strong>strategic_insight.xlsx › org_chart</strong>.</p>
+      <div class="org-stats">
+        <div class="org-stat"><label>Root Nodes</label><span>{{ root_nodes|length }}</span></div>
+        <div class="org-stat"><label>Zoomable Canvas</label><span>2.2×</span></div>
+        <div class="org-stat"><label>Modal Profiles</label><span>Enabled</span></div>
+      </div>
+    </section>
 
-  <div class="org-viewport" id="orgViewport">
-    <div class="org-canvas" id="orgCanvas">
-      <div class="tree">
-        <ul class="root">
-          {% for node in root_nodes %}
-            {{ render_node(node, dept_colors, 0) }}
-          {% endfor %}
-        </ul>
+    <section class="org-body">
+      <div class="org-toolbar">
+        <button id="zoomOutBtn">− Zoom</button>
+        <button id="zoomInBtn">+ Zoom</button>
+        <button id="fitBtn">Fit to View</button>
+        <button id="resetViewBtn">Reset</button>
+        <span class="zoom-indicator" id="zoomIndicator">100%</span>
+        <div class="org-legend">
+          <span><span style="width:10px;height:10px;border-radius:999px;background:#34d399;"></span>Active</span>
+          <span><span style="width:10px;height:10px;border-radius:999px;background:#f87171;"></span>Vacant</span>
+        </div>
+      </div>
+
+      <div class="org-viewport" id="orgViewport">
+        <div class="org-canvas" id="orgCanvas">
+          <div class="org-tree">
+            <ul>
+              {% for node in root_nodes %}
+                {{ render_node(node, dept_colors, 0) }}
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="org-modal" id="orgModal">
+  <div class="org-modal-inner">
+    <div class="org-modal-header">
+      <div>
+        <div class="node-role" id="modalRole"></div>
+        <h3 id="modalName" style="margin:0;font-size:1.6rem;"></h3>
+        <div id="modalDept" style="margin-top:8px;font-size:0.9rem;color:#cbd5f5;"></div>
+      </div>
+      <button id="closeModal" style="border:none;background:transparent;color:#94a3b8;font-size:1.6rem;cursor:pointer;">×</button>
+    </div>
+    <div class="org-modal-body">
+      <div>
+        <div class="org-modal-photo">
+          <img id="modalPhoto" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:none;">
+          <div id="modalPhotoFallback" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:800;color:#94a3b8;">?</div>
+        </div>
+        <div id="modalStatus" class="node-tag" style="justify-content:center;width:max-content;margin:0 auto;"></div>
+      </div>
+      <div style="flex:1;min-width:240px;">
+        <p style="font-size:0.9rem;color:#e2e8f0;line-height:1.6;">
+          This quick view mirrors live data from the org sheet. Edit the sheet to refresh titles, status, or reporting lines.
+        </p>
       </div>
     </div>
   </div>
-  <!-- Detail / Photo Modal -->
-  <div class="org-modal" id="orgModal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.65); z-index:9999; align-items:center; justify-content:center;">
-    <div class="org-modal-inner" style="background:#0f172a; color:#e5e7eb; border-radius:18px; max-width:720px; width:92vw; max-height:90vh; overflow:auto; box-shadow:0 24px 70px rgba(0,0,0,0.6); position:relative;">
-      <button type="button" id="orgModalClose" style="position:absolute; top:10px; right:12px; border:none; background:transparent; color:#9ca3af; font-size:1.5rem; cursor:pointer;">×</button>
-      <div style="display:flex; flex-wrap:wrap; gap:1.5rem; padding:1.75rem 1.75rem 1.5rem;">
-        <div style="flex:0 0 220px; max-width:100%; text-align:center;">
-          <div style="width:200px; height:200px; margin:0 auto 0.75rem; border-radius:999px; overflow:hidden; background:#111827; border:4px solid rgba(148,163,184,0.7);">
-            <img id="orgModalPhoto" src="" alt="" style="width:100%; height:100%; object-fit:cover; display:none;">
-            <div id="orgModalPhotoFallback" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:3rem; font-weight:800; color:#4b5563;">?</div>
-          </div>
-          <div id="orgModalStatus" style="font-size:0.85rem; padding:0.2rem 0.75rem; border-radius:999px; display:inline-block; margin-top:0.25rem; background:#e5e7eb; color:#111827;"></div>
-        </div>
-        <div style="flex:1 1 260px; min-width:0;">
-          <div style="font-size:0.8rem; letter-spacing:0.18em; text-transform:uppercase; color:#6b7280; margin-bottom:0.25rem;">Profile</div>
-          <h3 id="orgModalName" style="margin:0; font-size:1.35rem; font-weight:800;"></h3>
-          <div id="orgModalRole" style="margin-top:0.25rem; font-size:0.9rem; color:#9ca3af; text-transform:uppercase; letter-spacing:0.16em;"></div>
-          <div id="orgModalDepartment" style="margin-top:0.75rem; font-size:0.9rem; display:inline-flex; align-items:center; gap:0.4rem; padding:0.25rem 0.65rem; border-radius:999px; background:rgba(37,99,235,0.1); color:#e5e7eb;">
-            <span style="width:8px; height:8px; border-radius:999px; background:#22c55e;"></span>
-            <span></span>
-          </div>
-          <p style="margin-top:1.25rem; font-size:0.85rem; line-height:1.55; color:#d1d5db;">
-            This view shows a larger photo and key details for the selected team member. You can continue to navigate the org chart while this profile is open.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
+</div>
 
 <script>
-  (function() {
-    const canvas = document.getElementById('orgCanvas');
-    const viewport = document.getElementById('orgViewport');
-    const zoomInBtn = document.getElementById('zoomInBtn');
-    const zoomOutBtn = document.getElementById('zoomOutBtn');
-    const resetBtn = document.getElementById('resetViewBtn');
-    const zoomIndicator = document.getElementById('zoomIndicator');
+(function(){
+  const viewport = document.getElementById('orgViewport');
+  const canvas = document.getElementById('orgCanvas');
+  const zoomIndicator = document.getElementById('zoomIndicator');
+  const zoomInBtn = document.getElementById('zoomInBtn');
+  const zoomOutBtn = document.getElementById('zoomOutBtn');
+  const fitBtn = document.getElementById('fitBtn');
+  const resetBtn = document.getElementById('resetViewBtn');
+  let scale = 1;
+  let translateX = 0;
+  let translateY = 0;
+  let isPanning = false;
+  let startX = 0;
+  let startY = 0;
 
-    let scale = 1;
-    let translateX = 0;
-    let translateY = 0;
-    let isPanning = false;
-    let startX = 0;
-    let startY = 0;
+  function applyTransform(){
+    canvas.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    zoomIndicator.textContent = Math.round(scale * 100) + '%';
+  }
 
-    function applyTransform() {
-      canvas.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-      zoomIndicator.textContent = Math.round(scale * 100) + '%';
-    }
-
-    function zoom(delta) {
-      const newScale = Math.min(2.2, Math.max(0.5, scale + delta));
-      scale = newScale;
-      applyTransform();
-    }
-
-    zoomInBtn.addEventListener('click', () => zoom(0.15));
-    zoomOutBtn.addEventListener('click', () => zoom(-0.15));
-    resetBtn.addEventListener('click', () => {
-      scale = 1;
-      translateX = 0;
-      translateY = 0;
-      applyTransform();
-    });
-
-    viewport.addEventListener('mousedown', (e) => {
-      isPanning = true;
-      startX = e.clientX - translateX;
-      startY = e.clientY - translateY;
-    });
-    window.addEventListener('mouseup', () => { isPanning = false; });
-    window.addEventListener('mousemove', (e) => {
-      if (!isPanning) return;
-      translateX = e.clientX - startX;
-      translateY = e.clientY - startY;
-      applyTransform();
-    });
-
-    viewport.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      const delta = e.deltaY < 0 ? 0.08 : -0.08;
-      zoom(delta);
-    }, { passive: false });
-
-    // --- Detail modal logic ---
-    const modal = document.getElementById('orgModal');
-    const modalClose = document.getElementById('orgModalClose');
-    const modalName = document.getElementById('orgModalName');
-    const modalRole = document.getElementById('orgModalRole');
-    const modalDept = document.getElementById('orgModalDepartment').querySelector('span:last-child');
-    const modalStatus = document.getElementById('orgModalStatus');
-    const modalPhoto = document.getElementById('orgModalPhoto');
-    const modalPhotoFallback = document.getElementById('orgModalPhotoFallback');
-
-    function openModalFromCard(card) {
-      if (!card) return;
-      const name = card.getAttribute('data-name') || '';
-      const role = card.getAttribute('data-role') || '';
-      const dept = card.getAttribute('data-department') || '';
-      const status = card.getAttribute('data-status') || '';
-      const photo = card.getAttribute('data-photo') || '';
-
-      modalName.textContent = name;
-      modalRole.textContent = role;
-      modalDept.textContent = dept;
-      modalStatus.textContent = status;
-
-      if (photo) {
-        modalPhoto.src = photo;
-        modalPhoto.style.display = 'block';
-        modalPhotoFallback.style.display = 'none';
-      } else {
-        modalPhoto.src = '';
-        modalPhoto.style.display = 'none';
-        modalPhotoFallback.style.display = 'flex';
-        modalPhotoFallback.textContent = name ? name.charAt(0) : '?';
-      }
-
-      modal.style.display = 'flex';
-    }
-
-    document.querySelectorAll('.node-card').forEach(card => {
-      card.addEventListener('click', (e) => {
-        // avoid starting a pan when clicking
-        e.stopPropagation();
-        openModalFromCard(card);
-      });
-    });
-
-    modalClose.addEventListener('click', () => {
-      modal.style.display = 'none';
-    });
-
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        modal.style.display = 'none';
-      }
-    });
-
+  function zoom(delta){
+    const newScale = Math.min(2.2, Math.max(0.5, scale + delta));
+    scale = newScale;
     applyTransform();
-  })();
+  }
+
+  function fitToView(){
+    const viewportWidth = viewport.clientWidth - 60;
+    const canvasWidth = canvas.scrollWidth;
+    const ratio = viewportWidth / canvasWidth;
+    scale = Math.min(1.6, Math.max(0.6, ratio));
+    translateX = 0;
+    translateY = 0;
+    applyTransform();
+  }
+
+  zoomInBtn.addEventListener('click', () => zoom(0.1));
+  zoomOutBtn.addEventListener('click', () => zoom(-0.1));
+  fitBtn.addEventListener('click', fitToView);
+  resetBtn.addEventListener('click', () => { scale = 1; translateX = 0; translateY = 0; applyTransform(); });
+
+  viewport.addEventListener('mousedown', (e) => {
+    isPanning = true;
+    startX = e.clientX - translateX;
+    startY = e.clientY - translateY;
+  });
+
+  window.addEventListener('mouseup', () => { isPanning = false; });
+  window.addEventListener('mousemove', (e) => {
+    if(!isPanning) return;
+    translateX = e.clientX - startX;
+    translateY = e.clientY - startY;
+    applyTransform();
+  });
+
+  viewport.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    zoom(e.deltaY < 0 ? 0.08 : -0.08);
+  }, { passive:false });
+
+  fitToView();
+
+  const modal = document.getElementById('orgModal');
+  const closeModal = document.getElementById('closeModal');
+  const modalName = document.getElementById('modalName');
+  const modalRole = document.getElementById('modalRole');
+  const modalDept = document.getElementById('modalDept');
+  const modalStatus = document.getElementById('modalStatus');
+  const modalPhoto = document.getElementById('modalPhoto');
+  const modalPhotoFallback = document.getElementById('modalPhotoFallback');
+
+  function openModal(card){
+    const name = card.dataset.name || '';
+    const role = card.dataset.role || '';
+    const dept = card.dataset.department || '';
+    const status = card.dataset.status || '';
+    const photo = card.dataset.photo || '';
+
+    modalName.textContent = name;
+    modalRole.textContent = role;
+    modalDept.textContent = dept;
+    modalStatus.textContent = status;
+
+    if(photo){
+      modalPhoto.src = photo;
+      modalPhoto.style.display = 'block';
+      modalPhotoFallback.style.display = 'none';
+    } else {
+      modalPhoto.src = '';
+      modalPhoto.style.display = 'none';
+      modalPhotoFallback.style.display = 'flex';
+      modalPhotoFallback.textContent = name ? name.charAt(0) : '?';
+    }
+
+    modal.style.display = 'flex';
+  }
+
+  document.querySelectorAll('.node-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openModal(card);
+    });
+  });
+
+  closeModal.addEventListener('click', () => { modal.style.display = 'none'; });
+  modal.addEventListener('click', (e) => { if(e.target === modal){ modal.style.display = 'none'; } });
+})();
 </script>
 {% endblock %}
