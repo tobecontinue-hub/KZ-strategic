@@ -81,7 +81,13 @@
   border-radius: 18px;
   overflow: hidden;
   box-shadow: 0 15px 28px rgba(4,23,47,.08);
+  table-layout: fixed; /* ensure consistent column widths across tables */
 }
+
+/* Set consistent column widths for Metric, Current, Target */
+.ops-table col.col-metric { width: 45%; }
+.ops-table col.col-current,
+.ops-table col.col-target { width: 27.5%; }
 .ops-table thead {
   background: var(--surface-2);
   text-transform: uppercase;
@@ -178,6 +184,11 @@
   </div>
   <div class="table-responsive">
     <table class="ops-table">
+      <colgroup>
+        <col class="col-metric" />
+        <col class="col-current" />
+        <col class="col-target" />
+      </colgroup>
       <thead>
         <tr>
           <th>Metric</th>

@@ -177,14 +177,24 @@
 
     <li><hr class="dropdown-divider"></li>
 
-    <!-- Insights section -->
-    <li><h6 class="dropdown-header">Insights & Analysis</h6></li>
-    <li><a class="dropdown-item {{ 'active' if request.path == '/swot' else '' }}" href="/swot">
-      <i class="bi bi-intersect"></i> SWOT
-    </a></li>
-
+    <!-- Customer & Market section -->
+    <li><h6 class="dropdown-header">Customer & Market</h6></li>
     <li><a class="dropdown-item {{ 'active' if request.path == '/segments' else '' }}" href="/segments">
       <i class="bi bi-people-fill"></i> Segments
+    </a></li>
+    
+    <li><a class="dropdown-item {{ 'active' if request.path == '/cost_per_x' else '' }}" href="/cost_per_x">
+      <i class="bi bi-cash-coin"></i> Cost per X
+    </a></li>
+    
+    <li><a class="dropdown-item {{ 'active' if request.path == '/profit_per_x' else '' }}" href="/profit_per_x">
+      <i class="bi bi-graph-up"></i> Profit per X
+    </a></li>
+
+    <!-- Insights section -->
+    <li><h6 class="dropdown-header mt-3">Insights & Analysis</h6></li>
+    <li><a class="dropdown-item {{ 'active' if request.path == '/swot' else '' }}" href="/swot">
+      <i class="bi bi-intersect"></i> SWOT
     </a></li>
 
     <li><a class="dropdown-item {{ 'active' if request.path == '/trajectories' else '' }}" href="/trajectories">
@@ -250,7 +260,7 @@
 <!-- Planning & Execution -->
 <li class="nav-item dropdown">
   <a class="nav-link dropdown-toggle nav-underline 
-    {{ 'active' if request.path.startswith(('/roadmap','/ecom','/okr','/top_product','/top_product_promo')) else '' }}" 
+    {{ 'active' if request.path.startswith(('/roadmap','/ecom','/okr','/top_product','/top_product_promo','/retail_swift_online')) else '' }}" 
     href="#" id="planningDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     <i class="bi bi-rocket-takeoff"></i> Planning & Execution
   </a>
@@ -275,6 +285,11 @@
 
     <li><a class="dropdown-item {{ 'active' if request.path == '/okr' else '' }}" href="/okr">
       <i class="bi bi-bullseye"></i> OKR
+    </a></li>
+
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item {{ 'active' if request.path == '/retail_swift_online' else '' }}" href="/retail_swift_online">
+      <i class="bi bi-shop"></i> Retail Swift Online
     </a></li>
 
   </ul>

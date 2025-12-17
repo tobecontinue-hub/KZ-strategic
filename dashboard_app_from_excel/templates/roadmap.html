@@ -44,10 +44,15 @@
 
 .quarter-card:hover { transform: translateY(-6px); }
 
-.entry-table { width:100%; border-collapse:collapse; margin-top:12px; }
+.entry-table { width:100%; border-collapse:collapse; margin-top:12px; table-layout:fixed; }
+.entry-table col.col-activity { width: 20%; }
+.entry-table col.col-topic { width: 55%; }
+.entry-table col.col-owner { width: 25%; }
 .entry-table th, .entry-table td { padding:12px 10px; border-bottom:1px solid rgba(255,255,255,.1); }
 .entry-table th { text-transform:uppercase; font-size:.75rem; letter-spacing:.6px; color:#9ab2d3; }
 .entry-table td { color:#e7efff; }
+.entry-table th:nth-child(3),
+.entry-table td:nth-child(3) { text-align:right; }
 .badge-owner { padding:4px 10px; border-radius:999px; background:rgba(255,255,255,.15); font-size:.8rem; }
 </style>
 
@@ -69,6 +74,11 @@
       </div>
       <div class="table-responsive">
         <table class="entry-table">
+          <colgroup>
+            <col class="col-activity" />
+            <col class="col-topic" />
+            <col class="col-owner" />
+          </colgroup>
           <thead>
             <tr>
               <th>Activity ID</th>

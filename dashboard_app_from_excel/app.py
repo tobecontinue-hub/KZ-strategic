@@ -795,6 +795,19 @@ def trajectories_page():
         sections=sections,
         title="Trajectories & Strategic Insights"
     )
+@app.route("/retail_swift_online")
+def retail_swift_online():
+    try:
+        df = gs.sheet_to_df("Retail_Swift_Online")
+    except Exception as e:
+        print("Error loading Retail Swift Online data:", e)
+        df = pd.DataFrame()
+
+    # Clean NaNs to avoid template errors
+    df = df.fillna("")
+    
+    return render_template("retail_swift.html", data=df.to_dict("records"))
+
 @app.route("/segments")
 def segments_page():
     try:
@@ -821,6 +834,7 @@ def clean_html_breaks(text):
 
 
 @app.route("/profit_x")
+@app.route("/profit_per_x")
 def profit_x():
     try:
         df = gs.sheet_to_df("Profit per X")

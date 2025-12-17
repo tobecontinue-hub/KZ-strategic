@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.segments-wrapper {
+    padding: 20px;
+    animation: fadeIn 0.6s ease-in-out;
+}
+
+/* Section tabs */
+.section-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.section-tabs button {
+    padding: 8px 14px;
+    background: #f3f3ff;
+    border: 1px solid #c7c7ff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.section-tabs button:hover {
+    background: #4f46e5;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.section-tabs button.active {
+    background: #4f46e5;
+    color: white;
+    border-color: #4f46e5;
+}
+
+.segment-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.segment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.segment-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.segment-metric {
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.metric-card {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 4px solid #4f46e5;
+}
+
+.metric-label {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 5px;
+}
+
+.metric-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.metric-change {
+    font-size: 0.8rem;
+    margin-top: 3px;
+}
+
+.metric-change.positive {
+    color: #10b981;
+}
+
+.metric-change.negative {
+    color: #ef4444;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+<div class="segments-wrapper">
+    <h1>Profit per X</h1>
+    <p class="text-muted">Analyze profitability metrics across different segments</p>
+    
+    <div class="section-tabs" id="sectionTabs">
+        {% for section in sections %}
+        <button onclick="scrollToSection('{{ section }}')" 
+                class="{{ 'active' if loop.first else '' }}">
+            {{ section }}
+        </button>
+        {% endfor %}
+    </div>
+
+    {% for section, data in sections.items() %}
+    <div class="segment-card" id="{{ section }}">
+        <div class="segment-header">
+            <h2 class="segment-title">{{ section }}</h2>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                        <th>Target</th>
+                        <th>Variance</th>
+                        <th>Trend</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for _, row in data.iterrows() %}
+                    <tr>
+                        <td>{{ row.get('Metric', '') }}</td>
+                        <td>{{ "${:,.2f}".format(row.get('Value', 0)) if row.get('Value') else 'N/A' }}</td>
+                        <td>{{ "${:,.2f}".format(row.get('Target', 0)) if row.get('Target') else 'N/A' }}</td>
+                        <td class="{{ 'text-success' if row.get('Variance', 0) >= 0 else 'text-danger' }}">
+                            {{ "{:.2f}%".format(row.get('Variance', 0)) if row.get('Variance') is not none else 'N/A' }}
+                        </td>
+                        <td>
+                            {% if row.get('Trend') %}
+                                <i class="bi bi-arrow-{{ 'up' if row.get('Trend') > 0 else 'down' }}-circle-fill {{ 'text-success' if row.get('Trend') > 0 else 'text-danger' }}"></i>
+                            {% else %}
+                                <i class="bi bi-dash-circle text-muted"></i>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+function scrollToSection(id) {
+    document.getElementById(id).scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+    
+    // Update active tab
+    document.querySelectorAll('.section-tabs button').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent.trim() === id) {
+            btn.classList.add('active');
+        }
+    });
+}
+</script>
+
+{% endblock %}
