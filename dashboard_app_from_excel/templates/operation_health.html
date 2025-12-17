@@ -88,12 +88,31 @@
   font-size: .78rem;
   letter-spacing: .6px;
   color: var(--muted);
+  text-align: left;
+}
+
+/* Align header cells with their respective columns */
+.ops-table th:nth-child(1) {
+  text-align: left;
+}
+.ops-table th:nth-child(2),
+.ops-table th:nth-child(3) {
+  text-align: center;
 }
 .ops-table th,
 .ops-table td {
   padding: 12px 14px;
   border-bottom: 1px solid #edf1f7;
   font-size: .9rem;
+  text-align: left;
+}
+
+/* Center align the Current and Target columns */
+.ops-table th:nth-child(2),
+.ops-table td:nth-child(2),
+.ops-table th:nth-child(3),
+.ops-table td:nth-child(3) {
+  text-align: center;
 }
 .ops-table tbody tr:last-child td { border-bottom: none; }
 .status-chip {
