@@ -205,10 +205,18 @@
 </li>
 
 <!-- Operations -->
-<li class="nav-item">
-  <a class="nav-link nav-underline {{ 'active' if request.path == '/operation_health' else '' }}" href="/operation_health">
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle nav-underline {{ 'active' if request.path in ['/operation_health', '/bob'] else '' }}" href="#" id="operationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     <i class="bi bi-speedometer2"></i> Operations Health
   </a>
+  <ul class="dropdown-menu" aria-labelledby="operationsDropdown">
+    <li><a class="dropdown-item {{ 'active' if request.path == '/operation_health' else '' }}" href="/operation_health">
+      <i class="bi bi-activity"></i> Funnel Overview
+    </a></li>
+    <li><a class="dropdown-item {{ 'active' if request.path == '/bob' else '' }}" href="/bob">
+      <i class="bi bi-diagram-3"></i> BOB Performance
+    </a></li>
+  </ul>
 </li>
 
 <!-- Financial Factors -->

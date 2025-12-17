@@ -1,0 +1,350 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bob-bg: #050913;
+  --bob-card: #0f172a;
+  --bob-glass: rgba(255,255,255,0.08);
+  --bob-accent: #38bdf8;
+  --bob-pink: #f472b6;
+  --bob-amber: #fbbf24;
+}
+
+.page-enter {
+  animation: fadeUp .6s ease forwards;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+.bob-hero {
+  background: radial-gradient(circle at top, rgba(255,255,255,0.12), transparent),
+              linear-gradient(135deg, #0f172a, #111f3f 60%, #1c2f63);
+  color: #fff;
+  border-radius: 30px;
+  padding: 32px;
+  box-shadow: 0 35px 90px rgba(5,9,19,.65);
+  position: relative;
+  overflow: hidden;
+}
+.bob-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url('https://www.transparenttextures.com/patterns/cubes.png');
+  opacity: .12;
+}
+.bob-hero h1 { font-weight: 800; letter-spacing: -.02em; }
+.bob-hero p { margin: 0; opacity: .8; max-width: 600px; }
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 28px;
+}
+.stat-card {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+  padding: 18px;
+  backdrop-filter: blur(8px);
+  transition: transform .25s ease, border-color .25s ease;
+}
+.stat-card:hover { transform: translateY(-4px); border-color: rgba(56,189,248,.6); }
+.stat-label { font-size: .8rem; text-transform: uppercase; letter-spacing: .2em; opacity: .7; }
+.stat-value { font-size: 1.6rem; font-weight: 700; margin-top: 6px; }
+.stat-pill { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,0.12); margin-top: 8px; }
+
+.section-card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 25px 70px rgba(15,23,42,.12);
+  margin-top: 32px;
+}
+.section-header { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.section-header h2 { margin: 0; font-weight: 700; color: #0f172a; }
+.section-header span { color: #64748b; }
+
+.metric-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.metric-table col.col-month { width: 18%; }
+.metric-table col.col-bob { width: 22%; }
+.metric-table col.col-self { width: 22%; }
+.metric-table col.col-total { width: 23%; }
+.metric-table col.col-cs { width: 15%; }
+.metric-table th { background: #f8fafc; text-transform: uppercase; letter-spacing: .08em; font-size: .75rem; color: #475569; }
+.metric-table th,
+.metric-table td { padding: 14px 16px; border-bottom: 1px solid #e2e8f0; }
+.metric-table td { font-size: 0.95rem; color: #0f172a; }
+.metric-table td.text-right { text-align: right; font-variant-numeric: tabular-nums; }
+.metric-table tbody tr:hover { background: #f1f5f9; }
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 20px;
+}
+.chart-panel {
+  background: #0f172a;
+  color: #fff;
+  border-radius: 22px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+.chart-panel canvas {
+  width: 100% !important;
+  height: 240px !important;
+  flex: 1;
+}
+.chart-panel h3 { margin: 0 0 10px; font-size: 1rem; text-transform: uppercase; letter-spacing: .1em; opacity: .8; }
+
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+.review-card {
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  padding: 18px 20px;
+  min-height: 190px;
+  position: relative;
+  overflow: hidden;
+}
+.review-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(56,189,248,.15), transparent);
+  opacity: 0;
+  transition: opacity .3s;
+}
+.review-card:hover::after { opacity: 1; }
+.review-card h4 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: .18em; margin-bottom: 10px; color: #475569; }
+.review-text p { margin: 0 0 8px; color: #0f172a; font-size: .93rem; line-height: 1.45; }
+.review-bullet p { margin: 0; color: #0f172a; line-height: 1.45; }
+
+.badge-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+.badge-dot.bob { background: var(--bob-accent); }
+.badge-dot.self { background: var(--bob-pink); }
+.badge-dot.cs { background: var(--bob-amber); }
+
+@media(max-width: 768px) {
+  .stat-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .review-card { min-height: unset; }
+}
+</style>
+
+<div class="bob-hero page-enter">
+  <p class="text-uppercase mb-1" style="letter-spacing:.3em; font-size:.78rem; opacity:.7;">Operations Backbone</p>
+  <h1>BOB Performance Intelligence</h1>
+  <p>Monitor order splits, customer service adherence, and qualitative gates across the BOB funnel with an immersive experience.</p>
+
+  <div class="stat-grid">
+    <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay:.05s;">
+      <div class="stat-label">Total BOB Orders</div>
+      <div class="stat-value">{{ summary.total_bob }}</div>
+    </div>
+    <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay:.1s;">
+      <div class="stat-label">Total Self Orders</div>
+      <div class="stat-value">{{ summary.total_self }}</div>
+    </div>
+    <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay:.15s;">
+      <div class="stat-label">Avg CS%</div>
+      <div class="stat-value">{{ summary.avg_cs }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="section-header">
+    <div>
+      <h2>Monthly Order Distribution</h2>
+      <span>Sync from BOB sheet</span>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <div class="d-flex align-items-center gap-2"><span class="badge-dot bob"></span><small>BOB Order</small></div>
+      <div class="d-flex alignments-center gap-2"><span class="badge-dot self"></span><small>Self Order</small></div>
+      <div class="d-flex align-items-center gap-2"><span class="badge-dot cs"></span><small>CS%</small></div>
+    </div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-panel">
+      <h3>Order Mix Momentum</h3>
+      <canvas id="ordersChart"></canvas>
+    </div>
+    <div class="chart-panel">
+      <h3>Customer Service %</h3>
+      <canvas id="csChart"></canvas>
+    </div>
+  </div>
+
+  <div class="table-responsive mt-4">
+    <table class="metric-table">
+      <colgroup>
+        <col class="col-month" />
+        <col class="col-bob" />
+        <col class="col-self" />
+        <col class="col-total" />
+        <col class="col-cs" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Months</th>
+          <th>BOB Order</th>
+          <th>Self Order</th>
+          <th>Grand Total</th>
+          <th>CS%</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if rows %}
+          {% for row in rows %}
+          <tr class="animate__animated animate__fadeIn" style="animation-delay: {{ loop.index0 * 0.03 }}s;">
+            <td>{{ row["Months"] or '-' }}</td>
+            <td class="text-right">{{ row["BOB Order"] }}</td>
+            <td class="text-right">{{ row["Self Order"] }}</td>
+            <td class="text-right">{{ row["Grand Total"] }}</td>
+            <td class="text-right">{{ row["CS%"] }}</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="5" class="text-center py-4">No BOB volume data available.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="section-header">
+    <div>
+      <h2>BOB Review Intelligence</h2>
+      <span>Qualitative highlights from the BOB_review sheet</span>
+    </div>
+  </div>
+
+  {% if reviews %}
+  <div class="review-grid">
+    {% for section in review_sections %}
+    <div class="review-card animate__animated animate__fadeInUp" style="animation-delay: {{ loop.index0 * 0.05 }}s;">
+      <h4>{{ section.label }}</h4>
+      <div class="review-text">
+        {% set has_content = false %}
+        {% for review in reviews %}
+          {% for item in review.get(section.key, []) %}
+            {% set has_content = true %}
+            {% if item.type == 'bullet' %}
+              <div class="review-bullet d-flex gap-2">
+                <span class="badge-dot bob" style="margin-top:6px;"></span>
+                <p>{{ item.text|safe }}</p>
+              </div>
+            {% else %}
+              <p>{{ item.text|safe }}</p>
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+        {% if not has_content %}
+          <p class="text-muted">No notes captured.</p>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+    <div class="alert alert-info mt-3">No BOB review notes available.</div>
+  {% endif %}
+</div>
+
+{% block scripts %}
+<script>
+const chartData = {{ chart_data | tojson }};
+
+const ctxOrders = document.getElementById('ordersChart');
+if (ctxOrders) {
+  new Chart(ctxOrders, {
+    type: 'line',
+    data: {
+      labels: chartData.months,
+      datasets: [
+        {
+          label: 'BOB Order',
+          data: chartData.bob,
+          borderColor: '#38bdf8',
+          backgroundColor: 'rgba(56,189,248,.15)',
+          tension: .4,
+          fill: true,
+          borderWidth: 3,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+        },
+        {
+          label: 'Self Order',
+          data: chartData.self,
+          borderColor: '#f472b6',
+          backgroundColor: 'rgba(244,114,182,.15)',
+          tension: .4,
+          fill: true,
+          borderWidth: 3,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 1.8,
+      plugins: { legend: { labels: { color: '#fff' } } },
+      scales: {
+        x: { ticks: { color: '#e2e8f0' }, grid: { color: 'rgba(255,255,255,.15)' } },
+        y: { ticks: { color: '#e2e8f0' }, grid: { color: 'rgba(255,255,255,.1)' } }
+      }
+    }
+  });
+}
+
+const ctxCS = document.getElementById('csChart');
+if (ctxCS) {
+  new Chart(ctxCS, {
+    type: 'bar',
+    data: {
+      labels: chartData.months,
+      datasets: [{
+        label: 'CS%',
+        data: chartData.cs,
+        backgroundColor: chartData.cs.map(value => value >= 15 ? '#34d399' : '#f87171'),
+        borderRadius: 8,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 1.5,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#e2e8f0' }, grid: { display: false } },
+        y: { ticks: { color: '#e2e8f0', callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,.1)' } }
+      }
+    }
+  });
+}
+</script>
+{% endblock %}
+
+{% endblock %}

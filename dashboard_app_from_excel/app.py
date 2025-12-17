@@ -153,6 +153,58 @@ def fmt_money(x):
         return ""
     return "{:,.2f}".format(x)
 
+def read_local_excel_sheet(sheet_name):
+    base_dir = Path(__file__).resolve().parent
+    primary = base_dir / "strategic_insight.xlsx"
+    shadow = base_dir / "~$strategic_insight.xlsx"
+
+    if primary.exists():
+        try:
+            return pd.read_excel(primary, sheet_name=sheet_name)
+        except Exception as e:
+            print(f"❌ Error loading {sheet_name} from strategic_insight.xlsx: {e}")
+            return pd.DataFrame()
+
+    if shadow.exists():
+        try:
+            return pd.read_excel(shadow, sheet_name=sheet_name)
+        except Exception as e:
+            print(f"❌ Error loading {sheet_name} from ~$strategic_insight.xlsx: {e}")
+
+    return pd.DataFrame()
+
+def format_number(value, decimals=0):
+    if value in (None, ""):
+        return "-"
+    try:
+        value = float(str(value).replace(",", ""))
+    except Exception:
+        return str(value)
+    fmt = f"{{:,.{decimals}f}}"
+    return fmt.format(value)
+
+def format_percent(value):
+    num = parse_number(value)
+    if num is None:
+        return "-"
+    pct = num * 100 if abs(num) <= 1 else num
+    return f"{pct:.1f}%"
+
+def parse_review_text(text):
+    if not text or (isinstance(text, float) and pd.isna(text)):
+        return []
+    chunks = []
+    for raw in str(text).splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        if re.match(r"^(-|•|→|->|–)", line):
+            cleaned = re.sub(r"^(-|•|→|->|–)\s*", "", line)
+            chunks.append({"type": "bullet", "text": cleaned})
+        else:
+            chunks.append({"type": "text", "text": line})
+    return chunks
+
 @app.route("/ecom")
 def ecom():
     try:
@@ -1443,6 +1495,128 @@ def operation_health_page():
         insights=insights,
         status_counter=status_counter,
         title="Operations Health"
+    )
+
+
+@app.route("/bob")
+def bob_page():
+    bob_df = read_local_excel_sheet("BOB")
+    review_df = read_local_excel_sheet("BOB_review")
+
+    def normalize_columns(df):
+        if df.empty:
+            return df
+        df.columns = df.columns.astype(str).str.strip()
+        return df
+
+    bob_df = normalize_columns(bob_df)
+    review_df = normalize_columns(review_df)
+
+    # Ensure numeric table columns exist even if sheet uses variants like 'Grand_Total '
+    bob_column_map = {
+        "months": "Months",
+        "month": "Months",
+        "bob order": "BOB Order",
+        "bob": "BOB Order",
+        "boborder": "BOB Order",
+        "self order": "Self Order",
+        "self": "Self Order",
+        "grand total": "Grand Total",
+        "total": "Grand Total",
+        "cs%": "CS%",
+        "cs %": "CS%",
+        "cs percentage": "CS%"
+    }
+
+    if not bob_df.empty:
+        rename_map = {}
+        for col in bob_df.columns:
+            key = col.strip().lower()
+            if key in bob_column_map:
+                rename_map[col] = bob_column_map[key]
+        if rename_map:
+            bob_df = bob_df.rename(columns=rename_map)
+
+    bob_rows = []
+    chart_data = {"months": [], "bob": [], "self": [], "cs": []}
+    totals = {"bob": 0, "self": 0, "grand": 0, "cs": []}
+    best_month = {"label": "-", "value": 0}
+
+    if not bob_df.empty:
+        for _, row in bob_df.iterrows():
+            month = str(row.get("Months", "")).strip()
+            bob_val = parse_number(row.get("BOB Order")) or 0
+            self_val = parse_number(row.get("Self Order")) or 0
+            grand_val = parse_number(row.get("Grand Total")) or 0
+            cs_val = parse_number(row.get("CS%"))
+
+            bob_rows.append({
+                "Months": month,
+                "BOB Order": format_number(bob_val),
+                "Self Order": format_number(self_val),
+                "Grand Total": format_number(grand_val),
+                "CS%": format_percent(cs_val)
+            })
+
+            chart_data["months"].append(month)
+            chart_data["bob"].append(bob_val)
+            chart_data["self"].append(self_val)
+            chart_data["cs"].append((cs_val * 100) if (cs_val is not None and abs(cs_val) <= 1) else (cs_val or 0))
+
+            totals["bob"] += bob_val
+            totals["self"] += self_val
+            totals["grand"] += grand_val
+            if cs_val is not None:
+                totals["cs"].append(cs_val if abs(cs_val) <= 1 else cs_val / 100)
+
+            if grand_val > best_month["value"]:
+                best_month = {"label": month, "value": grand_val}
+
+    review_sections = [
+        {"key": "worked", "label": "What Worked?"},
+        {"key": "scale", "label": "What needs to scale?"},
+        {"key": "not_work", "label": "What did not work?"},
+        {"key": "lesson", "label": "What is the lesson learned?"},
+        {"key": "next_goal", "label": "What is the next goal for BOB?"}
+    ]
+
+    reviews = []
+    if not review_df.empty:
+        column_map = {
+            "what worked?": "worked",
+            "what needs to scale?": "scale",
+            "what did not work?": "not_work",
+            "what is the lesson learned?": "lesson",
+            "what is the next goal for bob?": "next_goal"
+        }
+        keys_defaults = {sec["key"]: [] for sec in review_sections}
+        for _, row in review_df.iterrows():
+            entry = dict(keys_defaults)
+            for col in review_df.columns:
+                normalized = str(col).strip().lower()
+                if normalized in column_map:
+                    entry[column_map[normalized]] = parse_review_text(row.get(col, ""))
+            if any(entry.values()):
+                reviews.append(entry)
+
+    summary = {
+        "total_bob": format_number(totals["bob"]),
+        "total_self": format_number(totals["self"]),
+        "total_grand": format_number(totals["grand"]),
+        "avg_cs": format_percent(sum(totals["cs"]) / len(totals["cs"]) if totals["cs"] else None),
+        "best_month": best_month["label"],
+        "best_month_value": format_number(best_month["value"])
+    }
+
+    return render_template(
+        "bob.html",
+        rows=bob_rows,
+        reviews=reviews,
+        review_sections=review_sections,
+        summary=summary,
+        chart_data=chart_data,
+        title="BOB Performance",
+        description="Monthly BOB volume split with qualitative learnings"
     )
 
 
