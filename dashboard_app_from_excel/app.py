@@ -916,7 +916,7 @@ def profit_x():
             continue
         section_groups[sec] = df[df["Section"] == sec]
 
-    return render_template("profit_x.html", sections=section_groups)
+    return render_template("profit_per_x.html", sections=section_groups)
 
 
 # ✅ SINGLE /top_product route
