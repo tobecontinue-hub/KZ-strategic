@@ -113,7 +113,7 @@
 <div class="segments-wrapper">
     <h1>Profit per X</h1>
     <p class="text-muted">Analyze profitability metrics across different segments</p>
-
+    
     <div class="section-tabs" id="sectionTabs">
         {% for section in sections %}
         <button onclick="scrollToSection('{{ section }}')" 
@@ -123,7 +123,7 @@
         {% endfor %}
     </div>
 
-    {% for section, data in sections.items() %}
+    {% for section, rows in sections.items() %}
     <div class="segment-card" id="{{ section }}">
         <div class="segment-header">
             <h2 class="segment-title">{{ section }}</h2>
@@ -134,14 +134,14 @@
                 <thead class="table-light">
                     <tr>
                         <th style="width: 20%">Segment</th>
-                        <th style="width: 25%">Data</th>
-                        <th style="width: 25%">Insight</th>
-                        <th style="width: 30%">What to Improve (2026)</th>
+                        <th style="width: 30%">Data</th>
+                        <th style="width: 30%">Insight</th>
+                        <th style="width: 20%">What to Improve (2026)</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% if data %}
-                        {% for row in data %}
+                    {% if rows %}
+                        {% for row in rows %}
                         <tr>
                             <td class="fw-semibold">{{ row.get('Segment', '-') }}</td>
                             <td>{{ row.get('Data', '')|safe }}</td>
@@ -161,14 +161,16 @@
     {% endfor %}
 
     {% if insights %}
-    <div class="alert alert-primary shadow-sm mt-4">
-        <h5 class="fw-semibold mb-3 text-uppercase" style="letter-spacing:.2em;">Key Insights</h5>
+    <div class="segment-card" id="insights">
+        <div class="segment-header">
+            <h2 class="segment-title">Key Insights</h2>
+        </div>
         <div class="row g-3">
-            {% for insight in insights %}
+            {% for item in insights %}
             <div class="col-12 col-md-6">
-                <div class="p-3 rounded bg-white border h-100">
-                    <div class="fw-semibold text-muted text-uppercase" style="font-size:.8rem; letter-spacing:.2em;">{{ insight.get('Segment', 'Summary') }}</div>
-                    <div class="mt-2">{{ insight.get('Insight', insight.get('Data', ''))|safe }}</div>
+                <div class="p-3 rounded border h-100" style="background:#f8fafc;">
+                    <div class="text-uppercase text-muted" style="font-size:.8rem; letter-spacing:.2em;">{{ item.get('Segment', 'Summary') }}</div>
+                    <div class="mt-2">{{ item.get('Insight', item.get('Data', ''))|safe }}</div>
                 </div>
             </div>
             {% endfor %}
@@ -184,6 +186,13 @@ function scrollToSection(id) {
         block: "start"
     });
     
+    // Update active tab
+    document.querySelectorAll('.section-tabs button').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent.trim() === id) {
+            btn.classList.add('active');
+        }
+    });
 }
 </script>
 

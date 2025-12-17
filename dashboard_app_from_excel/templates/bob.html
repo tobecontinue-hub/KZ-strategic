@@ -155,22 +155,14 @@
     <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay:.05s;">
       <div class="stat-label">Total BOB Orders</div>
       <div class="stat-value">{{ summary.total_bob }}</div>
-      <div class="stat-pill"><span class="badge-dot bob"></span>Contributes {{ (chart_data.bob | sum) / (chart_data.self | sum + chart_data.bob | sum + 1e-9) * 100 | round(1) if chart_data.self|sum + chart_data.bob|sum > 0 else 0 }}%</div>
     </div>
     <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay:.1s;">
       <div class="stat-label">Total Self Orders</div>
       <div class="stat-value">{{ summary.total_self }}</div>
-      <div class="stat-pill"><span class="badge-dot self"></span>Self-Serve share {{ (chart_data.self | sum) / (chart_data.self | sum + chart_data.bob | sum + 1e-9) * 100 | round(1) if chart_data.self|sum + chart_data.bob|sum > 0 else 0 }}%</div>
     </div>
     <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay:.15s;">
       <div class="stat-label">Avg CS%</div>
       <div class="stat-value">{{ summary.avg_cs }}</div>
-      <div class="stat-pill"><span class="badge-dot cs"></span>Target 15%+</div>
-    </div>
-    <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay:.20s;">
-      <div class="stat-label">Peak Momentum</div>
-      <div class="stat-value">{{ summary.best_month }}</div>
-      <div class="stat-pill">{{ summary.best_month_value }} total</div>
     </div>
   </div>
 </div>
@@ -179,7 +171,7 @@
   <div class="section-header">
     <div>
       <h2>Monthly Order Distribution</h2>
-      <span>Real-time sync from BOB sheet</span>
+      <span>Sync from BOB sheet</span>
     </div>
     <div class="d-flex align-items-center gap-3">
       <div class="d-flex align-items-center gap-2"><span class="badge-dot bob"></span><small>BOB Order</small></div>
@@ -277,7 +269,6 @@
     <div class="alert alert-info mt-3">No BOB review notes available.</div>
   {% endif %}
 </div>
-{% endblock %}
 
 {% block scripts %}
 <script>
@@ -354,4 +345,6 @@ if (ctxCS) {
   });
 }
 </script>
+{% endblock %}
+
 {% endblock %}

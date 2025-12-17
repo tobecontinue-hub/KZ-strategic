@@ -888,7 +888,7 @@ def clean_html_breaks(text):
 @app.route("/profit_x")
 @app.route("/profit_per_x")
 def profit_x():
-    # Prefer local Excel so we can render even without Google Sheets access
+    # Prefer local Excel so the page works offline
     df = read_local_excel_sheet("Profit per X")
     if df.empty:
         try:
@@ -897,25 +897,21 @@ def profit_x():
             print("GS error:", e)
             df = pd.DataFrame()
 
-    # Ensure missing columns do not break template
     required_cols = ["Section", "Segment", "Data", "Insight", "What to Improve More? (2026 Actions)"]
     for col in required_cols:
         if col not in df.columns:
             df[col] = ""
 
     if df.empty:
-        return render_template("profit_per_x.html", sections={})
+        return render_template("profit_per_x.html", sections={}, insights=[])
 
-    # Clean HTML breaks in relevant columns
     for col in ["Data", "Insight", "What to Improve More? (2026 Actions)"]:
         if col in df.columns:
             df[col] = df[col].apply(clean_html_breaks)
-    
-    # Trim spaces
+
     df.columns = df.columns.str.strip()
     df["Section"] = df["Section"].fillna("").str.strip()
 
-    # Split into sections and convert each to list of dicts for the template
     section_groups = {}
     insight_cards = []
     for sec in df["Section"].unique():
@@ -1517,11 +1513,7 @@ def operation_health_page():
 @app.route("/bob")
 def bob_page():
     bob_df = read_local_excel_sheet("BOB")
-    if bob_df.empty:
-        bob_df = gs.sheet_to_df("BOB")
     review_df = read_local_excel_sheet("BOB_review")
-    if review_df.empty:
-        review_df = gs.sheet_to_df("BOB_review")
 
     def normalize_columns(df):
         if df.empty:
