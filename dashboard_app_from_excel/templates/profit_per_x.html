@@ -113,7 +113,7 @@
 <div class="segments-wrapper">
     <h1>Profit per X</h1>
     <p class="text-muted">Analyze profitability metrics across different segments</p>
-    
+
     <div class="section-tabs" id="sectionTabs">
         {% for section in sections %}
         <button onclick="scrollToSection('{{ section }}')" 
@@ -130,39 +130,51 @@
         </div>
         
         <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
                     <tr>
-                        <th>Metric</th>
-                        <th>Value</th>
-                        <th>Target</th>
-                        <th>Variance</th>
-                        <th>Trend</th>
+                        <th style="width: 20%">Segment</th>
+                        <th style="width: 25%">Data</th>
+                        <th style="width: 25%">Insight</th>
+                        <th style="width: 30%">What to Improve (2026)</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for _, row in data.iterrows() %}
-                    <tr>
-                        <td>{{ row.get('Metric', '') }}</td>
-                        <td>{{ "${:,.2f}".format(row.get('Value', 0)) if row.get('Value') else 'N/A' }}</td>
-                        <td>{{ "${:,.2f}".format(row.get('Target', 0)) if row.get('Target') else 'N/A' }}</td>
-                        <td class="{{ 'text-success' if row.get('Variance', 0) >= 0 else 'text-danger' }}">
-                            {{ "{:.2f}%".format(row.get('Variance', 0)) if row.get('Variance') is not none else 'N/A' }}
-                        </td>
-                        <td>
-                            {% if row.get('Trend') %}
-                                <i class="bi bi-arrow-{{ 'up' if row.get('Trend') > 0 else 'down' }}-circle-fill {{ 'text-success' if row.get('Trend') > 0 else 'text-danger' }}"></i>
-                            {% else %}
-                                <i class="bi bi-dash-circle text-muted"></i>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
+                    {% if data %}
+                        {% for row in data %}
+                        <tr>
+                            <td class="fw-semibold">{{ row.get('Segment', '-') }}</td>
+                            <td>{{ row.get('Data', '')|safe }}</td>
+                            <td>{{ row.get('Insight', '')|safe }}</td>
+                            <td>{{ row.get('What to Improve More? (2026 Actions)', '')|safe }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">No entries for this section.</td>
+                        </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
     </div>
     {% endfor %}
+
+    {% if insights %}
+    <div class="alert alert-primary shadow-sm mt-4">
+        <h5 class="fw-semibold mb-3 text-uppercase" style="letter-spacing:.2em;">Key Insights</h5>
+        <div class="row g-3">
+            {% for insight in insights %}
+            <div class="col-12 col-md-6">
+                <div class="p-3 rounded bg-white border h-100">
+                    <div class="fw-semibold text-muted text-uppercase" style="font-size:.8rem; letter-spacing:.2em;">{{ insight.get('Segment', 'Summary') }}</div>
+                    <div class="mt-2">{{ insight.get('Insight', insight.get('Data', ''))|safe }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 <script>
@@ -172,13 +184,6 @@ function scrollToSection(id) {
         block: "start"
     });
     
-    // Update active tab
-    document.querySelectorAll('.section-tabs button').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.textContent.trim() === id) {
-            btn.classList.add('active');
-        }
-    });
 }
 </script>
 

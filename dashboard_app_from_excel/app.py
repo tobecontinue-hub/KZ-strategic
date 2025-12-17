@@ -888,17 +888,23 @@ def clean_html_breaks(text):
 @app.route("/profit_x")
 @app.route("/profit_per_x")
 def profit_x():
-    try:
-        df = gs.sheet_to_df("Profit per X")
-    except Exception as e:
-        print("GS error:", e)
-        df = pd.DataFrame()
+    # Prefer local Excel so we can render even without Google Sheets access
+    df = read_local_excel_sheet("Profit per X")
+    if df.empty:
+        try:
+            df = gs.sheet_to_df("Profit per X")
+        except Exception as e:
+            print("GS error:", e)
+            df = pd.DataFrame()
 
     # Ensure missing columns do not break template
     required_cols = ["Section", "Segment", "Data", "Insight", "What to Improve More? (2026 Actions)"]
     for col in required_cols:
         if col not in df.columns:
             df[col] = ""
+
+    if df.empty:
+        return render_template("profit_per_x.html", sections={})
 
     # Clean HTML breaks in relevant columns
     for col in ["Data", "Insight", "What to Improve More? (2026 Actions)"]:
@@ -909,14 +915,24 @@ def profit_x():
     df.columns = df.columns.str.strip()
     df["Section"] = df["Section"].fillna("").str.strip()
 
-    # Split into sections
+    # Split into sections and convert each to list of dicts for the template
     section_groups = {}
+    insight_cards = []
     for sec in df["Section"].unique():
-        if sec == "": 
+        if not sec:
             continue
-        section_groups[sec] = df[df["Section"] == sec]
+        section_df = df[df["Section"] == sec].fillna("")
+        records = section_df.to_dict(orient="records")
+        if sec.strip().lower() == "insight":
+            insight_cards.extend(records)
+            continue
+        section_groups[sec] = records
 
-    return render_template("profit_per_x.html", sections=section_groups)
+    return render_template(
+        "profit_per_x.html",
+        sections=section_groups,
+        insights=insight_cards
+    )
 
 
 # ✅ SINGLE /top_product route
@@ -1501,7 +1517,11 @@ def operation_health_page():
 @app.route("/bob")
 def bob_page():
     bob_df = read_local_excel_sheet("BOB")
+    if bob_df.empty:
+        bob_df = gs.sheet_to_df("BOB")
     review_df = read_local_excel_sheet("BOB_review")
+    if review_df.empty:
+        review_df = gs.sheet_to_df("BOB_review")
 
     def normalize_columns(df):
         if df.empty:
