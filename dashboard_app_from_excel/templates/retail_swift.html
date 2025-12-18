@@ -160,6 +160,20 @@
   margin-bottom: 0;
 }
 
+.swift-bullet-list {
+  padding-left: 20px;
+  margin: 0;
+  list-style-type: disc;
+}
+
+.swift-bullet-list li {
+  margin-bottom: 6px;
+}
+
+.swift-bullet-list li:last-child {
+  margin-bottom: 0;
+}
+
 .next-goal {
   background: rgba(30, 41, 59, 0.8);
   padding: 25px;
@@ -204,12 +218,22 @@
 }
 </style>
 
+{% macro render_bullets(text) %}
+  {% if text %}
+    <ul class="swift-bullet-list">
+      {% for line in text.split('\n') %}
+        {% if line.strip() %}
+          <li>{{ line.strip() }}</li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endmacro %}
+
 <div class="swift-shell">
   <div class="swift-card">
     <section class="swift-hero">
-      <p class="text-uppercase" style="letter-spacing:0.32em; color:#a5f3fc; font-weight:600; font-size:0.85rem;">Retail Swift Online</p>
-      <h1>Retail Performance Insights</h1>
-      <p>Analysis of key performance indicators and strategic insights for retail operations.</p>
+      <h1>Retail Swift Online Insights</h1>
     </section>
     
     <div class="swift-body">
@@ -249,7 +273,7 @@
                           <h3>What Worked</h3>
                         </div>
                         <div class="card-content">
-                          {{ item['What worked?'] }}
+                          {{ render_bullets(item['What worked?']) | safe }}
                         </div>
                       </div>
                     {% endif %}
@@ -261,7 +285,7 @@
                           <h3>What Needs to Scale</h3>
                         </div>
                         <div class="card-content">
-                          {{ item['What needs to scale?'] }}
+                          {{ render_bullets(item['What needs to scale?']) | safe }}
                         </div>
                       </div>
                     {% endif %}
@@ -273,7 +297,7 @@
                           <h3>What Didn't Work</h3>
                         </div>
                         <div class="card-content">
-                          {{ item['What did NOT work?'] }}
+                          {{ render_bullets(item['What did NOT work?']) | safe }}
                         </div>
                       </div>
                     {% endif %}
@@ -285,7 +309,7 @@
                           <h3>Lessons Learned</h3>
                         </div>
                         <div class="card-content">
-                          {{ item['What is the lesson learned?'] }}
+                          {{ render_bullets(item['What is the lesson learned?']) | safe }}
                         </div>
                       </div>
                     {% endif %}
@@ -297,7 +321,7 @@
                           <h3>New Ideas to Validate</h3>
                         </div>
                         <div class="card-content">
-                          {{ item['What new ideas should be validated next?'] }}
+                          {{ render_bullets(item['What new ideas should be validated next?']) | safe }}
                         </div>
                       </div>
                     {% endif %}
