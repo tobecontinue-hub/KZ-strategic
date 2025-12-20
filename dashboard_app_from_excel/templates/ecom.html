@@ -140,19 +140,20 @@
             <th>Months</th>
             <th class="text-end">2024</th>
             <th class="text-end">2025</th>
-            <th class="text-end">Δ (2025-2024)</th>
+            <th class="text-end">Δ % (2025 vs 2024)</th>
           </tr>
         </thead>
         <tbody>
           {% for row in comp_rows %}
-          {% set positive = row['delta'] >= 0 %}
+          {% set pct = row['delta_pct'] if row['delta_pct'] is not none else 0 %}
+          {% set positive = pct >= 0 %}
           <tr>
             <td>{{ row['Months'] }}</td>
             <td class="text-end">{{ row['2024_fmt'] }}</td>
             <td class="text-end">{{ row['2025_fmt'] }}</td>
             <td class="text-end">
               <span class="delta-pill {% if not positive %}bad{% endif %}">
-                {% if positive %}+{% endif %}{{ row['delta_fmt'] }}
+                {% if positive and row['delta_pct_fmt'] != '—' %}+{% endif %}{{ row['delta_pct_fmt'] }}
               </span>
             </td>
           </tr>

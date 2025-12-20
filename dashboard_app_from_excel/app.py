@@ -303,6 +303,12 @@ def ecom_comparison():
         except Exception:
             return "0"
 
+    def fmt_pct(val):
+        try:
+            return f"{float(val):.1f}%"
+        except Exception:
+            return "—"
+
     records = []
     total_2024 = total_2025 = 0
     max_row = min_row = None
@@ -312,14 +318,18 @@ def ecom_comparison():
             month = str(row.get("Months", "")).strip()
             val_2024 = parse_number(row.get("2024")) or 0
             val_2025 = parse_number(row.get("2025")) or 0
+            delta = val_2025 - val_2024
+            delta_pct = ((delta / val_2024) * 100) if val_2024 else None
             entry = {
                 "Months": month,
                 "2024": val_2024,
                 "2025": val_2025,
                 "2024_fmt": fmt_int(val_2024),
                 "2025_fmt": fmt_int(val_2025),
-                "delta": val_2025 - val_2024,
-                "delta_fmt": fmt_int(val_2025 - val_2024)
+                "delta": delta,
+                "delta_fmt": fmt_int(delta),
+                "delta_pct": delta_pct,
+                "delta_pct_fmt": fmt_pct(delta_pct) if delta_pct is not None else "—"
             }
             records.append(entry)
             total_2024 += val_2024
